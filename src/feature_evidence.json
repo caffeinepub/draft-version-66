@@ -1,0 +1,45 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-on-the-active-meditation-timer-screen-the-view-shown-after-the-user-clicks-start-meditation-reduce-the-rendered-width-of-both-range-inputs-volume-slider-and-time-seek-slider-by-10-20-on-screens-narrower-than-390px-so-they-do-not-overflow-horizontally",
+      "featureTitle": "On the active meditation timer screen (the view shown after the user clicks “Start Meditation”), reduce the rendered width of both range inputs (volume slider and time/seek slider) by ~10–20% on screens narrower than 390px so they do not overflow horizontally.",
+      "files": [
+        "frontend/src/pages/PreMeditationPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-on-the-active-meditation-timer-screen-remove-any-overflow-hidden-styling-that-clips-the-circular-svg-timer-s-fill-shadow-the-drop-shadow-visible-as-the-timer-fills-so-the-shadow-can-render-fully-and-fade-naturally-no-hard-cutoff",
+      "featureTitle": "On the active meditation timer screen, remove any `overflow: hidden` styling that clips the circular SVG timer’s fill/shadow (the drop-shadow visible as the timer fills), so the shadow can render fully and fade naturally (no hard cutoff).",
+      "files": [
+        "frontend/src/pages/PreMeditationPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

@@ -1,0 +1,370 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 19,
+  "summary": "Inner Bloom has expanded from the original meditation companion into a multi-page, highly animated SPA with a strong lotus/canvas motif and responsive UI. In addition to the landing page, it now includes: a post-login/guest dashboard with a meditation picker carousel + daily quote; a pre-meditation setup page with guides, duration slider, ambient sound carousel with preview + volume; an active meditation timer experience; a post-session reflection capture flow (mood + energy state + optional note/favorite); a Progress page that visualizes minutes/streak/rank; a Journal/Analysis page that lists and manages saved sessions/notes with search/filter and backend+guest parity; and a Book Recommendations page with a carousel UI and frontend-stored book data. The app emphasizes consistent theming (dark/light) and export/import of a unified meditation data JSON across guest and authenticated modes.",
+  "existing_features": [
+    {
+      "id": "IF-1",
+      "title": "Internet Identity authentication with long-lived sessions",
+      "synonyms": [
+        "II login",
+        "DFINITY AuthClient login"
+      ],
+      "description": "Users can log in via Internet Identity; the identity is loaded on app start if previously authenticated, supports up to ~30-day delegation TTL, and can be cleared via logout.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-2",
+      "title": "Guest mode with local persistence",
+      "synonyms": [
+        "offline mode",
+        "localStorage mode"
+      ],
+      "description": "When not authenticated (or anonymous), meditation progress and journal entries are stored and read from localStorage, enabling use without an account.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-3",
+      "title": "Actor creation and identity-bound backend client",
+      "synonyms": [
+        "useActor",
+        "backend interface actor"
+      ],
+      "description": "Creates an anonymous or authenticated canister actor depending on identity; recreates the actor on identity change and invalidates/refetches all React Query queries dependent on backend state.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-4",
+      "title": "Role-based access control initialization and admin tooling",
+      "synonyms": [
+        "access control",
+        "admin token initialization"
+      ],
+      "description": "Motoko access control assigns roles (admin/user/guest). First registered caller can become admin if a provided secret matches the canister env admin token; includes APIs to read caller role, check admin, and assign roles (admin-only). Frontend pulls the secret from a hash parameter and calls the init method on actor creation.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-5",
+      "title": "Landing experience with login and guest entry",
+      "synonyms": [
+        "landing page",
+        "start journey"
+      ],
+      "description": "Landing page provides a login CTA via Internet Identity and a guest explore CTA; authenticated users are redirected to the dashboard.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-6",
+      "title": "Theme system (dark/light) with toggles",
+      "synonyms": [
+        "next-themes",
+        "dark mode"
+      ],
+      "description": "App-wide theme switching via next-themes, with toggles available on multiple pages (desktop button and a mobile hamburger menu toggle).",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-7",
+      "title": "Dashboard with daily quotes and meditation selection",
+      "synonyms": [
+        "home dashboard",
+        "daily inspiration"
+      ],
+      "description": "Dashboard fetches daily quotes from the backend, displays a randomized quote, and allows selecting a meditation type from a carousel or launching a recommendation quiz.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-8",
+      "title": "Meditation recommendation quiz",
+      "synonyms": [
+        "quiz dialog",
+        "guided recommendation"
+      ],
+      "description": "A 5-question quiz scores four meditation types and returns a recommended type; ties are broken using the first answer; result navigates into the selected meditation flow.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-9",
+      "title": "Meditation types catalog (frontend mock)",
+      "synonyms": [
+        "meditation types list",
+        "guided types"
+      ],
+      "description": "Frontend exposes a hook returning meditation type info (name/description/guide). Since backend support is missing, this is currently backed by mock data.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-10",
+      "title": "Meditation session flow with guide, timer, pause, seek, and ambient audio",
+      "synonyms": [
+        "pre-meditation",
+        "active meditation"
+      ],
+      "description": "End-to-end meditation flow: setup (type-specific guide steps, duration slider, ambient audio selection), active timed meditation (pause/resume, volume control, seek slider), and smooth audio fade-out on completion.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-11",
+      "title": "Post-session reflection capture and journal entry creation",
+      "synonyms": [
+        "reflection flow",
+        "session reflection"
+      ],
+      "description": "After a session, users select one or more moods, choose an energy level, optionally add notes, and mark the session as favorite; the entry is saved to backend (authenticated) or localStorage (guest).",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-12",
+      "title": "Meditation progress tracking (total minutes, streaks, monthly minutes, rank)",
+      "synonyms": [
+        "progress stats",
+        "streak tracking"
+      ],
+      "description": "Records sessions (backend or local) and computes total minutes, current streak (day-to-day), last-30-days minutes, and a rank string; frontend displays these stats with rank thresholds.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-13",
+      "title": "Progress visualization with animated lotus bloom",
+      "synonyms": [
+        "lotus progress canvas",
+        "journey visualization"
+      ],
+      "description": "Progress page renders an animated lotus/bloom visualization on a canvas tied to total minutes and shows metric cards (total minutes, streak, monthly minutes) plus rank and time-to-next-rank.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-14",
+      "title": "Journal management UI (list, search, filters, favorites)",
+      "synonyms": [
+        "journal page",
+        "reflection history"
+      ],
+      "description": "Journal page lists entries with meditation type, moods, energy, duration, timestamp; supports search across fields, filtering by meditation type/mood/energy, and a favorites tab.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-15",
+      "title": "Journal CRUD operations (create/update/delete) and favorite toggling",
+      "synonyms": [
+        "edit reflection",
+        "delete entry",
+        "toggle favorite"
+      ],
+      "description": "Supports saving new entries, editing reflection text, deleting entries with confirmation dialog, and toggling favorite state; works for both authenticated backend storage and guest local storage.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-16",
+      "title": "Unified export/import of meditation data (journal + sessions + progress)",
+      "synonyms": [
+        "data backup",
+        "data restore",
+        "JSON export/import"
+      ],
+      "description": "Exports a unified JSON file containing journal entries, session list, and progress stats; imports the same format into backend (by re-saving entries and re-recording sessions) or into localStorage for guest users; triggers React Query invalidations to refresh UI immediately.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-17",
+      "title": "Book recommendations browsing",
+      "synonyms": [
+        "recommended reading",
+        "books carousel"
+      ],
+      "description": "A carousel-based UI displays a curated static list of meditation books with tags and an external Amazon link (opens in a new tab). A React Query hook also exposes the same dataset as Book[] for consistency.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-18",
+      "title": "Navigation and session state UI elements",
+      "synonyms": [
+        "floating nav",
+        "hamburger menu",
+        "session indicator"
+      ],
+      "description": "Floating navigation links to Journal/Progress/Books, a mobile hamburger menu shows theme and account status with logout/return actions, session indicator shows guest vs logged-in state, and a mobile back button navigates to dashboard.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-19",
+      "title": "Backend journal storage and filtering APIs",
+      "synonyms": [
+        "Motoko journal API",
+        "journal filters"
+      ],
+      "description": "Motoko canister stores per-user journal entries and supports save, fetch (reverse chronological), update, delete, toggleFavorite, and filters by meditation type, mood, energy, and favorites (user-only).",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-20",
+      "title": "Backend session recording and progress stats APIs (with admin views)",
+      "synonyms": [
+        "recordSession",
+        "getProgressStats",
+        "admin stats"
+      ],
+      "description": "Motoko canister records sessions, updates streak logic based on last session time, computes monthly minutes (last 30 days), determines rank, caches computed stats, and provides admin-only endpoints to view other users' stats and all users' totals.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-21",
+      "title": "Backend quotes and book query APIs",
+      "synonyms": [
+        "daily quotes backend",
+        "book tag search"
+      ],
+      "description": "Motoko canister provides daily quote strings and book list queries including tag listing/filtering and description search (books are currently static in-canister).",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-22",
+      "title": "User profile and avatar reference (backend)",
+      "synonyms": [
+        "profile API",
+        "avatar blob reference"
+      ],
+      "description": "Backend includes caller profile get/save and avatar retrieval with access restrictions (self or admin). Avatar is represented as an external blob reference type.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-23",
+      "title": "Blob storage gateway authorization and cycles refill mixin (backend)",
+      "synonyms": [
+        "storage mixin",
+        "gateway principals",
+        "cycles top-up"
+      ],
+      "description": "Backend includes a storage mixin that can update authorized gateway principals via a cashier canister, list and prune dead blobs (authorized callers only), confirm deletion with GC trigger, and support cashier refill operations.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-24",
+      "title": "Migration stub for canister upgrades",
+      "synonyms": [
+        "data migration",
+        "with migration clause"
+      ],
+      "description": "Includes a migration module wired via Motoko's with-clause to carry forward existing state during upgrades (currently a pass-through).",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-25",
+      "title": "Externally configurable lotus favicon applied across SPA",
+      "synonyms": [
+        "favicon from URL",
+        "lotus icon favicon"
+      ],
+      "description": "The app favicon is sourced from a configurable external asset URL (lotus icon) and applied consistently so it appears correctly across routes/pages.",
+      "reqIds": [
+        "AR-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-active-meditation-timer-screen-the-view-shown-after-the-user-clicks-start-meditation-reduce-the-rendered-width-of-both-range-inputs-volume-slider-and-time-seek-slider-by-10-20-on-screens-narrower-than-390px-so-they-do-not-overflow-horizontally",
+      "title": "On the active meditation timer screen (the view shown after the user clicks “Start Meditation”), reduce the rendered width of both range inputs (volume slider and time/seek slider) by ~10–20% on screens narrower than 390px so they do not overflow horizontally.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-active-meditation-timer-screen-remove-any-overflow-hidden-styling-that-clips-the-circular-svg-timer-s-fill-shadow-the-drop-shadow-visible-as-the-timer-fills-so-the-shadow-can-render-fully-and-fade-naturally-no-hard-cutoff",
+      "title": "On the active meditation timer screen, remove any `overflow: hidden` styling that clips the circular SVG timer’s fill/shadow (the drop-shadow visible as the timer fills), so the shadow can render fully and fade naturally (no hard cutoff).",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Universal import/export that works both directions (guest↔logged-in) using the same unified JSON schema; online imports must reflect immediately in Journal/Progress and support overwrite confirmation dialog",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Add a mobile hamburger menu across all pages for top controls (theme toggle, login/guest status/actions, export/import, etc.) while keeping a dedicated top-left back button on small screens",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Books page: store book recommendations in the frontend and present them in a responsive carousel of book cards (title/author/tags/description) with animated transitions and external links (Amazon/Goodreads as specified)",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "architecturalNotes": [
+    "Frontend is a SPA built with React + TypeScript using TanStack Router (manual route declarations) and TanStack React Query for server state management.",
+    "Authentication uses Dfinity Internet Identity via @dfinity/auth-client, exposed through a React context provider (useInternetIdentity).",
+    "Backend actor is created via a custom useActor hook; on actor creation it calls an authorization initializer that assigns roles (admin/user) based on a secret token.",
+    "Offline-first/guest mode: the same React Query hooks route calls either to the backend (authenticated) or to localStorage (guest), keyed by principal or 'guest'.",
+    "Unified export/import JSON schema implemented in the frontend (journalEntries + sessions + progressStats) with immediate query invalidation after import.",
+    "UI uses TailwindCSS with extensive theme tokens (OKLCH color system), next-themes for dark/light mode, and shadcn/ui components for dialogs/tabs/forms.",
+    "Several animated canvas/SVG effects (LotusCanvas and progress lotus bloom) are used as ambient background and progress visualization.",
+    "Motoko backend uses in-canister data structures (Map + List) for journal entries, sessions, cached progress stats, and user profiles (no stable persistence shown beyond migration stub).",
+    "Motoko code uses a 'mixin' pattern to include authorization and blob-storage related functions into the main actor.",
+    "Backend includes a blob-storage helper/mixin for authorization of gateway principals and cycles top-up via a designated 'cashier' canister/principal.",
+    "Favicon should be configurable from an external asset URL (lotus icon) and applied consistently across the SPA.",
+    "Import/export must use a single unified JSON format that can be imported into either guest(localStorage) or authenticated(backend) storage, with an explicit overwrite confirmation step and immediate UI refresh (query invalidation) after import.",
+    "Favicon is configured via the frontend config/env and applied in index.html so it remains consistent across SPA navigation.",
+    "Active meditation page responsive constraint: for screens <390px, reduce width of both range inputs (time + volume) by ~10–20% to prevent horizontal overflow.",
+    "Active meditation circular SVG timer: remove any overflow:hidden clipping so the fill/shadow can render naturally (preferred over reducing shadow)."
+  ],
+  "knownIssues": [
+    "Frontend useMeditationTypes returns mock meditation types because the backend has no corresponding method yet.",
+    "Frontend book recommendations are sourced from a static dataset (Amazon links) while the backend also exposes getBooks (Goodreads links); the frontend currently ignores backend book APIs and maps amazonLink into the Book.goodreadsLink field for compatibility.",
+    "Guest journal entry IDs are generated as BigInt(entries.length); deleting entries can cause future ID reuse/collisions and unexpected updates/toggles because IDs are not globally unique in guest mode.",
+    "Progress export for authenticated users pulls session history from localStorage (if any) rather than the backend; backend session history is stored but no API is used/exposed in the shown frontend to export it, so exports may be incomplete for cloud-only users.",
+    "Backend environment variable name for storage cashier principal is spelled \"CAFFFEINE_STORAGE_CASHIER_PRINCIPAL\" (triple 'F'), which may be a typo and can cause runtime traps if the intended env var is differently named.",
+    "Access control getUserRole traps if the user is not registered; while the frontend initializes access control on actor creation for authenticated users, any missed initialization or direct calls could trap.",
+    "Two different CSS files are shown (frontend/src/index.css with app styling and frontend/index.css with generic tokens); depending on build wiring, there may be confusion or unused/overriding styles.",
+    "Logged-in import can report success but not reflect in Journal/Progress immediately (missing/incorrect refresh or backend re-fetch).",
+    "Import format mismatch: offline-exported JSON may not be accepted for online import (schema/validation inconsistency).",
+    "Book recommendations sometimes do not render (missing frontend dataset or reliance on unavailable backend data).",
+    "After refresh while logged in, some pages (books/journal/progress) can show 'no data yet' until re-login (session/actor/query initialization issue).",
+    "Online/authenticated import does not accept (or does not properly process) the unified JSON exported from offline/guest mode, even though offline import works; import should be bidirectional (offline↔online) and reflect immediately in Journal/Progress.",
+    "Logged-in data persistence/sourcing bug: after importing while authenticated, data appears immediately but is not reliably persisted to backend and/or subsequent reads incorrectly source from localStorage. Symptoms: (1) after logout, doing a guest/local session then logging back in shows progress contaminated by the guest session; (2) logging into the same account in a private tab (no localStorage) shows no data even though the import previously appeared to succeed. Indicates improper separation of guest vs authenticated storage keys and/or authenticated import writing to localStorage instead of backend, or queries preferring local cache over backend.",
+    "Meditation session page: time/volume range input overflows horizontally on small smartphone screens; needs responsive width reduction (~10–20%).",
+    "Active meditation circular SVG timer: fill/shadow effect is visually clipped (likely due to overflow: hidden on a parent). Shadow should render naturally (remove overflow hidden where appropriate or reduce shadow).",
+    "Active meditation page (timer after clicking “Start Meditation”): on very small screens (<390px), the two range inputs (time + volume) overflow horizontally; reduce their width ~10–20%.",
+    "Active meditation circular SVG timer: shadow on the fill animation is clipped due to an overflow:hidden constraint; remove overflow hidden (preferred) so the shadow renders naturally.",
+    "Active meditation page (after clicking “Start Meditation”): for screens <390px, both range inputs (time + volume) should be reduced in width by ~10–20% to prevent horizontal overflow.",
+    "Active meditation circular SVG timer: remove any overflow:hidden clipping so the fill/shadow can render naturally (user preference: remove overflow constraint rather than reducing shadow)."
+  ],
+  "isFixRequest": true,
+  "gameProjectType": "none",
+  "projectName": "Inner Bloom",
+  "clarification_mode": "pro",
+  "clarification_rounds": 0,
+  "requiresBackendChanges": false,
+  "requiresFrontendChanges": true
+}

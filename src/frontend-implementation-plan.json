@@ -1,0 +1,37 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Active meditation UI polish: small-screen slider width + unclipped timer shadow",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Reduce volume and seek slider rendered width on very small screens (<390px) to prevent horizontal overflow on the active meditation timer view.",
+      "acceptanceCriteria": [
+        "When viewport width is < 390px, the volume slider and seek/time slider fit within the screen bounds with no horizontal overflow/clipping.",
+        "When viewport width is >= 390px, slider widths remain visually unchanged from the current design."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/PreMeditationPage.tsx",
+          "operation": "modify",
+          "description": "In the 'active' meditation timer view, adjust the two Slider components (volume + seek/time) to render ~10–20% narrower when viewport width is <390px (e.g., Tailwind max-[389px] responsive width reduction) and keep the current width at >=390px. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Remove overflow clipping that cuts off the circular SVG timer fill/shadow on the active meditation timer view while avoiding new page scrollbars.",
+      "acceptanceCriteria": [
+        "During timer progress/fill animation, the circular SVG timer’s shadow is not visibly clipped by a container boundary.",
+        "The active meditation page does not introduce unwanted page scrolling as a result of removing overflow clipping (no persistent horizontal scrollbar)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/PreMeditationPage.tsx",
+          "operation": "modify",
+          "description": "In the 'active' meditation timer view, remove/replace any overflow-hidden styling that can clip the SVG timer's drop-shadow (including ensuring the SVG itself allows overflow visibility), and add only the minimal overflow constraint needed to prevent persistent horizontal scrolling (e.g., constrain x-axis only)."
+        }
+      ]
+    }
+  ]
+}

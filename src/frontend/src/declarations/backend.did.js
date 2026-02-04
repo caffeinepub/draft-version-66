@@ -24,6 +24,19 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
+export const MeditationType = IDL.Variant({
+  'ifs' : IDL.Null,
+  'metta' : IDL.Null,
+  'mindfulness' : IDL.Null,
+  'visualization' : IDL.Null,
+});
+export const Ritual = IDL.Record({
+  'duration' : IDL.Nat,
+  'ambientSoundVolume' : IDL.Nat,
+  'timestamp' : IDL.Int,
+  'ambientSound' : IDL.Text,
+  'meditationType' : MeditationType,
+});
 export const Book = IDL.Record({
   'title' : IDL.Text,
   'goodreadsLink' : IDL.Text,
@@ -38,12 +51,6 @@ export const MoodState = IDL.Variant({
   'happy' : IDL.Null,
   'calm' : IDL.Null,
   'neutral' : IDL.Null,
-});
-export const MeditationType = IDL.Variant({
-  'ifs' : IDL.Null,
-  'metta' : IDL.Null,
-  'mindfulness' : IDL.Null,
-  'visualization' : IDL.Null,
 });
 export const EnergyState = IDL.Variant({
   'tired' : IDL.Null,
@@ -120,6 +127,7 @@ export const idlService = IDL.Service({
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'deleteRitual' : IDL.Func([Ritual], [], []),
   'getBooks' : IDL.Func([], [IDL.Vec(Book)], ['query']),
   'getCallerJournalEntries' : IDL.Func([], [IDL.Vec(JournalEntry)], ['query']),
   'getCallerProgressStats' : IDL.Func([], [ProgressStats], ['query']),
@@ -139,12 +147,14 @@ export const idlService = IDL.Service({
     ),
   'importData' : IDL.Func([ImportData, IDL.Bool], [], []),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'listCallerRituals' : IDL.Func([], [IDL.Vec(Ritual)], ['query']),
   'recordMeditationSession' : IDL.Func(
       [MeditationSession, IDL.Nat, IDL.Nat],
       [ProgressStats],
       [],
     ),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'saveRitual' : IDL.Func([Ritual], [], []),
 });
 
 export const idlInitArgs = [];
@@ -166,6 +176,19 @@ export const idlFactory = ({ IDL }) => {
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
+  const MeditationType = IDL.Variant({
+    'ifs' : IDL.Null,
+    'metta' : IDL.Null,
+    'mindfulness' : IDL.Null,
+    'visualization' : IDL.Null,
+  });
+  const Ritual = IDL.Record({
+    'duration' : IDL.Nat,
+    'ambientSoundVolume' : IDL.Nat,
+    'timestamp' : IDL.Int,
+    'ambientSound' : IDL.Text,
+    'meditationType' : MeditationType,
+  });
   const Book = IDL.Record({
     'title' : IDL.Text,
     'goodreadsLink' : IDL.Text,
@@ -180,12 +203,6 @@ export const idlFactory = ({ IDL }) => {
     'happy' : IDL.Null,
     'calm' : IDL.Null,
     'neutral' : IDL.Null,
-  });
-  const MeditationType = IDL.Variant({
-    'ifs' : IDL.Null,
-    'metta' : IDL.Null,
-    'mindfulness' : IDL.Null,
-    'visualization' : IDL.Null,
   });
   const EnergyState = IDL.Variant({
     'tired' : IDL.Null,
@@ -262,6 +279,7 @@ export const idlFactory = ({ IDL }) => {
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'deleteRitual' : IDL.Func([Ritual], [], []),
     'getBooks' : IDL.Func([], [IDL.Vec(Book)], ['query']),
     'getCallerJournalEntries' : IDL.Func(
         [],
@@ -285,12 +303,14 @@ export const idlFactory = ({ IDL }) => {
       ),
     'importData' : IDL.Func([ImportData, IDL.Bool], [], []),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'listCallerRituals' : IDL.Func([], [IDL.Vec(Ritual)], ['query']),
     'recordMeditationSession' : IDL.Func(
         [MeditationSession, IDL.Nat, IDL.Nat],
         [ProgressStats],
         [],
       ),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'saveRitual' : IDL.Func([Ritual], [], []),
   });
 };
 

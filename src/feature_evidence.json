@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-only-the-selected-element-the-progress-bowl-canvas-rendered-by-frontend-src-components-progressbowl-tsx-to-remove-the-apparent-top-empty-space-above-the-bowl-by-adjusting-the-canvas-rendering-layout-so-the-bowl-is-vertically-positioned-without-extra-top-margin-blank-area-inside-the-canvas",
-      "featureTitle": "Update ONLY the selected element (the Progress bowl <canvas> rendered by `frontend/src/components/ProgressBowl.tsx`) to remove the apparent top empty space above the bowl by adjusting the canvas rendering/layout so the bowl is vertically positioned without extra top margin/blank area inside the canvas.",
+      "featureId": "feature-add-horizontal-swipe-navigation-prev-next-to-the-meditation-guide-container-shown-on-the-pre-meditation-page-the-meditation-guides-card-that-renders-meditationguidestepper-swiping-left-must-go-to-the-next-step-swiping-right-must-go-to-the-previous-step-with-a-reasonable-minimum-swipe-distance-threshold-and-must-respect-first-last-step-boundaries-no-wraparound-swipe-navigation-must-stay-in-sync-with-the-existing-prev-next-buttons-and-dot-navigation",
+      "featureTitle": "Add horizontal swipe navigation (Prev/Next) to the meditation guide container shown on the Pre‑Meditation page (the \"Meditation Guides\" card that renders `MeditationGuideStepper`). Swiping left must go to the next step; swiping right must go to the previous step, with a reasonable minimum swipe distance threshold, and must respect first/last step boundaries (no wraparound). Swipe navigation must stay in sync with the existing Prev/Next buttons and dot navigation.",
       "files": [
-        "frontend/src/components/ProgressBowl.tsx"
+        "frontend/src/components/MeditationGuideStepper.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -17,7 +17,48 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-25"
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-in-the-post-session-reflection-flow-on-the-pre-meditation-page-restrict-mood-state-selection-so-the-user-can-select-at-most-2-mood-states-total-the-energy-level-selection-must-remain-single-choice-exactly-as-it-is-now-no-behavioral-changes-to-energy-selection-update-any-on-screen-instruction-text-for-mood-selection-to-clearly-indicate-the-up-to-2-limit-in-english",
+      "featureTitle": "In the post-session reflection flow on the Pre‑Meditation page, restrict mood/state selection so the user can select at most 2 mood states total. The energy level selection must remain single-choice exactly as it is now (no behavioral changes to energy selection). Update any on-screen instruction text for mood selection to clearly indicate the \"up to 2\" limit in English.",
+      "files": [
+        "frontend/src/pages/PreMeditationPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-fix-the-toast-notification-styling-for-ritual-saved-deleted-notifications-so-they-are-not-transparent-toasts-must-render-with-a-solid-theme-consistent-background-color-and-a-visible-border-that-matches-the-app-theme-in-both-light-and-dark-modes-apply-this-specifically-to-the-notifications-shown-when-a-ritual-is-saved-or-deleted",
+      "featureTitle": "Fix the toast/notification styling for ritual saved/deleted notifications so they are not transparent: toasts must render with a solid, theme-consistent background color and a visible border that matches the app theme in both light and dark modes. Apply this specifically to the notifications shown when a ritual is saved or deleted.",
+      "files": [
+        "frontend/src/pages/DashboardPage.tsx",
+        "frontend/src/pages/PreMeditationPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-10"
       ],
       "confidence": "high"
     }

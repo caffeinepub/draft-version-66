@@ -49,6 +49,13 @@ export interface JournalEntry {
     meditationType: MeditationType;
     energy: EnergyState;
 }
+export interface Ritual {
+    duration: bigint;
+    ambientSoundVolume: bigint;
+    timestamp: bigint;
+    ambientSound: string;
+    meditationType: MeditationType;
+}
 export interface ImportData {
     journalEntries: Array<JournalEntry>;
     progressStats: ProgressStats;
@@ -86,6 +93,7 @@ export enum UserRole {
 }
 export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    deleteRitual(ritualToDelete: Ritual): Promise<void>;
     getBooks(): Promise<Array<Book>>;
     getCallerJournalEntries(): Promise<Array<JournalEntry>>;
     getCallerProgressStats(): Promise<ProgressStats>;
@@ -97,6 +105,8 @@ export interface backendInterface {
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     importData(importData: ImportData, overwrite: boolean): Promise<void>;
     isCallerAdmin(): Promise<boolean>;
+    listCallerRituals(): Promise<Array<Ritual>>;
     recordMeditationSession(session: MeditationSession, _monthlyStats: bigint, _currentStreak: bigint): Promise<ProgressStats>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    saveRitual(ritual: Ritual): Promise<void>;
 }

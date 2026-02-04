@@ -1,34 +1,73 @@
 {
   "kind": "build_request",
-  "title": "Remove extra top empty space above Progress bowl canvas",
+  "title": "Add swipe navigation to Pre‑Meditation guide, limit reflection mood selection to 2, and fix ritual toast styling",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-25",
-      "text": "Update ONLY the selected element (the Progress bowl <canvas> rendered by `frontend/src/components/ProgressBowl.tsx`) to remove the apparent top empty space above the bowl by adjusting the canvas rendering/layout so the bowl is vertically positioned without extra top margin/blank area inside the canvas.",
+      "id": "REQ-8",
+      "text": "Add horizontal swipe navigation (Prev/Next) to the meditation guide container shown on the Pre‑Meditation page (the \"Meditation Guides\" card that renders `MeditationGuideStepper`). Swiping left must go to the next step; swiping right must go to the previous step, with a reasonable minimum swipe distance threshold, and must respect first/last step boundaries (no wraparound). Swipe navigation must stay in sync with the existing Prev/Next buttons and dot navigation.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "Remove top margin entirely from this container or parent container, basically the bowl container is too big there is empty space that is left at the top side of container"
+          "Introduce also swiping in the meditation guide container. The container is in pre-meditation page."
         ]
       },
       "acceptanceCriteria": [
-        "On the Progress page, the bowl visualization no longer has noticeable unused/blank space above it inside its container; the bowl is visually shifted up to eliminate the top gap.",
-        "The change is implemented by modifying the bowl canvas element behavior (CSS on the canvas and/or the bowl drawing’s vertical origin in `ProgressBowl.tsx`), without changing unrelated page layout or other components.",
-        "The bowl remains fully visible (not clipped) and the animation continues to run correctly in both light and dark themes."
+        "On mobile/touch devices, swiping left on the guide content advances exactly one step (unless already on the last step).",
+        "On mobile/touch devices, swiping right on the guide content goes back exactly one step (unless already on the first step).",
+        "Prev/Next buttons and dot indicators continue to work and reflect the same current step index used by swipes.",
+        "Swiping does not cause step wraparound from last to first (or first to last)."
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "In the post-session reflection flow on the Pre‑Meditation page, restrict mood/state selection so the user can select at most 2 mood states total. The energy level selection must remain single-choice exactly as it is now (no behavioral changes to energy selection). Update any on-screen instruction text for mood selection to clearly indicate the \"up to 2\" limit in English.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Allow for those states, only 2 at most, and 1 for energy level (as it is now) so no changes for that at least."
+        ]
+      },
+      "acceptanceCriteria": [
+        "It is impossible to end up with more than 2 items in the selected moods list via any UI interaction.",
+        "Energy selection remains single-choice and continues to behave exactly as before.",
+        "The mood question text indicates the limit (e.g., \"Select up to 2\").",
+        "Saving the reflection/journal entry persists at most 2 moods (or defaults as currently implemented when none are selected)."
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Fix the toast/notification styling for ritual saved/deleted notifications so they are not transparent: toasts must render with a solid, theme-consistent background color and a visible border that matches the app theme in both light and dark modes. Apply this specifically to the notifications shown when a ritual is saved or deleted.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "the notification backgrounds are transparent, add a solid bg color with border around it with fitting theme. Notifications I am talking about, are the ones that appear when ritual is saved or deleted."
+        ]
+      },
+      "acceptanceCriteria": [
+        "When saving a ritual, the success toast has an opaque (non-transparent) background in both light and dark themes and includes a visible border.",
+        "When deleting a ritual, the corresponding toast also has an opaque background and visible border in both light and dark themes.",
+        "Toast text remains readable and consistent with the existing theme tokens."
       ]
     }
   ],
   "constraints": [
-    "Apply changes ONLY to the selected element (the bowl visualization canvas) and its direct canvas-rendering behavior; do not modify other page sections or unrelated containers.",
-    "Do not change any backend code or data models."
+    "Frontend immutable paths must not be edited: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui",
+    "Keep the backend single-actor architecture unchanged; no backend changes are required for these UI/UX updates"
   ],
   "nonGoals": [
-    "Redesigning the Progress page layout or changing the bowl container sizing/padding outside of the selected canvas element behavior",
-    "Any changes to progress calculations, ranks, or statistics"
+    "Do not change the energy level question/options or convert it to multi-select",
+    "Do not add new reflection questions or new mood/energy categories beyond enforcing the selection limit",
+    "Do not introduce new real-time systems or external integrations for notifications"
   ],
   "imageRequirements": {
     "required": [],

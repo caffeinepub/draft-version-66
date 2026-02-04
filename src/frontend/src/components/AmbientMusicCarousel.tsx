@@ -64,8 +64,14 @@ interface AmbientMusicCarouselProps {
 
 export default function AmbientMusicCarousel({ selectedMusic, onSelectMusic, volume, onVolumeChange }: AmbientMusicCarouselProps) {
   const [isMuted, setIsMuted] = useState(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const currentIndex = musicOptions.findIndex((m) => m.id === selectedMusic);
+
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50;
 
   useEffect(() => {
     // Stop and clean up any previous audio immediately
@@ -143,6 +149,29 @@ export default function AmbientMusicCarousel({ selectedMusic, onSelectMusic, vol
     onVolumeChange(newVolume);
   };
 
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      handleNext();
+    } else if (isRightSwipe) {
+      handlePrevious();
+    }
+  };
+
   const getCardStyle = (index: number) => {
     const totalItems = musicOptions.length;
     let diff = index - currentIndex;
@@ -192,7 +221,13 @@ export default function AmbientMusicCarousel({ selectedMusic, onSelectMusic, vol
   return (
     <div className="relative w-full">
       {/* Carousel Container with strong overflow hidden */}
-      <div className="relative h-[260px] sm:h-[300px] overflow-hidden">
+      <div 
+        ref={containerRef}
+        className="relative h-[260px] sm:h-[300px] overflow-hidden"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
           {musicOptions.map((music, index) => {
             const style = getCardStyle(index);

@@ -62,6 +62,13 @@ export interface ProgressStats {
   'currentStreak' : bigint,
   'totalMinutes' : bigint,
 }
+export interface Ritual {
+  'duration' : bigint,
+  'ambientSoundVolume' : bigint,
+  'timestamp' : bigint,
+  'ambientSound' : string,
+  'meditationType' : MeditationType,
+}
 export interface UserProfile {
   'name' : string,
   'email' : [] | [string],
@@ -99,6 +106,7 @@ export interface _SERVICE {
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'deleteRitual' : ActorMethod<[Ritual], undefined>,
   'getBooks' : ActorMethod<[], Array<Book>>,
   'getCallerJournalEntries' : ActorMethod<[], Array<JournalEntry>>,
   'getCallerProgressStats' : ActorMethod<[], ProgressStats>,
@@ -110,11 +118,13 @@ export interface _SERVICE {
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'importData' : ActorMethod<[ImportData, boolean], undefined>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'listCallerRituals' : ActorMethod<[], Array<Ritual>>,
   'recordMeditationSession' : ActorMethod<
     [MeditationSession, bigint, bigint],
     ProgressStats
   >,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'saveRitual' : ActorMethod<[Ritual], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

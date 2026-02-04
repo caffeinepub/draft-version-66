@@ -20,8 +20,17 @@ interface GuestProgressData {
   sessions: Array<{ minutes: number; timestamp: string }>;
 }
 
+interface GuestRitual {
+  meditationType: string;
+  duration: number;
+  ambientSound: string;
+  ambientSoundVolume: number;
+  timestamp: string;
+}
+
 const GUEST_JOURNAL_KEY = 'guest-journalEntries';
 const GUEST_PROGRESS_KEY = 'guest-meditationProgress';
+const GUEST_RITUALS_KEY = 'guest-rituals';
 
 // Legacy keys for migration
 const LEGACY_JOURNAL_KEY = 'journalEntries';
@@ -98,6 +107,7 @@ export function clearGuestData(): void {
   try {
     localStorage.removeItem(GUEST_JOURNAL_KEY);
     localStorage.removeItem(GUEST_PROGRESS_KEY);
+    // Note: guest rituals are NOT cleared on logout
   } catch (error) {
     console.error('Error clearing guest data:', error);
   }
@@ -151,4 +161,31 @@ export function updateGuestProgress(minutes: number): GuestProgressData {
 
   setGuestProgressData(progress);
   return progress;
+}
+
+// Guest ritual storage utilities
+export function getGuestRituals(): GuestRitual[] {
+  try {
+    const data = localStorage.getItem(GUEST_RITUALS_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (error) {
+    console.error('Error reading guest rituals:', error);
+    return [];
+  }
+}
+
+export function setGuestRituals(rituals: GuestRitual[]): void {
+  try {
+    localStorage.setItem(GUEST_RITUALS_KEY, JSON.stringify(rituals));
+  } catch (error) {
+    console.error('Error saving guest rituals:', error);
+  }
+}
+
+export function clearGuestRituals(): void {
+  try {
+    localStorage.removeItem(GUEST_RITUALS_KEY);
+  } catch (error) {
+    console.error('Error clearing guest rituals:', error);
+  }
 }

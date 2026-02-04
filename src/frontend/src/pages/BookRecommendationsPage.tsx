@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun, ArrowLeft, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -15,6 +15,12 @@ export default function BookRecommendationsPage() {
   const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50;
 
   useEffect(() => {
     setMounted(true);
@@ -26,6 +32,29 @@ export default function BookRecommendationsPage() {
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev === BOOK_RECOMMENDATIONS.length - 1 ? 0 : prev + 1));
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      handleNext();
+    } else if (isRightSwipe) {
+      handlePrevious();
+    }
   };
 
   const getCardStyle = (index: number) => {
@@ -134,7 +163,13 @@ export default function BookRecommendationsPage() {
 
           <div className="relative w-full max-w-6xl mx-auto">
             {/* Carousel Container with strong overflow hidden */}
-            <div className="relative h-[500px] sm:h-[550px] md:h-[600px] overflow-hidden">
+            <div 
+              ref={containerRef}
+              className="relative h-[500px] sm:h-[550px] md:h-[600px] overflow-hidden"
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+            >
               <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
                 {BOOK_RECOMMENDATIONS.map((book, index) => {
                   const style = getCardStyle(index);

@@ -9,7 +9,9 @@ import FloatingNav from '../components/FloatingNav';
 import QuizDialog from '../components/QuizDialog';
 import SessionIndicator from '../components/SessionIndicator';
 import HamburgerMenu from '../components/HamburgerMenu';
-import { useDailyQuotes } from '../hooks/useQueries';
+import SavedRitualsCarousel from '../components/SavedRitualsCarousel';
+import { useDailyQuotes, useRituals, useDeleteRitual } from '../hooks/useQueries';
+import { toast } from 'sonner';
 
 export default function DashboardPage() {
   const { theme, setTheme } = useTheme();
@@ -20,6 +22,8 @@ export default function DashboardPage() {
   const [showQuiz, setShowQuiz] = useState(false);
 
   const { data: quotes = [] } = useDailyQuotes();
+  const { data: rituals = [], isLoading: ritualsLoading } = useRituals();
+  const deleteRitual = useDeleteRitual();
 
   useEffect(() => {
     setMounted(true);
@@ -49,6 +53,33 @@ export default function DashboardPage() {
       to: '/pre-meditation',
       search: { type: recommendedType, fromQuiz: true },
     });
+  };
+
+  const handleStartRitual = (ritual: any) => {
+    navigate({
+      to: '/pre-meditation',
+      search: {
+        type: ritual.meditationType,
+        ritualDuration: ritual.duration,
+        ritualSound: ritual.ambientSound,
+        ritualVolume: ritual.ambientSoundVolume,
+        instantStart: true,
+      },
+    });
+  };
+
+  const handleDeleteRitual = async (ritual: any) => {
+    try {
+      await deleteRitual.mutateAsync(ritual);
+      toast.success('Ritual deleted successfully', {
+        className: 'bg-card border-2 border-accent-cyan/50 text-foreground',
+      });
+    } catch (error) {
+      console.error('Error deleting ritual:', error);
+      toast.error('Failed to delete ritual. Please try again.', {
+        className: 'bg-card border-2 border-destructive/50 text-foreground',
+      });
+    }
   };
 
   return (
@@ -87,6 +118,21 @@ export default function DashboardPage() {
       {/* Main Content */}
       <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 py-8">
         <div className="max-w-6xl mx-auto w-full space-y-4 sm:space-y-6 animate-fade-in">
+          {/* Rituals Section - Only shown when rituals exist */}
+          {!ritualsLoading && rituals.length > 0 && (
+            <div className="space-y-3 mb-6">
+              <h2 className="text-xl sm:text-2xl font-semibold text-foreground text-center">
+                Your Rituals
+              </h2>
+              <SavedRitualsCarousel
+                rituals={rituals}
+                onStart={handleStartRitual}
+                onDelete={handleDeleteRitual}
+                isDeleting={deleteRitual.isPending}
+              />
+            </div>
+          )}
+
           {/* Daily Quote Banner - Reduced spacing */}
           <div className="text-center space-y-2 sm:space-y-3">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-playfair italic text-accent-cyan-tinted">

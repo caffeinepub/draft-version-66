@@ -2,12 +2,13 @@ import Nat "mo:core/Nat";
 import Map "mo:core/Map";
 import List "mo:core/List";
 import Int "mo:core/Int";
-import Text "mo:core/Text";
 import Time "mo:core/Time";
 import Runtime "mo:core/Runtime";
-import Iter "mo:core/Iter";
 import Array "mo:core/Array";
+import Iter "mo:core/Iter";
+import Order "mo:core/Order";
 import Principal "mo:core/Principal";
+
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
 import Storage "blob-storage/Storage";
@@ -88,11 +89,19 @@ actor {
     userProfile : ?UserProfile;
   };
 
+  type Ritual = {
+    meditationType : MeditationType;
+    duration : Nat;
+    ambientSound : Text;
+    ambientSoundVolume : Nat;
+    timestamp : Int;
+  };
+
   let books = List.fromArray<Book>([
     {
       title = "The Science of Enlightenment";
       author = "Shinzen Young";
-      description = "A comprehensive guide to meditation practice, blending scientific insights with spiritual wisdom.";
+      description = "A comprehensive guide to meditation, blending scientific insights with spiritual wisdom.";
       goodreadsLink = "https://www.goodreads.com/book/show/34219827-the-science-of-enlightenment";
       tags = ["Mindfulness", "Enlightenment", "Practice"];
       icon = "lotus";
@@ -201,6 +210,8 @@ actor {
 
   include MixinAuthorization(accessControlState);
   include MixinStorage();
+
+  let ritualsStore = Map.empty<Principal, List.List<Ritual>>();
 
   public query ({ caller }) func getBooks() : async ([Book]) {
     books.toArray();
@@ -418,5 +429,86 @@ actor {
     progressCache.add(caller, newStats);
 
     newStats;
+  };
+
+  // RITUALS FEATURE
+
+  public shared ({ caller }) func saveRitual(ritual : Ritual) : async () {
+    if (caller.isAnonymous()) { return };
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
+
+    let newRitual = { ritual with timestamp = Time.now() };
+
+    let existingRituals = switch (ritualsStore.get(caller)) {
+      case (null) { List.empty<Ritual>() };
+      case (?list) { list };
+    };
+
+    // Check for duplicates
+    let isDuplicate = existingRituals.any(
+      func(existing) {
+        existing.meditationType == newRitual.meditationType and
+        existing.duration == newRitual.duration and
+        existing.ambientSound == newRitual.ambientSound and
+        existing.ambientSoundVolume == newRitual.ambientSoundVolume
+      }
+    );
+
+    if (isDuplicate) {
+      Runtime.trap("DuplicateSoundscape: An identical soundscape already exists in your rituals collection. You cannot save this an additional time.");
+    };
+
+    existingRituals.add(newRitual);
+    ritualsStore.add(caller, existingRituals);
+  };
+
+  public query ({ caller }) func listCallerRituals() : async [Ritual] {
+    if (caller.isAnonymous()) { return [] };
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
+
+    switch (ritualsStore.get(caller)) {
+      case (null) { [] };
+      case (?list) {
+        let array = list.toArray();
+        array.sort(
+          func(a, b) {
+            Int.compare(b.timestamp, a.timestamp);
+          }
+        );
+      };
+    };
+  };
+
+  public shared ({ caller }) func deleteRitual(ritualToDelete : Ritual) : async () {
+    if (caller.isAnonymous()) { return };
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
+
+    switch (ritualsStore.get(caller)) {
+      case (null) { Runtime.trap("RitualNotFound: No rituals found for this user") };
+      case (?ritualsList) {
+        let filteredRituals = ritualsList.filter(
+          func(existing) {
+            not (
+              existing.meditationType == ritualToDelete.meditationType and
+              existing.duration == ritualToDelete.duration and
+              existing.ambientSound == ritualToDelete.ambientSound and
+              existing.ambientSoundVolume == ritualToDelete.ambientSoundVolume
+            );
+          }
+        );
+
+        if (filteredRituals.size() == ritualsList.size()) {
+          Runtime.trap("RitualNotFound: The specified ritual was not found and could not be deleted.");
+        };
+
+        ritualsStore.add(caller, filteredRituals);
+      };
+    };
   };
 };

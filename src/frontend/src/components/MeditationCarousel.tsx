@@ -1,3 +1,4 @@
+import { useState, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -50,6 +51,12 @@ interface MeditationCarouselProps {
 
 export default function MeditationCarousel({ selectedMeditation, onSelectMeditation }: MeditationCarouselProps) {
   const currentIndex = meditations.findIndex((m) => m.id === selectedMeditation);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50;
 
   const handlePrevious = () => {
     const newIndex = currentIndex === 0 ? meditations.length - 1 : currentIndex - 1;
@@ -59,6 +66,29 @@ export default function MeditationCarousel({ selectedMeditation, onSelectMeditat
   const handleNext = () => {
     const newIndex = currentIndex === meditations.length - 1 ? 0 : currentIndex + 1;
     onSelectMeditation(meditations[newIndex].id);
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      handleNext();
+    } else if (isRightSwipe) {
+      handlePrevious();
+    }
   };
 
   const getCardStyle = (index: number) => {
@@ -110,7 +140,13 @@ export default function MeditationCarousel({ selectedMeditation, onSelectMeditat
   return (
     <div className="relative w-full">
       {/* Carousel Container with strong overflow hidden */}
-      <div className="relative h-[300px] sm:h-[350px] md:h-[400px] overflow-hidden">
+      <div 
+        ref={containerRef}
+        className="relative h-[300px] sm:h-[350px] md:h-[400px] overflow-hidden"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
           {meditations.map((meditation, index) => {
             const style = getCardStyle(index);

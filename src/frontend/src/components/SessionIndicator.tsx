@@ -26,6 +26,7 @@ export default function SessionIndicator() {
     queryClient.removeQueries({ queryKey: ['journalEntries'] });
     queryClient.removeQueries({ queryKey: ['progressStats'] });
     queryClient.removeQueries({ queryKey: ['currentUserProfile'] });
+    queryClient.removeQueries({ queryKey: ['rituals'] });
     
     await clear();
     navigate({ to: '/' });

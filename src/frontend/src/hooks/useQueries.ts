@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { useInternetIdentity } from './useInternetIdentity';
-import type { ProgressStats, JournalEntry, MeditationType, MoodState, EnergyState, Book, ImportData } from '../backend';
+import type { ProgressStats, JournalEntry, MeditationType, MoodState, EnergyState, Book, ImportData, Ritual } from '../backend';
 import { BOOK_RECOMMENDATIONS } from '../lib/bookData';
 import { formatRankDisplay } from '../utils/progressRanks';
 import {
@@ -9,6 +9,8 @@ import {
   setGuestJournalEntries,
   getGuestProgressData,
   updateGuestProgress,
+  getGuestRituals,
+  setGuestRituals,
 } from '../utils/meditationStorage';
 
 // Stub types for methods not yet implemented in backend
@@ -50,6 +52,15 @@ interface UnifiedExportData {
     monthlyMinutes: number;
     lastSessionDate?: string;
   };
+}
+
+// Local ritual type for guest storage
+interface LocalRitual {
+  meditationType: string;
+  duration: number;
+  ambientSound: string;
+  ambientSoundVolume: number;
+  timestamp: string;
 }
 
 // Mock data for meditation types since backend doesn't have this yet
@@ -283,7 +294,6 @@ export function useSaveJournalEntry() {
       if (isAuthenticated && actor) {
         // Authenticated: save to backend (backend will handle ID generation)
         // For now, we'll use a workaround since backend doesn't have a direct save method
-        // We'll need to add this to the backend in the future
         console.warn('Backend journal save not yet implemented, using guest storage');
         const entries = getGuestJournalEntries();
         const newEntry = {
@@ -576,5 +586,161 @@ export function useBooks() {
       }));
     },
     staleTime: Infinity, // Static data, never stale
+  });
+}
+
+// RITUALS HOOKS - branches by auth state
+
+// Helper to get meditation name from type
+function getMeditationName(type: string): string {
+  const typeMap: Record<string, string> = {
+    mindfulness: 'Mindfulness',
+    metta: 'Metta',
+    visualization: 'Visualization',
+    ifs: 'IFS',
+  };
+  return typeMap[type] || 'Mindfulness';
+}
+
+// Helper to get ambient sound name
+function getAmbientSoundName(soundId: string): string {
+  const soundMap: Record<string, string> = {
+    temple: 'Temple',
+    'singing-bowl': 'Singing Bowl',
+    rain: 'Rain',
+    ocean: 'Ocean',
+    soothing: 'Soothing',
+    birds: 'Birds',
+    crickets: 'Crickets',
+  };
+  return soundMap[soundId] || 'Soothing';
+}
+
+// Helper to check if two rituals are exact matches
+function areRitualsEqual(a: LocalRitual, b: LocalRitual): boolean {
+  return (
+    a.meditationType === b.meditationType &&
+    a.duration === b.duration &&
+    a.ambientSound === b.ambientSound &&
+    a.ambientSoundVolume === b.ambientSoundVolume
+  );
+}
+
+// Hook to list rituals - branches by auth state
+export function useRituals() {
+  const { actor, isFetching } = useActor();
+  const { identity, isInitializing } = useInternetIdentity();
+  const principalId = identity?.getPrincipal().toString();
+  const isAuthenticated = identity && !identity.getPrincipal().isAnonymous();
+
+  return useQuery<Array<LocalRitual & { displayName: string }>>({
+    queryKey: ['rituals', principalId || 'guest'],
+    queryFn: async () => {
+      if (isAuthenticated && actor) {
+        // Authenticated: fetch from backend
+        try {
+          const backendRituals = await actor.listCallerRituals();
+          return backendRituals.map((r) => ({
+            meditationType: r.meditationType,
+            duration: Number(r.duration),
+            ambientSound: r.ambientSound,
+            ambientSoundVolume: Number(r.ambientSoundVolume),
+            timestamp: new Date(Number(r.timestamp) / 1000000).toISOString(),
+            displayName: `${getMeditationName(r.meditationType)} · ${Number(r.duration)} min · ${getAmbientSoundName(r.ambientSound)}`,
+          }));
+        } catch (error) {
+          console.error('Error fetching backend rituals:', error);
+          return [];
+        }
+      } else {
+        // Guest: read from localStorage
+        const guestRituals = getGuestRituals();
+        return guestRituals.map((r) => ({
+          ...r,
+          displayName: `${getMeditationName(r.meditationType)} · ${r.duration} min · ${getAmbientSoundName(r.ambientSound)}`,
+        }));
+      }
+    },
+    enabled: !!actor && !isFetching && !isInitializing,
+    staleTime: 30 * 1000, // 30 seconds
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
+}
+
+// Hook to save a ritual - branches by auth state with duplicate detection
+export function useSaveRitual() {
+  const { actor } = useActor();
+  const { identity } = useInternetIdentity();
+  const queryClient = useQueryClient();
+  const principalId = identity?.getPrincipal().toString();
+  const isAuthenticated = identity && !identity.getPrincipal().isAnonymous();
+
+  return useMutation({
+    mutationFn: async (ritual: Omit<LocalRitual, 'timestamp'>) => {
+      if (isAuthenticated && actor) {
+        // Authenticated: save to backend (backend handles duplicate check)
+        const backendRitual: Ritual = {
+          meditationType: ritual.meditationType as MeditationType,
+          duration: BigInt(ritual.duration),
+          ambientSound: ritual.ambientSound,
+          ambientSoundVolume: BigInt(ritual.ambientSoundVolume),
+          timestamp: BigInt(Date.now() * 1000000),
+        };
+        await actor.saveRitual(backendRitual);
+      } else {
+        // Guest: check for duplicates in localStorage before saving
+        const guestRituals = getGuestRituals();
+        const newRitual: LocalRitual = {
+          ...ritual,
+          timestamp: new Date().toISOString(),
+        };
+        
+        const isDuplicate = guestRituals.some((existing) => areRitualsEqual(existing, newRitual));
+        
+        if (isDuplicate) {
+          throw new Error('DUPLICATE_RITUAL');
+        }
+        
+        guestRituals.push(newRitual);
+        setGuestRituals(guestRituals);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['rituals', principalId || 'guest'] });
+    },
+  });
+}
+
+// Hook to delete a ritual - branches by auth state
+export function useDeleteRitual() {
+  const { actor } = useActor();
+  const { identity } = useInternetIdentity();
+  const queryClient = useQueryClient();
+  const principalId = identity?.getPrincipal().toString();
+  const isAuthenticated = identity && !identity.getPrincipal().isAnonymous();
+
+  return useMutation({
+    mutationFn: async (ritual: LocalRitual) => {
+      if (isAuthenticated && actor) {
+        // Authenticated: delete from backend
+        const backendRitual: Ritual = {
+          meditationType: ritual.meditationType as MeditationType,
+          duration: BigInt(ritual.duration),
+          ambientSound: ritual.ambientSound,
+          ambientSoundVolume: BigInt(ritual.ambientSoundVolume),
+          timestamp: BigInt(new Date(ritual.timestamp).getTime() * 1000000),
+        };
+        await actor.deleteRitual(backendRitual);
+      } else {
+        // Guest: delete from localStorage
+        const guestRituals = getGuestRituals();
+        const filteredRituals = guestRituals.filter((existing) => !areRitualsEqual(existing, ritual));
+        setGuestRituals(filteredRituals);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['rituals', principalId || 'guest'] });
+    },
   });
 }

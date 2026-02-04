@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { Moon, Sun, ArrowLeft, Play, Pause, Heart, Smile, Meh, Frown, Zap, Battery, BatteryCharging } from 'lucide-react';
+import { Moon, Sun, ArrowLeft, Play, Pause, Heart, Smile, Meh, Frown, Zap, Battery, BatteryCharging, Sparkles } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -13,8 +13,9 @@ import SessionIndicator from '../components/SessionIndicator';
 import HamburgerMenu from '../components/HamburgerMenu';
 import MobileBackButton from '../components/MobileBackButton';
 import MeditationGuideStepper from '../components/MeditationGuideStepper';
-import { useMeditationTypes, useRecordSession, useSaveJournalEntry } from '../hooks/useQueries';
+import { useMeditationTypes, useRecordSession, useSaveJournalEntry, useSaveRitual } from '../hooks/useQueries';
 import type { MeditationType, MoodState, EnergyState } from '../backend';
+import { toast } from 'sonner';
 
 const detailedGuides: Record<string, { steps: Array<{ title: string; content: string }> }> = {
   mindfulness: {
@@ -101,15 +102,24 @@ const detailedGuides: Record<string, { steps: Array<{ title: string; content: st
 
 type ViewState = 'setup' | 'active' | 'reflection';
 
+interface PreMeditationSearch {
+  type?: string;
+  fromQuiz?: boolean;
+  ritualDuration?: number;
+  ritualSound?: string;
+  ritualVolume?: number;
+  instantStart?: boolean;
+}
+
 export default function PreMeditationPage() {
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
-  const search = useSearch({ from: '/pre-meditation' }) as { type?: string; fromQuiz?: boolean };
+  const search = useSearch({ from: '/pre-meditation' }) as PreMeditationSearch;
   const [mounted, setMounted] = useState(false);
-  const [duration, setDuration] = useState(15);
-  const [selectedMusic, setSelectedMusic] = useState('soothing');
-  const [volume, setVolume] = useState(50);
-  const [viewState, setViewState] = useState<ViewState>('setup');
+  const [duration, setDuration] = useState(search.ritualDuration || 15);
+  const [selectedMusic, setSelectedMusic] = useState(search.ritualSound || 'soothing');
+  const [volume, setVolume] = useState(search.ritualVolume || 50);
+  const [viewState, setViewState] = useState<ViewState>(search.instantStart ? 'active' : 'setup');
   
   // Active meditation state
   const [isPaused, setIsPaused] = useState(false);
@@ -133,10 +143,18 @@ export default function PreMeditationPage() {
   const { data: meditationTypes } = useMeditationTypes();
   const recordSession = useRecordSession();
   const saveJournalEntry = useSaveJournalEntry();
+  const saveRitual = useSaveRitual();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Handle instant start from ritual
+  useEffect(() => {
+    if (search.instantStart && mounted) {
+      handleStartMeditation();
+    }
+  }, [search.instantStart, mounted]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -159,6 +177,19 @@ export default function PreMeditationPage() {
       ifs: 'IFS',
     };
     return typeMap[meditationType] || 'Mindfulness';
+  };
+
+  const getAmbientSoundName = (soundId: string) => {
+    const soundMap: Record<string, string> = {
+      temple: 'Temple',
+      'singing-bowl': 'Singing Bowl',
+      rain: 'Rain',
+      ocean: 'Ocean',
+      soothing: 'Soothing',
+      birds: 'Birds',
+      crickets: 'Crickets',
+    };
+    return soundMap[soundId] || 'Soothing';
   };
 
   const getGuideSteps = () => {
@@ -328,7 +359,7 @@ export default function PreMeditationPage() {
   // Reflection handlers
   const moodQuestions = [
     {
-      question: 'How are you feeling right now? (Select all that apply)',
+      question: 'How are you feeling right now? (Select up to 2)',
       options: [
         { value: 'calm' as MoodState, label: 'Calm', icon: Smile },
         { value: 'happy' as MoodState, label: 'Happy', icon: Smile },
@@ -352,8 +383,13 @@ export default function PreMeditationPage() {
   const handleMoodToggle = (mood: MoodState) => {
     setSelectedMoods((prev) => {
       if (prev.includes(mood)) {
+        // Allow deselection
         return prev.filter((m) => m !== mood);
       } else {
+        // Limit to 2 moods maximum
+        if (prev.length >= 2) {
+          return prev; // Don't add if already at limit
+        }
         return [...prev, mood];
       }
     });
@@ -369,12 +405,42 @@ export default function PreMeditationPage() {
     setShowNotesSection(true);
   };
 
+  const handleSaveAsRitual = async () => {
+    try {
+      await saveRitual.mutateAsync({
+        meditationType,
+        duration,
+        ambientSound: selectedMusic,
+        ambientSoundVolume: volume,
+      });
+      toast.success('Ritual saved successfully!', {
+        className: 'bg-card border-2 border-accent-cyan/50 text-foreground',
+      });
+    } catch (error: any) {
+      console.error('Error saving ritual:', error);
+      
+      // Check for duplicate error
+      if (error.message === 'DUPLICATE_RITUAL' || error.message?.includes('DuplicateSoundscape')) {
+        toast.error('This ritual already exists in your collection.', {
+          className: 'bg-card border-2 border-destructive/50 text-foreground',
+        });
+      } else {
+        toast.error('Failed to save ritual. Please try again.', {
+          className: 'bg-card border-2 border-destructive/50 text-foreground',
+        });
+      }
+    }
+  };
+
   const handleSaveAndContinue = () => {
+    // Defensively cap moods to 2 at save time
+    const moodsToSave = selectedMoods.slice(0, 2);
+    
     // Save to journal using backend/local storage with multiple moods and energy state
     saveJournalEntry.mutate({
       meditationType: meditationType as MeditationType,
       duration: BigInt(duration),
-      mood: selectedMoods.length > 0 ? selectedMoods : ['neutral' as MoodState],
+      mood: moodsToSave.length > 0 ? moodsToSave : ['neutral' as MoodState],
       energy: selectedEnergy || ('balanced' as EnergyState),
       reflection: personalNotes,
       isFavorite,
@@ -584,25 +650,29 @@ export default function PreMeditationPage() {
                   {currentQ.options.map((option) => {
                     const IconComponent = option.icon;
                     const isSelected = selectedMoods.includes(option.value);
+                    const isDisabled = !isSelected && selectedMoods.length >= 2;
                     return (
                       <div
                         key={option.value}
-                        className={`relative flex items-center space-x-3 p-4 rounded-xl border-2 transition-all cursor-pointer ${
-                          isSelected
-                            ? 'border-accent-cyan bg-accent-cyan/10'
-                            : 'border-border/50 hover:border-accent-cyan/50 hover:bg-accent-cyan/5'
+                        className={`relative flex items-center space-x-3 p-4 rounded-xl border-2 transition-all ${
+                          isDisabled
+                            ? 'border-border/30 opacity-50 cursor-not-allowed'
+                            : isSelected
+                            ? 'border-accent-cyan bg-accent-cyan/10 cursor-pointer'
+                            : 'border-border/50 hover:border-accent-cyan/50 hover:bg-accent-cyan/5 cursor-pointer'
                         }`}
-                        onClick={() => handleMoodToggle(option.value)}
+                        onClick={() => !isDisabled && handleMoodToggle(option.value)}
                       >
                         <Checkbox
                           checked={isSelected}
-                          onCheckedChange={() => handleMoodToggle(option.value)}
+                          onCheckedChange={() => !isDisabled && handleMoodToggle(option.value)}
                           id={option.value}
+                          disabled={isDisabled}
                         />
                         <IconComponent className="w-6 h-6 text-accent-cyan shrink-0" />
                         <Label
                           htmlFor={option.value}
-                          className="text-base cursor-pointer text-foreground flex-1"
+                          className={`text-base flex-1 ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'} text-foreground`}
                         >
                           {option.label}
                         </Label>
@@ -698,6 +768,17 @@ export default function PreMeditationPage() {
                       className={`w-5 h-5 mr-2 ${isFavorite ? 'fill-current' : ''}`}
                     />
                     {isFavorite ? 'Marked as Favorite' : 'Mark as Favorite'}
+                  </Button>
+
+                  <Button
+                    onClick={handleSaveAsRitual}
+                    variant="outline"
+                    size="lg"
+                    disabled={saveRitual.isPending}
+                    className="w-full sm:w-auto border-2 border-accent-cyan/50 hover:border-accent-cyan hover:bg-accent-cyan/10 text-foreground font-semibold rounded-full transition-all duration-300"
+                  >
+                    <Sparkles className="w-5 h-5 mr-2 text-accent-cyan" />
+                    Save this as my ritual
                   </Button>
 
                   <Button

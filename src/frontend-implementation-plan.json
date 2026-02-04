@@ -1,21 +1,60 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Remove top blank space in Progress bowl canvas rendering",
+  "title": "Pre‑Meditation UX polish: swipeable guides, mood cap, solid ritual toasts",
   "requirements": [
     {
-      "id": "REQ-25",
-      "summary": "Adjust ProgressBowl canvas drawing/layout so the bowl is vertically positioned without extra blank space above it inside the canvas.",
+      "id": "REQ-8",
+      "summary": "Add horizontal swipe navigation to the Pre‑Meditation MeditationGuideStepper container, synced with existing Prev/Next and dot navigation, respecting boundaries.",
       "acceptanceCriteria": [
-        "On the Progress page, the bowl visualization no longer has noticeable unused/blank space above it inside its container; the bowl is visually shifted up to eliminate the top gap.",
-        "The change is implemented by modifying the bowl canvas element behavior (CSS on the canvas and/or the bowl drawing’s vertical origin in `ProgressBowl.tsx`), without changing unrelated page layout or other components.",
-        "The bowl remains fully visible (not clipped) and the animation continues to run correctly in both light and dark themes."
+        "On mobile/touch devices, swiping left on the guide content advances exactly one step (unless already on the last step).",
+        "On mobile/touch devices, swiping right on the guide content goes back exactly one step (unless already on the first step).",
+        "Prev/Next buttons and dot indicators continue to work and reflect the same current step index used by swipes.",
+        "Swiping does not cause step wraparound from last to first (or first to last)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/ProgressBowl.tsx",
+          "path": "frontend/src/components/MeditationGuideStepper.tsx",
           "operation": "modify",
-          "description": "Update only the ProgressBowl canvas-rendering behavior to remove the apparent top empty space by shifting the drawing’s vertical origin upward (e.g., compute a smaller `bowlTop`/adjust `centerY` based on the bowl’s true drawn bounds) so the bowl’s bounding box sits higher within the 300x300 canvas while remaining fully visible and not clipped. Keep animation loop and theme-aware colors intact; do not modify parent/page layout outside the canvas element."
+          "description": "Implement touch swipe handling (touch start/move/end) on the guide content container with a reasonable minimum horizontal swipe distance threshold; map left swipe to the existing Next behavior and right swipe to the existing Previous behavior; ensure swipes call the same navigation handlers so state remains in sync with buttons and dot navigation, and boundaries are respected (no wraparound). Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Limit reflection mood selection to at most 2 items while keeping energy selection single-choice unchanged, and update the mood instruction text to say “up to 2”.",
+      "acceptanceCriteria": [
+        "It is impossible to end up with more than 2 items in the selected moods list via any UI interaction.",
+        "Energy selection remains single-choice and continues to behave exactly as before.",
+        "The mood question text indicates the limit (e.g., \"Select up to 2\").",
+        "Saving the reflection/journal entry persists at most 2 moods (or defaults as currently implemented when none are selected)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/PreMeditationPage.tsx",
+          "operation": "modify",
+          "description": "Update the mood question prompt text to clearly indicate the \"up to 2\" selection limit in English; adjust the mood toggle handler so it prevents selecting more than 2 moods (while still allowing deselection); ensure the saved reflection payload persists no more than 2 moods (defensively cap to 2 at save time) without changing the existing single-choice energy selection behavior."
+        }
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "summary": "Make ritual saved/deleted toasts opaque with a theme-consistent solid background and visible border in both light and dark modes.",
+      "acceptanceCriteria": [
+        "When saving a ritual, the success toast has an opaque (non-transparent) background in both light and dark themes and includes a visible border.",
+        "When deleting a ritual, the corresponding toast also has an opaque background and visible border in both light and dark themes.",
+        "Toast text remains readable and consistent with the existing theme tokens."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/PreMeditationPage.tsx",
+          "operation": "modify",
+          "description": "Adjust the toast options used for the ritual saved notification so the toast uses a solid, theme-consistent background (no transparency/backdrop blur dependency) and a clearly visible border in both light and dark modes, while keeping text readable with existing theme tokens."
+        },
+        {
+          "path": "frontend/src/pages/DashboardPage.tsx",
+          "operation": "modify",
+          "description": "Adjust the toast options used for the ritual deleted notification so the toast uses a solid, theme-consistent background (no transparency/backdrop blur dependency) and a clearly visible border in both light and dark modes, while keeping text readable with existing theme tokens."
         }
       ]
     }

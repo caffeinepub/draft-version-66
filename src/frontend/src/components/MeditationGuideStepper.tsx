@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 
@@ -14,6 +14,8 @@ interface MeditationGuideStepperProps {
 export default function MeditationGuideStepper({ steps }: MeditationGuideStepperProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState<'next' | 'prev'>('next');
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -34,6 +36,37 @@ export default function MeditationGuideStepper({ steps }: MeditationGuideStepper
       setDirection(index > currentStep ? 'next' : 'prev');
       setCurrentStep(index);
     }
+  };
+
+  // Touch handlers for swipe navigation
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchEndX.current = null;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStartX.current === null || touchEndX.current === null) return;
+
+    const swipeDistance = touchStartX.current - touchEndX.current;
+    const minSwipeDistance = 50; // Minimum distance for a swipe to register
+
+    if (Math.abs(swipeDistance) > minSwipeDistance) {
+      if (swipeDistance > 0) {
+        // Swiped left - go to next
+        handleNext();
+      } else {
+        // Swiped right - go to previous
+        handlePrev();
+      }
+    }
+
+    // Reset touch positions
+    touchStartX.current = null;
+    touchEndX.current = null;
   };
 
   const isFirstStep = currentStep === 0;
@@ -61,8 +94,13 @@ export default function MeditationGuideStepper({ steps }: MeditationGuideStepper
         </p>
       </div>
 
-      {/* Step content with animation - responsive layout */}
-      <div className="relative min-h-[280px]">
+      {/* Step content with animation and swipe support - responsive layout */}
+      <div 
+        className="relative min-h-[280px]"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <div
           key={currentStep}
           className={`flex flex-col md:flex-row gap-4 items-start ${

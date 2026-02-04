@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
-  "summary": "Inner Bloom is a React + TypeScript single-page meditation companion backed by a Motoko canister on the Internet Computer. It supports Internet Identity authentication plus a guest/offline mode that persists meditation data in localStorage. Users can select a meditation type (or take a recommendation quiz), follow step-by-step guides, choose duration and ambient audio, run a timed meditation (pause/seek/volume with audio fade-out), then record a post-session reflection (moods, energy, notes, favorite) into a journal. The app tracks progress (total minutes, streak, last-30-days minutes), derives rank tiers aligned to a 0–20,000-minute cap, renders progress visuals (animated canvas bowl; lotus background; progress lotus via SVG and optional 3D R3F), and provides unified JSON export/import (guest uses localStorage; authenticated users use canister export/import). A curated book recommendations page is served from a static frontend dataset (Amazon links).",
+  "projectStateVersion": 39,
+  "summary": "Inner Bloom is a React + TypeScript single-page meditation companion with an Internet Computer (Motoko) canister backend. The app supports Internet Identity authentication plus a guest/offline mode backed by localStorage. Users can pick a meditation type (or take a recommendation quiz), follow a step-by-step guide, choose duration and ambient audio, run a timed meditation session with controls, then record a post-session reflection (mood(s), energy, notes, favorite) into a journal. The app tracks progress (total minutes, streak, last-30-days minutes), computes rank tiers for a 0–20,000-minute cap, renders progress visuals (animated canvas bowl; lotus background; progress lotus via SVG and optional 3D R3F), and offers unified JSON export/import (guest uses localStorage; authenticated users use canister export/import). A curated book recommendations page is served from a static frontend dataset (Amazon links), while the backend also provides a static books list (Goodreads links).",
   "existing_features": [
     {
       "id": "IF-1",
@@ -17,13 +17,13 @@
     },
     {
       "id": "IF-2",
-      "title": "Identity-bound canister actor creation, initialization, and cache invalidation",
+      "title": "Identity-bound canister actor creation with query invalidation",
       "synonyms": [
         "useActor",
         "createActorWithConfig",
         "actor cache"
       ],
-      "description": "Creates an anonymous actor for guests and an identity-bound actor for authenticated users; on actor creation it calls backend RBAC initialization and invalidates/refetches non-actor React Query data when the actor changes.",
+      "description": "Creates an anonymous actor for guests and an identity-bound actor for authenticated users; on actor creation it initializes backend access control and invalidates/refetches other React Query data when the actor changes.",
       "reqIds": [],
       "version": 1
     },
@@ -72,7 +72,7 @@
         "createRouter",
         "manual route tree"
       ],
-      "description": "Defines navigation across Landing, Dashboard, Pre-Meditation, Progress, Journal, and Books pages using TanStack Router with a manually built route tree.",
+      "description": "Defines navigation across Landing, Dashboard, Pre‑Meditation, Progress, Journal, and Books pages using TanStack Router with a manually built route tree.",
       "reqIds": [],
       "version": 1
     },
@@ -90,18 +90,6 @@
     },
     {
       "id": "IF-8",
-      "title": "Global styling utilities and animations",
-      "synonyms": [
-        "Tailwind config",
-        "src/index.css",
-        "custom keyframes"
-      ],
-      "description": "Defines typography (Playfair Display), OKLCH token sets, and reusable animations (fade-in, breathe, glow-pulse, slide-in, float) used across the UI.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-9",
       "title": "Guest mode persistence with localStorage and legacy-key migration",
       "synonyms": [
         "meditationStorage",
@@ -113,7 +101,7 @@
       "version": 1
     },
     {
-      "id": "IF-10",
+      "id": "IF-9",
       "title": "Landing page with login and guest entry",
       "synonyms": [
         "LandingPage",
@@ -125,41 +113,30 @@
       "version": 1
     },
     {
-      "id": "IF-11",
-      "title": "Dashboard with daily inspiration, meditation selection, quiz entry, and navigation",
-      "synonyms": [
-        "DashboardPage",
-        "MeditationCarousel",
-        "FloatingNav"
-      ],
-      "description": "Displays a random daily quote fetched from the backend, a meditation-type selector carousel (including quiz option), a Begin action to start the flow, plus persistent floating navigation and mobile hamburger menu.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-12",
+      "id": "IF-10",
       "title": "Daily quotes feed (principal-scoped caching)",
       "synonyms": [
         "useDailyQuotes",
         "getDailyQuotes"
       ],
-      "description": "Fetches a list of inspirational quotes from the backend and caches results per principal/guest with a short stale time; dashboard selects a random quote to display.",
+      "description": "Fetches a list of inspirational quotes from the backend and caches results per principal/guest with a short stale time; the dashboard selects a random quote to display.",
       "reqIds": [],
       "version": 1
     },
     {
-      "id": "IF-13",
-      "title": "Meditation type selector carousel",
+      "id": "IF-11",
+      "title": "Dashboard with meditation selection, quiz entry, and navigation",
       "synonyms": [
+        "DashboardPage",
         "MeditationCarousel",
-        "type picker"
+        "FloatingNav"
       ],
-      "description": "Carousel for selecting meditation types (Mindfulness/Metta/Visualization/IFS) or entering a quiz flow, with prev/next navigation and a “Recommended” badge for Mindfulness when centered.",
+      "description": "Displays a random daily quote, provides a meditation-type selector carousel (including quiz option), and routes users into the pre-meditation flow; includes persistent floating navigation and mobile hamburger menu.",
       "reqIds": [],
       "version": 1
     },
     {
-      "id": "IF-14",
+      "id": "IF-12",
       "title": "Meditation recommendation quiz",
       "synonyms": [
         "QuizDialog",
@@ -170,7 +147,7 @@
       "version": 1
     },
     {
-      "id": "IF-15",
+      "id": "IF-13",
       "title": "Meditation types catalog (frontend mock)",
       "synonyms": [
         "useMeditationTypes",
@@ -181,30 +158,19 @@
       "version": 1
     },
     {
-      "id": "IF-16",
-      "title": "Step-by-step meditation guide stepper (responsive + benefits hierarchy)",
+      "id": "IF-14",
+      "title": "Step-by-step meditation guide stepper",
       "synonyms": [
         "MeditationGuideStepper",
         "clickable step dots",
         "slide animations"
       ],
-      "description": "Renders guided steps with Previous/Next navigation, clickable indicator dots, direction-aware slide animations, responsive layout (mobile stacking), and parsing of a 'Benefits:' section into a distinct block with heading/icon.",
+      "description": "Renders guided steps with Previous/Next navigation, clickable indicator dots, directional slide animations, responsive layout, and parsing of a 'Benefits:' section into a distinct block.",
       "reqIds": [],
       "version": 1
     },
     {
-      "id": "IF-17",
-      "title": "Pre-meditation setup + active session + reflection flow (single-page state machine)",
-      "synonyms": [
-        "PreMeditationPage",
-        "setup/active/reflection views"
-      ],
-      "description": "Implements a three-state meditation experience: setup (guide, duration slider, ambient selection), active timed meditation, and post-session reflection capture with save-and-return to dashboard.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-18",
+      "id": "IF-15",
       "title": "Ambient sound carousel with preview, volume and mute",
       "synonyms": [
         "AmbientMusicCarousel",
@@ -215,7 +181,18 @@
       "version": 1
     },
     {
-      "id": "IF-19",
+      "id": "IF-16",
+      "title": "Pre-meditation setup + active session + reflection flow",
+      "synonyms": [
+        "PreMeditationPage",
+        "setup/active/reflection views"
+      ],
+      "description": "Implements a three-state meditation experience: setup (guide, duration slider, ambient selection), active timed meditation, and post-session reflection capture with save-and-return to dashboard.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-17",
       "title": "Active meditation timer with pause, seek, and volume controls",
       "synonyms": [
         "in-session timer",
@@ -226,7 +203,7 @@
       "version": 1
     },
     {
-      "id": "IF-20",
+      "id": "IF-18",
       "title": "Post-session reflection capture and journal save mutation",
       "synonyms": [
         "reflection flow",
@@ -237,7 +214,7 @@
       "version": 1
     },
     {
-      "id": "IF-21",
+      "id": "IF-19",
       "title": "Session recording and progress tracking (guest + authenticated branching)",
       "synonyms": [
         "useRecordSession",
@@ -248,7 +225,7 @@
       "version": 1
     },
     {
-      "id": "IF-22",
+      "id": "IF-20",
       "title": "Progress stats query with principal-scoped caching",
       "synonyms": [
         "useProgressStats"
@@ -258,19 +235,30 @@
       "version": 1
     },
     {
-      "id": "IF-23",
+      "id": "IF-21",
       "title": "Rank tiers aligned to a 0–20,000 minute cap",
       "synonyms": [
         "progressRanks",
         "RANK_TIERS",
         "formatRankDisplay"
       ],
-      "description": "Defines rank tiers and helper functions to derive current rank, next rank, minutes-until-next, and a formatted display string; used in UI and in import pipeline rank labeling.",
+      "description": "Defines rank tiers and helper functions to derive current rank, next rank, minutes-until-next, and a formatted rank display string; used in UI and in the import pipeline for rank labeling.",
       "reqIds": [],
       "version": 1
     },
     {
-      "id": "IF-24",
+      "id": "IF-22",
+      "title": "Animated bowl-fill progress visualization (canvas)",
+      "synonyms": [
+        "ProgressBowl",
+        "progress bowl canvas"
+      ],
+      "description": "Theme-aware canvas bowl that fills proportionally to total minutes (capped at 20,000) with layered glow outlines and animated double-wave liquid surface; uses a larger internal render size and shifts bowl geometry upward to reduce apparent empty top space.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-23",
       "title": "Progress page with metrics, rank display, bowl visualization, and data portability",
       "synonyms": [
         "ProgressPage",
@@ -281,30 +269,19 @@
       "version": 1
     },
     {
-      "id": "IF-25",
-      "title": "Animated bowl-fill progress visualization (canvas)",
-      "synonyms": [
-        "ProgressBowl",
-        "progress bowl canvas"
-      ],
-      "description": "Theme-aware canvas bowl that fills proportionally to total minutes (capped at 20,000) with layered glow outlines, animated double-wave liquid surface, and increased internal render size/scaling to reduce glow clipping.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-26",
+      "id": "IF-24",
       "title": "Lotus background canvas animation with variants and intensity control",
       "synonyms": [
         "LotusCanvas",
         "default/enhanced/premed variants",
         "intensity prop"
       ],
-      "description": "Full-screen decorative canvas animation (lotus + ripples + particles) that adjusts visibility by theme and context (variant) and supports a per-page intensity multiplier for subtlety tuning.",
+      "description": "Full-screen decorative canvas animation (lotus + ripples + particles) that adjusts visibility by theme and context (variant) and supports a per-page intensity multiplier.",
       "reqIds": [],
       "version": 1
     },
     {
-      "id": "IF-27",
+      "id": "IF-25",
       "title": "Lotus growth model for progress-driven visuals",
       "synonyms": [
         "calculateLotusGrowth",
@@ -315,30 +292,30 @@
       "version": 1
     },
     {
-      "id": "IF-28",
+      "id": "IF-26",
       "title": "SVG lotus progress visualization (layered)",
       "synonyms": [
         "ProgressLotusSVG",
         "layered lotus SVG"
       ],
-      "description": "Renders a layered SVG lotus (4 layers, all petals present from start) with progressive opening, glow, subtle breathing/pulsing animations, vividness ramp, and theme-aware coloring driven by the lotus growth model and streak.",
+      "description": "Renders a layered SVG lotus (4 layers, all petals present from start) with progressive opening, glow, breathing/pulsing animations, vividness ramp, and theme-aware coloring driven by the lotus growth model and streak.",
       "reqIds": [],
       "version": 1
     },
     {
-      "id": "IF-29",
+      "id": "IF-27",
       "title": "3D lotus progress visualization (React Three Fiber)",
       "synonyms": [
         "ProgressLotusR3F",
         "LotusModel",
         "LotusParticles"
       ],
-      "description": "Optional WebGL lotus visualization with a 3D lotus mesh, animated center glow, and particle system that transitions from chaotic to coherent motion as progress increases; includes lighting and auto-rotating orbit controls.",
+      "description": "Optional WebGL lotus visualization with a 3D lotus mesh, animated center glow, and a particle system that transitions from chaotic to coherent motion as progress increases; includes lighting and auto-rotating orbit controls.",
       "reqIds": [],
       "version": 1
     },
     {
-      "id": "IF-30",
+      "id": "IF-28",
       "title": "Journal entries query with auth/guest branching and unified serialization helpers",
       "synonyms": [
         "useJournalEntries",
@@ -349,18 +326,18 @@
       "version": 1
     },
     {
-      "id": "IF-31",
-      "title": "Journal browsing and management UI (search, filters, edit, delete, favorites)",
+      "id": "IF-29",
+      "title": "Journal browsing and management UI",
       "synonyms": [
         "JournalPage",
         "reflection management"
       ],
-      "description": "Displays journal entries with search and filters (type/mood/energy), favorites tab, inline reflection editing, delete confirmation, favorite toggling, loading overlays per entry, and export/import actions.",
+      "description": "Displays journal entries with search and filters (type/mood/energy), favorites tab, inline reflection editing, delete confirmation, favorite toggling, per-entry loading overlays, and export/import actions.",
       "reqIds": [],
       "version": 1
     },
     {
-      "id": "IF-32",
+      "id": "IF-30",
       "title": "Unified export of meditation data (guest and authenticated)",
       "synonyms": [
         "useExportMeditationData",
@@ -371,7 +348,7 @@
       "version": 1
     },
     {
-      "id": "IF-33",
+      "id": "IF-31",
       "title": "Unified import of meditation data with overwrite semantics",
       "synonyms": [
         "useImportMeditationData",
@@ -382,8 +359,8 @@
       "version": 1
     },
     {
-      "id": "IF-34",
-      "title": "Book recommendations (static frontend dataset) and carousel page",
+      "id": "IF-32",
+      "title": "Book recommendations UI backed by static frontend dataset",
       "synonyms": [
         "BOOK_RECOMMENDATIONS",
         "BookRecommendationsPage"
@@ -393,52 +370,8 @@
       "version": 1
     },
     {
-      "id": "IF-35",
-      "title": "Session/account indicator with logout cache cleanup",
-      "synonyms": [
-        "SessionIndicator",
-        "guest vs logged-in badge",
-        "query cache cleanup"
-      ],
-      "description": "Displays guest vs authenticated state and provides return-to-start/logout actions; logout clears key React Query caches to reduce cross-session data contamination.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-36",
-      "title": "Mobile hamburger menu for theme and account actions",
-      "synonyms": [
-        "HamburgerMenu",
-        "Sheet menu"
-      ],
-      "description": "Mobile slide-in menu providing theme toggling, guest/logged-in indicators, return-to-start, and logout with authenticated-query cache cleanup.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-37",
-      "title": "Mobile back button helper",
-      "synonyms": [
-        "MobileBackButton"
-      ],
-      "description": "Mobile-only floating back button that navigates back to the dashboard on small screens.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-38",
-      "title": "Floating quick navigation",
-      "synonyms": [
-        "FloatingNav",
-        "side icon nav"
-      ],
-      "description": "Floating vertical navigation linking to Journal, Progress, and Books with drift animation and hover labels; configured to remain above other UI layers.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-39",
-      "title": "Motoko backend APIs for books/quotes, profiles, export/import, and session/progress storage",
+      "id": "IF-33",
+      "title": "Backend APIs for quotes, books, profiles, export/import, and session/progress storage",
       "synonyms": [
         "getDailyQuotes",
         "getBooks",
@@ -453,43 +386,260 @@
       "version": 1
     },
     {
-      "id": "IF-40",
-      "title": "UI/UX polish: lotus subtlety, Journal responsive breakpoint, and light-theme readability improvements",
+      "id": "IF-34",
+      "title": "Session/account indicator with logout cache cleanup",
       "synonyms": [
-        "lotus intensity tuning",
-        "Journal filter breakpoint ~800px",
-        "light theme contrast pass"
+        "SessionIndicator",
+        "guest vs logged-in badge",
+        "query cache cleanup"
       ],
-      "description": "Reduces lotus background intensity on Dashboard and Pre‑Meditation views via LotusCanvas intensity, adjusts the Journal filter/search container to switch to single-column at ~800px, and improves light-theme border/description-gray contrast in global tokens for readability.",
+      "description": "Displays guest vs authenticated state and provides return-to-start/logout actions; logout clears key React Query caches to reduce cross-session data contamination.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-35",
+      "title": "Mobile hamburger menu for theme and account actions",
+      "synonyms": [
+        "HamburgerMenu",
+        "Sheet menu"
+      ],
+      "description": "Mobile slide-in menu providing theme toggling, guest/logged-in indicators, return-to-start, and logout with authenticated-query cache cleanup.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-36",
+      "title": "Mobile back button helper",
+      "synonyms": [
+        "MobileBackButton"
+      ],
+      "description": "Mobile-only floating back button that navigates back to the dashboard on small screens.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-37",
+      "title": "Floating quick navigation",
+      "synonyms": [
+        "FloatingNav",
+        "side icon nav"
+      ],
+      "description": "Floating vertical navigation linking to Journal, Progress, and Books with drift animation and hover labels; configured to remain above other UI layers.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-38",
+      "title": "Saved meditation rituals data model (multi-ritual) with deduplication",
+      "synonyms": [
+        "SavedRitual",
+        "rituals model",
+        "dedupe by type/duration/sound/volume"
+      ],
+      "description": "Introduces a Saved Ritual entity capturing meditation type, duration (minutes), ambient sound selection, and volume. Rituals are auto-named as “<MeditationName> · <Duration> min · <AmbientSoundName>” and duplicate saves are prevented using an exact-match rule over (type + duration + ambient sound + volume).",
       "reqIds": [
-        "REQ-22",
-        "REQ-23",
-        "REQ-24"
+        "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-update-only-the-selected-element-the-progress-bowl-canvas-rendered-by-frontend-src-components-progressbowl-tsx-to-remove-the-apparent-top-empty-space-above-the-bowl-by-adjusting-the-canvas-rendering-layout-so-the-bowl-is-vertically-positioned-without-extra-top-margin-blank-area-inside-the-canvas",
-      "title": "Update ONLY the selected element (the Progress bowl <canvas> rendered by `frontend/src/components/ProgressBowl.tsx`) to remove the apparent top empty space above the bowl by adjusting the canvas rendering/layout so the bowl is vertically positioned without extra top margin/blank area inside the canvas.",
+      "id": "IF-39",
+      "title": "Guest-mode ritual persistence in localStorage (no auth migration)",
+      "synonyms": [
+        "guest rituals storage",
+        "guest-prefixed rituals key"
+      ],
+      "description": "Persists saved rituals in guest mode using a dedicated guest-prefixed localStorage key, aligned with existing offline-first storage utilities. Guest and authenticated ritual stores remain separate with no automatic migration on login.",
       "reqIds": [
-        "REQ-25"
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-40",
+      "title": "Authenticated ritual persistence in Motoko canister with RBAC",
+      "synonyms": [
+        "canister rituals endpoints",
+        "listRituals",
+        "createRitual",
+        "deleteRitual"
+      ],
+      "description": "Adds per-caller saved-ritual storage to the Motoko backend with endpoints to list and create rituals (and support deletion where applicable), enforcing the same user-role RBAC checks used by other user-scoped endpoints; anonymous callers behave safely (empty/no-op as appropriate).",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-41",
+      "title": "Rituals React Query hooks with auth/guest branching and invalidation",
+      "synonyms": [
+        "useRituals",
+        "ritual mutations",
+        "principal-scoped ritual query"
+      ],
+      "description": "Provides React Query query/mutation hooks for rituals that branch by authentication state (canister for authenticated, localStorage for guests). Ritual list queries are invalidated/refetched after ritual create/delete operations to keep dashboard UI up to date.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-42",
+      "title": "Reflection action: “Save this as my ritual” with toast feedback",
+      "synonyms": [
+        "save ritual from reflection",
+        "ritual saved toast"
+      ],
+      "description": "Enhances the reflection view within PreMeditationPage to include an action labeled exactly “Save this as my ritual”, saving the current session’s type, duration, ambient sound, and volume via the rituals mutation and providing success/failure feedback (toast).",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-43",
+      "title": "Dashboard Saved Rituals carousel with instant-start and deletion UX",
+      "synonyms": [
+        "SavedRitualsCarousel",
+        "ritual instant start",
+        "ritual delete confirmation",
+        "swipe/arrow/dots"
+      ],
+      "description": "Displays saved rituals on the Dashboard when present using a left/right circular navigation carousel (mobile swipe + desktop arrows + dot indicators). Each ritual shows its auto-generated name and a primary “Start” action that instant-starts the active meditation timer (skipping setup) using the ritual’s saved configuration; includes inline deletion affordance with confirmation.",
+      "reqIds": [
+        "REQ-6",
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-44",
+      "title": "Mobile swipe gesture support for key carousels with smooth transitions",
+      "synonyms": [
+        "swipeable carousel",
+        "touch gestures",
+        "dashboard meditation picker swipe",
+        "ambient sound carousel swipe",
+        "book recommendations carousel swipe"
+      ],
+      "description": "Adds finger-swipe gesture navigation (with smooth transition animations) alongside existing desktop arrow/button controls for: the Dashboard meditation picker carousel, the Pre‑Meditation ambient sound carousel, and the Book Recommendations carousel.",
+      "reqIds": [
+        "AR-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-45",
+      "title": "Rituals UX polish: themed toasts, deletion loading feedback, and carousel transitions",
+      "synonyms": [
+        "ritual delete loading state",
+        "theme-aware toast styles",
+        "ritual saved/deleted toast styling",
+        "carousel next/prev animations"
+      ],
+      "description": "Improves rituals UX by adding visible deletion/loading feedback while a ritual delete is in progress, styling ritual saved/deleted toasts with theme-aware background + border, and ensuring animated next/prev transitions for the rituals carousel.",
+      "reqIds": [
+        "AR-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-46",
+      "title": "Exportable build template (React + Motoko + shadcn/ui) for ICP deployment",
+      "synonyms": [
+        "build-template",
+        "icp.yaml template",
+        "deploy.sh",
+        "shadcn-ui scaffolding"
+      ],
+      "description": "Adds a self-contained build-template workspace that mirrors the project’s React+TypeScript frontend and Motoko backend for reproducible builds and ICP deployment, including Dockerfile/deploy scripts, canister YAMLs, frontend tooling configs, and a bundled shadcn/ui component set plus helper scripts (e.g., prune/resize images).",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "feature-add-horizontal-swipe-navigation-prev-next-to-the-meditation-guide-container-shown-on-the-pre-meditation-page-the-meditation-guides-card-that-renders-meditationguidestepper-swiping-left-must-go-to-the-next-step-swiping-right-must-go-to-the-previous-step-with-a-reasonable-minimum-swipe-distance-threshold-and-must-respect-first-last-step-boundaries-no-wraparound-swipe-navigation-must-stay-in-sync-with-the-existing-prev-next-buttons-and-dot-navigation",
+      "title": "Add horizontal swipe navigation (Prev/Next) to the meditation guide container shown on the Pre‑Meditation page (the \"Meditation Guides\" card that renders `MeditationGuideStepper`). Swiping left must go to the next step; swiping right must go to the previous step, with a reasonable minimum swipe distance threshold, and must respect first/last step boundaries (no wraparound). Swipe navigation must stay in sync with the existing Prev/Next buttons and dot navigation.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-the-post-session-reflection-flow-on-the-pre-meditation-page-restrict-mood-state-selection-so-the-user-can-select-at-most-2-mood-states-total-the-energy-level-selection-must-remain-single-choice-exactly-as-it-is-now-no-behavioral-changes-to-energy-selection-update-any-on-screen-instruction-text-for-mood-selection-to-clearly-indicate-the-up-to-2-limit-in-english",
+      "title": "In the post-session reflection flow on the Pre‑Meditation page, restrict mood/state selection so the user can select at most 2 mood states total. The energy level selection must remain single-choice exactly as it is now (no behavioral changes to energy selection). Update any on-screen instruction text for mood selection to clearly indicate the \"up to 2\" limit in English.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-toast-notification-styling-for-ritual-saved-deleted-notifications-so-they-are-not-transparent-toasts-must-render-with-a-solid-theme-consistent-background-color-and-a-visible-border-that-matches-the-app-theme-in-both-light-and-dark-modes-apply-this-specifically-to-the-notifications-shown-when-a-ritual-is-saved-or-deleted",
+      "title": "Fix the toast/notification styling for ritual saved/deleted notifications so they are not transparent: toasts must render with a solid, theme-consistent background color and a visible border that matches the app theme in both light and dark modes. Apply this specifically to the notifications shown when a ritual is saved or deleted.",
+      "reqIds": [
+        "REQ-10"
       ],
       "version": 1
     }
   ],
-  "new_feature_requests": [],
+  "new_feature_requests": [
+    {
+      "id": "AR-2",
+      "summary": "Add a skippable onboarding/tutorial overlay that teaches navigation (start meditation, quiz mention, audio selection, journal, progress) with Next/Prev/Skip; auto-shows on first launch; replayable from Settings; completion stored per-device (localStorage) and per-identity when logged in",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Add a gentle weekly reflection summary card (dashboard) generated from existing session/journal data; dismissible for the week; optional link to view details in journal",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Rituals UX polish: in-card loading/disabled states during ritual save/delete to prevent duplicate actions; theme-aware ritual saved/deleted toasts (background + border); smooth prev/next transition animations for Saved Rituals carousel",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Add unified mobile-first drag/swipe gesture support (kept in sync with arrows/buttons) for key carousels: Books page books carousel, Dashboard meditation + saved rituals carousels, and Pre-meditation ambient sounds carousel",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Add swipe/drag navigation to the Pre‑Meditation guide step container (Prev/Next via horizontal swipe)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Limit post-session reflection mood selection to at most 2 moods while keeping energy level as a single-choice field",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Fix ritual saved/deleted toast styling: ensure solid, theme-consistent background and border (not transparent)",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
   "architectural_notes": [
-    "Frontend is a SPA using TanStack Router with a manually declared route tree (/, /dashboard, /pre-meditation, /progress, /journal, /books).",
-    "Server-state and mutations are managed via TanStack React Query; many query keys are scoped by principal ID (or 'guest') to reduce cache collisions across sessions.",
-    "Authentication is encapsulated in an InternetIdentityProvider (Dfinity AuthClient), exposing identity state plus granular login status flags.",
-    "Backend access is encapsulated via a react-query-cached canister actor (useActor) that switches between anonymous and identity-bound agents; on actor changes it invalidates/refetches dependent queries.",
-    "Guest/offline-first behavior is implemented by branching inside React Query hooks: authenticated users call canister APIs, guests use localStorage via meditationStorage utilities (including legacy-key migration).",
+    "Frontend is a SPA built with TanStack Router and manually declared routes (/, /dashboard, /pre-meditation, /progress, /journal, /books).",
+    "Server-state and mutations are managed with TanStack React Query; query keys are often scoped by principal ID (or 'guest') to avoid cache collisions across sessions.",
+    "Authentication is encapsulated in an InternetIdentityProvider using Dfinity AuthClient, exposing identity plus granular status flags for UI gating.",
+    "Backend access is encapsulated via a cached canister actor (useActor) that switches between anonymous and identity-bound agents; when actor changes, dependent queries are invalidated/refetched.",
+    "Guest/offline-first behavior is implemented by branching inside React Query hooks: authenticated users call canister APIs, guests use localStorage utilities (including legacy key migration).",
     "Data portability uses a unified JSON export/import structure; exports are downloaded in-browser; imports overwrite guest local data or invoke canister import with overwrite semantics.",
-    "Visual identity relies on theme-aware OKLCH design tokens (Tailwind + CSS variables) and multiple animated visualizations (Canvas lotus background, Canvas progress bowl, SVG lotus, optional WebGL via react-three-fiber).",
-    "Motoko backend composes capabilities via mixins (authorization/RBAC and blob-storage maintenance endpoints)."
+    "Visual identity relies on theme-aware OKLCH design tokens (Tailwind + CSS variables) and animated visualizations (Canvas lotus background, Canvas progress bowl, SVG lotus, optional WebGL via react-three-fiber).",
+    "Motoko backend composes capabilities via mixins (authorization/RBAC and blob-storage maintenance endpoints).",
+    "Add multi-ritual persistence: guest rituals stored in localStorage; authenticated rituals stored per-identity in backend; do not auto-migrate between guest and authenticated stores.",
+    "Onboarding tutorial state should persist both per-device (localStorage) and per-identity (backend) for authenticated users, and be replayable via a Settings entry."
   ],
   "known_issues": [
-    "Provider duplication: frontend/src/main.tsx wraps App with QueryClientProvider and InternetIdentityProvider, while frontend/src/App.tsx also wraps Router with its own QueryClientProvider and InternetIdentityProvider. This can create multiple QueryClients/auth contexts and confusing cache/auth behavior.",
     "Backend lacks journal mutation endpoints (create/update/delete/toggle favorite). Frontend journal mutations currently fall back to guest localStorage even when authenticated, so authenticated journal changes are not persisted to the canister.",
     "Authenticated session recording computes streak/monthly minutes client-side from guest localStorage and sends derived values to the backend, which can diverge from backend truth and breaks multi-device consistency.",
     "Backend recordMeditationSession sets ProgressStore.totalMinutes to the client-provided monthly minutes and also sets monthlyMinutes to the same value, effectively overwriting lifetime totals; it also leaves rank empty.",
@@ -499,8 +649,7 @@
     "Blob-storage cashier env var is spelled \"CAFFFEINE_STORAGE_CASHIER_PRINCIPAL\" (typo with triple 'F'); misconfigured deployments will trap at runtime.",
     "Books are duplicated: backend exposes a Goodreads-based list, but the UI uses a static frontend Amazon-link dataset; the backend getBooks endpoint is currently unused by the UI.",
     "Two global CSS token files exist (frontend/index.css and frontend/src/index.css) with different token sets; only one is imported (src/index.css), which can cause drift/confusion.",
-    "Placeholder/empty page modules exist (frontend/src/pages/ActiveMeditationPage.tsx, ReflectionPage.tsx, StatsPage.tsx) while the active/reflection flow is implemented inside PreMeditationPage.",
-    "Progress/Journey page: bowl visualization container (or its parent) has excessive top margin/empty space above the bowl; needs margin-top removed (and possibly padding/gap) to reduce unused vertical space."
+    "Placeholder/empty page modules exist (frontend/src/pages/ActiveMeditationPage.tsx, ReflectionPage.tsx, StatsPage.tsx) while the active/reflection flow is implemented inside PreMeditationPage."
   ],
   "isFixRequest": true,
   "gameProjectType": "none",

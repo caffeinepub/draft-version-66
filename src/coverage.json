@@ -1,35 +1,24 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-03T11:40:18.397Z",
+  "generatedAt": "2026-02-04T09:36:13.172Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 2,
+    "total": 1,
+    "implemented": 1,
     "items": [
       {
-        "id": "REQ-1",
-        "summary": "On the active meditation timer screen (the view shown after the user clicks “Start Meditation”), reduce the rendered width of both range inputs (volume slider and time/seek slider) by ~10–20% on screens narrower than 390px so they do not overflow horizontally.",
+        "id": "REQ-25",
+        "summary": "Update ONLY the selected element (the Progress bowl <canvas> rendered by `frontend/src/components/ProgressBowl.tsx`) to remove the apparent top empty space above the bowl by adjusting the canvas rendering/layout so the bowl is vertically positioned without extra top margin/blank area inside the canvas.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
+          "frontend/src/components/ProgressBowl.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-2",
-        "summary": "On the active meditation timer screen, remove any `overflow: hidden` styling that clips the circular SVG timer’s fill/shadow (the drop-shadow visible as the timer fills), so the shadow can render fully and fade naturally (no hard cutoff).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
+          "frontend/src/components/ProgressBowl.tsx"
         ]
       }
     ]
@@ -39,7 +28,7 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/pages/PreMeditationPage.tsx",
+    "frontend/src/components/ProgressBowl.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -1,273 +1,184 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-    :root {
-        --radius: 1rem;
-        
-        /* Light mode - Flat colors, no gradients */
-        --background: 0.93 0.01 210; /* #EEEEEE - soft light gray */
-        --foreground: 0.145 0.02 210; /* #222831 - dark charcoal */
-        --card: 0.98 0.005 210;
-        --card-foreground: 0.145 0.02 210;
-        --popover: 0.98 0.005 210;
-        --popover-foreground: 0.145 0.02 210;
-        
-        /* Primary - Dark charcoal */
-        --primary: 0.145 0.02 210;
-        --primary-foreground: 0.93 0.01 210;
-        
-        /* Secondary - Medium gray */
-        --secondary: 0.25 0.02 210;
-        --secondary-foreground: 0.93 0.01 210;
-        
-        /* Muted */
-        --muted: 0.88 0.01 210;
-        --muted-foreground: 0.45 0.02 210;
-        
-        /* Accent - Cyan */
-        --accent: 0.88 0.01 210;
-        --accent-foreground: 0.145 0.02 210;
-        
-        /* Destructive */
-        --destructive: 0.577 0.245 27.325;
-        --destructive-foreground: 0.985 0 0;
-        
-        /* Borders */
-        --border: 0.82 0.01 210;
-        --input: 0.82 0.01 210;
-        --ring: 0.55 0.15 195;
-        
-        /* Custom colors for Inner Bloom */
-        --primary-dark: 0.145 0.02 210; /* #222831 */
-        --primary-gray: 0.25 0.02 210; /* #393E46 */
-        --accent-cyan: 0.65 0.12 195; /* #00ADB5 */
-        --accent-cyan-tinted: 0.68 0.13 195; /* Subtle tint variation */
-        --accent-lavender: 0.70 0.10 280; /* Lavender tint */
-        --accent-green: 0.75 0.08 140; /* Gentle green */
-        --description-gray: 0.50 0.01 210; /* Darkened for better contrast in light theme */
-        --guide-text: 0.28 0.02 210; /* Darker text for guide section in light theme - increased contrast */
-        --selected-element-light: 0.28 0.02 210; /* Darkened color for selected element in light theme - increased contrast */
-        --quiz-question-light: 0.35 0.02 210; /* Darker text for quiz question counter in light theme */
-    }
+  :root {
+    /* OKLCH color system - Light theme */
+    --background: 0.98 0.01 210;
+    --foreground: 0.145 0.02 210;
+    --card: 0.98 0.01 210;
+    --card-foreground: 0.145 0.02 210;
+    --popover: 0.98 0.01 210;
+    --popover-foreground: 0.145 0.02 210;
+    --primary: 0.145 0.02 210;
+    --primary-foreground: 0.98 0.01 210;
+    --secondary: 0.93 0.01 210;
+    --secondary-foreground: 0.145 0.02 210;
+    --muted: 0.93 0.01 210;
+    --muted-foreground: 0.45 0.02 210;
+    --accent: 0.93 0.01 210;
+    --accent-foreground: 0.145 0.02 210;
+    --destructive: 0.55 0.22 25;
+    --destructive-foreground: 0.98 0.01 210;
+    --border: 0.75 0.02 210;
+    --input: 0.75 0.02 210;
+    --ring: 0.145 0.02 210;
+    --radius: 0.5rem;
 
-    .dark {
-        /* Dark mode - Deep, calming colors with gradients */
-        --background: 0.16 0.02 220; /* Base color matching #040F13 */
-        --foreground: 0.93 0.01 210; /* #EEEEEE */
-        --card: 0.20 0.02 220;
-        --card-foreground: 0.93 0.01 210;
-        --popover: 0.25 0.02 220;
-        --popover-foreground: 0.93 0.01 210;
-        
-        /* Primary - Light for dark mode */
-        --primary: 0.88 0.01 210;
-        --primary-foreground: 0.145 0.02 210;
-        
-        /* Secondary */
-        --secondary: 0.25 0.02 220;
-        --secondary-foreground: 0.93 0.01 210;
-        
-        /* Muted */
-        --muted: 0.25 0.02 220;
-        --muted-foreground: 0.65 0.02 210;
-        
-        /* Accent */
-        --accent: 0.30 0.02 220;
-        --accent-foreground: 0.93 0.01 210;
-        
-        /* Destructive */
-        --destructive: 0.704 0.191 22.216;
-        --destructive-foreground: 0.145 0.02 210;
-        
-        /* Borders */
-        --border: 1 0 0 / 15%;
-        --input: 1 0 0 / 20%;
-        --ring: 0.65 0.12 195;
-        
-        /* Custom colors for Inner Bloom - adjusted for dark mode */
-        --primary-dark: 0.93 0.01 210;
-        --primary-gray: 0.70 0.02 210;
-        --accent-cyan: 0.70 0.15 195;
-        --accent-cyan-tinted: 0.73 0.16 195;
-        --accent-lavender: 0.75 0.12 280;
-        --accent-green: 0.80 0.10 140;
-        --description-gray: 0.67 0.01 210; /* Gray for description text in dark mode */
-        --guide-text: 0.67 0.01 210; /* Same as description-gray for dark mode */
-        --selected-element-light: 0.67 0.01 210; /* Not used in dark mode, but defined for consistency */
-        --quiz-question-light: 0.67 0.01 210; /* Not used in dark mode, but defined for consistency */
-    }
+    /* Custom colors */
+    --accent-cyan: 0.65 0.12 195;
+    --accent-cyan-tinted: 0.70 0.15 195;
+    --primary-dark: 0.145 0.02 210;
+    --description-gray: 0.48 0.02 210;
+    --selected-element-light: 0.35 0.02 210;
+    --guide-text: 0.75 0.02 210;
+  }
 
-    * {
-        @apply border-border;
-    }
-    
-    body {
-        @apply text-foreground;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-            'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-            sans-serif;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        /* Consistent gradient across all pages: #040F13 to #122830 at 135deg, starting at 68% */
-        background: linear-gradient(135deg, #040F13 0%, #040F13 68%, #122830 100%);
-        background-attachment: fixed;
-    }
-    
-    /* Light theme override */
-    :root body {
-        background: linear-gradient(135deg, oklch(var(--background)) 0%, oklch(calc(var(--background) + 0.03) 0.01 210) 100%);
-        background-attachment: fixed;
-    }
+  .dark {
+    /* OKLCH color system - Dark theme */
+    --background: 0.145 0.02 210;
+    --foreground: 0.93 0.01 210;
+    --card: 0.18 0.02 210;
+    --card-foreground: 0.93 0.01 210;
+    --popover: 0.145 0.02 210;
+    --popover-foreground: 0.93 0.01 210;
+    --primary: 0.93 0.01 210;
+    --primary-foreground: 0.145 0.02 210;
+    --secondary: 0.22 0.02 210;
+    --secondary-foreground: 0.93 0.01 210;
+    --muted: 0.22 0.02 210;
+    --muted-foreground: 0.60 0.02 210;
+    --accent: 0.22 0.02 210;
+    --accent-foreground: 0.93 0.01 210;
+    --destructive: 0.50 0.22 25;
+    --destructive-foreground: 0.93 0.01 210;
+    --border: 0.22 0.02 210;
+    --input: 0.22 0.02 210;
+    --ring: 0.70 0.15 195;
+
+    /* Custom colors for dark theme */
+    --accent-cyan: 0.70 0.15 195;
+    --accent-cyan-tinted: 0.75 0.18 195;
+    --primary-dark: 0.145 0.02 210;
+    --description-gray: 0.60 0.02 210;
+    --selected-element-light: 0.75 0.02 210;
+    --guide-text: 0.75 0.02 210;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
 @layer utilities {
-    /* Custom color utilities */
-    .text-primary-dark {
-        color: oklch(var(--primary-dark));
+  /* Animations */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
     }
-    
-    .text-primary-gray {
-        color: oklch(var(--primary-gray));
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
-    
-    .text-accent-cyan {
-        color: oklch(var(--accent-cyan));
-    }
-    
-    .text-accent-cyan-tinted {
-        color: oklch(var(--accent-cyan-tinted));
-    }
-    
-    .text-accent-lavender {
-        color: oklch(var(--accent-lavender));
-    }
-    
-    .text-accent-green {
-        color: oklch(var(--accent-green));
-    }
-    
-    .text-description-gray {
-        color: oklch(var(--description-gray));
-    }
-    
-    .text-guide-text {
-        color: oklch(var(--guide-text));
-    }
-    
-    .text-selected-element-light {
-        color: oklch(var(--selected-element-light));
-    }
-    
-    .text-quiz-question-light {
-        color: oklch(var(--quiz-question-light));
-    }
-    
-    .bg-accent-cyan {
-        background-color: oklch(var(--accent-cyan));
-    }
-    
-    .bg-accent-lavender {
-        background-color: oklch(var(--accent-lavender));
-    }
-    
-    .border-accent-cyan {
-        border-color: oklch(var(--accent-cyan));
-    }
-    
-    /* Playfair Display font utility */
-    .font-playfair {
-        font-family: 'Playfair Display', 'Georgia', 'Times New Roman', serif;
-    }
-    
-    /* Custom animations */
-    @keyframes fade-in {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    @keyframes breathe {
-        0%, 100% {
-            transform: scale(1);
-        }
-        50% {
-            transform: scale(1.05);
-        }
-    }
-    
-    @keyframes breathe-gentle {
-        0%, 100% {
-            transform: scale(1);
-            opacity: 0.95;
-        }
-        50% {
-            transform: scale(1.02);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes glow-pulse {
-        0%, 100% {
-            box-shadow: 0 0 20px oklch(var(--accent-cyan) / 0.3);
-        }
-        50% {
-            box-shadow: 0 0 40px oklch(var(--accent-cyan) / 0.6);
-        }
-    }
-    
-    @keyframes float {
-        0%, 100% {
-            transform: translateY(0);
-        }
-        50% {
-            transform: translateY(-10px);
-        }
-    }
-    
-    .animate-fade-in {
-        animation: fade-in 1s ease-out;
-    }
-    
-    .animate-breathe {
-        animation: breathe 4s ease-in-out infinite;
-    }
-    
-    .animate-breathe-gentle {
-        animation: breathe-gentle 6s ease-in-out infinite;
-    }
-    
-    .animate-glow-pulse {
-        animation: glow-pulse 2s ease-in-out infinite;
-    }
-    
-    .animate-float {
-        animation: float 3s ease-in-out infinite;
-    }
-    
-    /* Custom shadows */
-    .shadow-glow {
-        box-shadow: 0 4px 20px oklch(var(--accent-cyan) / 0.3),
-                    0 0 40px oklch(var(--accent-lavender) / 0.2);
-    }
-    
-    .shadow-glow-lg {
-        box-shadow: 0 8px 30px oklch(var(--accent-cyan) / 0.4),
-                    0 0 60px oklch(var(--accent-lavender) / 0.3);
-    }
-}
+  }
 
-/* Light theme specific - remove gradients */
-:root {
-    .bg-gradient-to-br {
-        background: oklch(var(--background));
+  @keyframes breathe-gentle {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
     }
+    50% {
+      transform: scale(1.02);
+      opacity: 0.95;
+    }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% {
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 0.9;
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes wave {
+    0% {
+      transform: translateX(0) translateY(0);
+    }
+    50% {
+      transform: translateX(-25%) translateY(-5%);
+    }
+    100% {
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slide-in-left {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.6s ease-out;
+  }
+
+  .animate-breathe-gentle {
+    animation: breathe-gentle 4s ease-in-out infinite;
+  }
+
+  .animate-glow-pulse {
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-wave {
+    animation: wave 3s linear infinite;
+  }
+
+  .animate-slide-in-right {
+    animation: slide-in-right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .animate-slide-in-left {
+    animation: slide-in-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
 }

@@ -3,6 +3,7 @@ import { useActor } from './useActor';
 import { useInternetIdentity } from './useInternetIdentity';
 import type { ProgressStats, JournalEntry, MeditationType, MoodState, EnergyState, Book, ImportData } from '../backend';
 import { BOOK_RECOMMENDATIONS } from '../lib/bookData';
+import { formatRankDisplay } from '../utils/progressRanks';
 import {
   getGuestJournalEntries,
   setGuestJournalEntries,
@@ -521,7 +522,7 @@ export function useImportMeditationData() {
               totalMinutes: BigInt(data.progressStats.totalMinutes || 0),
               currentStreak: BigInt(data.progressStats.currentStreak || 0),
               monthlyMinutes: BigInt(data.progressStats.monthlyMinutes || 0),
-              rank: 'Seedling – just beginning to open',
+              rank: formatRankDisplay(data.progressStats.totalMinutes || 0),
             },
             userProfile: undefined,
           };

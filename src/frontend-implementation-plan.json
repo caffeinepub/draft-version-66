@@ -1,35 +1,21 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Active meditation UI polish: small-screen slider width + unclipped timer shadow",
+  "title": "Remove top blank space in Progress bowl canvas rendering",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Reduce volume and seek slider rendered width on very small screens (<390px) to prevent horizontal overflow on the active meditation timer view.",
+      "id": "REQ-25",
+      "summary": "Adjust ProgressBowl canvas drawing/layout so the bowl is vertically positioned without extra blank space above it inside the canvas.",
       "acceptanceCriteria": [
-        "When viewport width is < 390px, the volume slider and seek/time slider fit within the screen bounds with no horizontal overflow/clipping.",
-        "When viewport width is >= 390px, slider widths remain visually unchanged from the current design."
+        "On the Progress page, the bowl visualization no longer has noticeable unused/blank space above it inside its container; the bowl is visually shifted up to eliminate the top gap.",
+        "The change is implemented by modifying the bowl canvas element behavior (CSS on the canvas and/or the bowl drawing’s vertical origin in `ProgressBowl.tsx`), without changing unrelated page layout or other components.",
+        "The bowl remains fully visible (not clipped) and the animation continues to run correctly in both light and dark themes."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/PreMeditationPage.tsx",
+          "path": "frontend/src/components/ProgressBowl.tsx",
           "operation": "modify",
-          "description": "In the 'active' meditation timer view, adjust the two Slider components (volume + seek/time) to render ~10–20% narrower when viewport width is <390px (e.g., Tailwind max-[389px] responsive width reduction) and keep the current width at >=390px. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Remove overflow clipping that cuts off the circular SVG timer fill/shadow on the active meditation timer view while avoiding new page scrollbars.",
-      "acceptanceCriteria": [
-        "During timer progress/fill animation, the circular SVG timer’s shadow is not visibly clipped by a container boundary.",
-        "The active meditation page does not introduce unwanted page scrolling as a result of removing overflow clipping (no persistent horizontal scrollbar)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/PreMeditationPage.tsx",
-          "operation": "modify",
-          "description": "In the 'active' meditation timer view, remove/replace any overflow-hidden styling that can clip the SVG timer's drop-shadow (including ensuring the SVG itself allows overflow visibility), and add only the minimal overflow constraint needed to prevent persistent horizontal scrolling (e.g., constrain x-axis only)."
+          "description": "Update only the ProgressBowl canvas-rendering behavior to remove the apparent top empty space by shifting the drawing’s vertical origin upward (e.g., compute a smaller `bowlTop`/adjust `centerY` based on the bowl’s true drawn bounds) so the bowl’s bounding box sits higher within the 300x300 canvas while remaining fully visible and not clipped. Keep animation loop and theme-aware colors intact; do not modify parent/page layout outside the canvas element."
         }
       ]
     }

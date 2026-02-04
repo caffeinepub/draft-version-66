@@ -12,10 +12,11 @@ interface Particle {
 }
 
 interface LotusCanvasProps {
-  variant?: 'default' | 'enhanced';
+  variant?: 'default' | 'enhanced' | 'premed';
+  intensity?: number; // 0-1 scale, default 1.0
 }
 
-export default function LotusCanvas({ variant = 'default' }: LotusCanvasProps) {
+export default function LotusCanvas({ variant = 'default', intensity = 1.0 }: LotusCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { theme } = useTheme();
 
@@ -53,10 +54,19 @@ export default function LotusCanvas({ variant = 'default' }: LotusCanvasProps) {
 
     // Enhanced visibility multipliers based on variant and theme
     const getVisibilityMultiplier = () => {
-      if (variant === 'enhanced') {
-        return theme === 'dark' ? 1.3 : 2.0; // Slightly higher for dark, much higher for light
+      let baseMultiplier = 1.0;
+      
+      if (variant === 'premed') {
+        // Pre-meditation page: much stronger on light, moderate on dark
+        baseMultiplier = theme === 'dark' ? 1.8 : 3.5;
+      } else if (variant === 'enhanced') {
+        baseMultiplier = theme === 'dark' ? 1.3 : 2.5;
+      } else {
+        baseMultiplier = theme === 'dark' ? 1.0 : 1.8; // Default: boost light theme
       }
-      return 1.0; // Default visibility
+      
+      // Apply intensity scaling
+      return baseMultiplier * intensity;
     };
 
     // Lotus petals animation - slightly smaller with faster pulse timing
@@ -192,7 +202,7 @@ export default function LotusCanvas({ variant = 'default' }: LotusCanvasProps) {
       window.removeEventListener('resize', resizeCanvas);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [theme, variant]);
+  }, [theme, variant, intensity]);
 
   return (
     <canvas

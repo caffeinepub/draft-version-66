@@ -39,7 +39,7 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#040f13] to-background">
+    <div className="relative min-h-screen overflow-hidden bg-background dark:bg-gradient-to-br dark:from-[#040f13] dark:to-background">
       {/* Canvas Background with z-index 0 */}
       <LotusCanvas />
 

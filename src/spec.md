@@ -1,10 +1,10 @@
 # Specification
 
 ## Summary
-**Goal:** Polish the active meditation timer screen for small-screen responsiveness and ensure the circular timer shadow is not clipped.
+**Goal:** Remove the apparent top empty/blank space above the Progress bowl visualization by adjusting only the Progress bowl `<canvas>` rendering/layout.
 
 **Planned changes:**
-- On viewports narrower than 390px, reduce the rendered width of the volume and seek/time range sliders by ~10–20% so they fit without horizontal overflow.
-- Remove any `overflow: hidden` styling on the active meditation timer screen that clips the circular SVG timer’s fill/shadow, while avoiding any new persistent page scrolling (especially horizontal).
+- Update `frontend/src/components/ProgressBowl.tsx` canvas element behavior (CSS and/or drawing vertical origin) to vertically position the bowl higher within the canvas and eliminate unused top blank area.
+- Ensure the bowl remains fully visible (not clipped) and the existing animation continues working in both light and dark themes.
 
-**User-visible outcome:** On small phones, the volume and seek sliders fit within the screen, and the circular timer’s shadow renders fully during the fill animation without a hard cutoff.
+**User-visible outcome:** On the Progress page, the bowl visualization sits higher without noticeable blank space above it, while remaining fully visible and animated.

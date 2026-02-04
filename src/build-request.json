@@ -1,55 +1,34 @@
 {
   "kind": "build_request",
-  "title": "Meditation session UI polish: responsive sliders and unclipped timer shadow",
+  "title": "Remove extra top empty space above Progress bowl canvas",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "On the active meditation timer screen (the view shown after the user clicks “Start Meditation”), reduce the rendered width of both range inputs (volume slider and time/seek slider) by ~10–20% on screens narrower than 390px so they do not overflow horizontally.",
+      "id": "REQ-25",
+      "text": "Update ONLY the selected element (the Progress bowl <canvas> rendered by `frontend/src/components/ProgressBowl.tsx`) to remove the apparent top empty space above the bowl by adjusting the canvas rendering/layout so the bowl is vertically positioned without extra top margin/blank area inside the canvas.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4",
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "I want those lowered by 10%-20%",
-          "I think < than 390px is a solid choise for that"
+          "Remove top margin entirely from this container or parent container, basically the bowl container is too big there is empty space that is left at the top side of container"
         ]
       },
       "acceptanceCriteria": [
-        "When viewport width is < 390px, the volume slider and seek/time slider fit within the screen bounds with no horizontal overflow/clipping.",
-        "When viewport width is >= 390px, slider widths remain visually unchanged from the current design."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "On the active meditation timer screen, remove any `overflow: hidden` styling that clips the circular SVG timer’s fill/shadow (the drop-shadow visible as the timer fills), so the shadow can render fully and fade naturally (no hard cutoff).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4",
-          "msg-6"
-        ],
-        "quotes": [
-          "I want you to remove that overflow hidden property if any, so the shadow has good ending transition",
-          "I'd prefer overflow hidden constraint to be removed"
-        ]
-      },
-      "acceptanceCriteria": [
-        "During timer progress/fill animation, the circular SVG timer’s shadow is not visibly clipped by a container boundary.",
-        "The active meditation page does not introduce unwanted page scrolling as a result of removing overflow clipping (no persistent horizontal scrollbar)."
+        "On the Progress page, the bowl visualization no longer has noticeable unused/blank space above it inside its container; the bowl is visually shifted up to eliminate the top gap.",
+        "The change is implemented by modifying the bowl canvas element behavior (CSS on the canvas and/or the bowl drawing’s vertical origin in `ProgressBowl.tsx`), without changing unrelated page layout or other components.",
+        "The bowl remains fully visible (not clipped) and the animation continues to run correctly in both light and dark themes."
       ]
     }
   ],
   "constraints": [
-    "Frontend-only change; do not modify backend canister code or schemas.",
-    "Do not edit files under frontend immutablePaths (e.g., frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui).",
-    "Use English for any user-facing text."
+    "Apply changes ONLY to the selected element (the bowl visualization canvas) and its direct canvas-rendering behavior; do not modify other page sections or unrelated containers.",
+    "Do not change any backend code or data models."
   ],
   "nonGoals": [
-    "No redesign of the meditation flow, timer behavior, or audio logic beyond the requested styling adjustments.",
-    "Do not change the shadow style/strength unless necessary to prevent clipping after removing overflow hidden (preference is to remove overflow clipping rather than reduce shadow)."
+    "Redesigning the Progress page layout or changing the bowl container sizing/padding outside of the selected canvas element behavior",
+    "Any changes to progress calculations, ranks, or statistics"
   ],
   "imageRequirements": {
     "required": [],

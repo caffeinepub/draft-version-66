@@ -75,11 +75,11 @@ export default function BookRecommendationsPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#040f13] to-background">
-      <div className="fixed top-0 left-0 w-96 h-96 opacity-10 dark:opacity-8 pointer-events-none">
+    <div className="relative min-h-screen overflow-hidden bg-background dark:bg-gradient-to-br dark:from-[#040f13] dark:to-background">
+      <div className="fixed top-0 left-0 w-96 h-96 opacity-15 dark:opacity-10 pointer-events-none">
         <LotusCanvas variant="enhanced" />
       </div>
-      <div className="fixed bottom-0 right-0 w-96 h-96 opacity-10 dark:opacity-8 pointer-events-none">
+      <div className="fixed bottom-0 right-0 w-96 h-96 opacity-15 dark:opacity-10 pointer-events-none">
         <LotusCanvas variant="enhanced" />
       </div>
 

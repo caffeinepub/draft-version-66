@@ -52,14 +52,9 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#040f13] to-background">
-      {/* Two Lotus Canvases scattered diagonally across corners */}
-      <div className="fixed top-0 left-0 w-[40%] h-[40%] opacity-20 pointer-events-none">
-        <LotusCanvas />
-      </div>
-      <div className="fixed bottom-0 right-0 w-[40%] h-[40%] opacity-20 pointer-events-none">
-        <LotusCanvas />
-      </div>
+    <div className="relative min-h-screen overflow-hidden bg-background dark:bg-gradient-to-br dark:from-[#040f13] dark:to-background">
+      {/* Single centered Lotus Canvas with reduced intensity */}
+      <LotusCanvas variant="enhanced" intensity={0.7} />
 
       {/* Desktop Session Indicator */}
       {mounted && (

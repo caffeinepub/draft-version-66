@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun, ArrowLeft, Flame, TrendingUp, Award, Download, Upload, Loader2 } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -7,10 +7,13 @@ import LotusCanvas from '../components/LotusCanvas';
 import SessionIndicator from '../components/SessionIndicator';
 import HamburgerMenu from '../components/HamburgerMenu';
 import MobileBackButton from '../components/MobileBackButton';
+import ProgressBowl from '../components/ProgressBowl';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useProgressStats, useExportMeditationData, useImportMeditationData } from '../hooks/useQueries';
 import type { ProgressStats } from '../backend';
 import { toast } from 'sonner';
+import { useRef } from 'react';
+import { getCurrentRank, getRankIndex, getNextRank, getMinutesUntilNextRank, RANK_TIERS } from '../utils/progressRanks';
 
 interface LocalProgressData {
   totalMinutes: number;
@@ -20,19 +23,10 @@ interface LocalProgressData {
   sessions: Array<{ minutes: number; timestamp: string }>;
 }
 
-const RANKS = [
-  { name: 'Seedling', subtitle: 'just beginning to open', minMinutes: 0, maxMinutes: 999 },
-  { name: 'Budding', subtitle: 'finding your rhythm', minMinutes: 1000, maxMinutes: 4999 },
-  { name: 'Blooming', subtitle: 'steady presence', minMinutes: 5000, maxMinutes: 19999 },
-  { name: 'Lotus in Full Flower', subtitle: 'deep calm cultivated', minMinutes: 20000, maxMinutes: 99999 },
-  { name: 'Master Lotus', subtitle: 'profound wisdom achieved', minMinutes: 100000, maxMinutes: Infinity },
-];
-
 export default function ProgressPage() {
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
-  const lotusCanvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showImportConfirm, setShowImportConfirm] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -64,14 +58,6 @@ export default function ProgressPage() {
     : 0;
 
   const hasData = totalMinutes > 0;
-
-  function getCurrentRank() {
-    return RANKS.find(rank => totalMinutes >= rank.minMinutes && totalMinutes <= rank.maxMinutes) || RANKS[0];
-  }
-
-  function getRankIndex() {
-    return RANKS.findIndex(rank => totalMinutes >= rank.minMinutes && totalMinutes <= rank.maxMinutes);
-  }
 
   const handleExport = async () => {
     try {
@@ -151,145 +137,18 @@ export default function ProgressPage() {
     }
   };
 
-  useEffect(() => {
-    const canvas = lotusCanvasRef.current;
-    if (!canvas || !hasData) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
-
-    const centerX = rect.width / 2;
-    const centerY = rect.height * 0.6;
-
-    const bloomProgress = Math.min(totalMinutes / 10000, 1);
-    
-    let animationFrame: number;
-    let time = 0;
-
-    function animate() {
-      if (!ctx || !canvas) return;
-      
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      time += 0.015;
-      const breathe = Math.sin(time) * 0.08 + 1;
-      const glowIntensity = 0.2 + bloomProgress * 0.6;
-
-      const stemHeight = 80 + bloomProgress * 40;
-      ctx.beginPath();
-      ctx.moveTo(centerX, centerY);
-      ctx.quadraticCurveTo(
-        centerX - 10, 
-        centerY - stemHeight / 2, 
-        centerX, 
-        centerY - stemHeight
-      );
-      ctx.strokeStyle = `oklch(0.5 0.1 140 / ${0.4 + bloomProgress * 0.4})`;
-      ctx.lineWidth = 3;
-      ctx.stroke();
-
-      const lotusY = centerY - stemHeight;
-      
-      const petalCount = 5;
-      const baseRadius = (30 + bloomProgress * 50) * breathe;
-      
-      for (let i = 0; i < petalCount; i++) {
-        const angle = (i / petalCount) * Math.PI - Math.PI / 2;
-        const x = centerX + Math.cos(angle) * baseRadius * 0.4;
-        const y = lotusY + Math.sin(angle) * baseRadius * 0.3;
-        
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(angle + Math.PI / 2);
-        
-        ctx.beginPath();
-        ctx.ellipse(0, 0, baseRadius * 0.4, baseRadius * 0.7, 0, 0, Math.PI * 2);
-        
-        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, baseRadius * 0.7);
-        gradient.addColorStop(0, `oklch(0.6 0.12 195 / ${0.2 + bloomProgress * 0.3})`);
-        gradient.addColorStop(1, `oklch(0.6 0.12 195 / ${0.05 + bloomProgress * 0.1})`);
-        ctx.fillStyle = gradient;
-        ctx.fill();
-        
-        ctx.strokeStyle = `oklch(0.65 0.12 195 / ${0.3 + bloomProgress * 0.4})`;
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-        
-        ctx.restore();
-      }
-
-      for (let i = 0; i < petalCount; i++) {
-        const angle = (i / petalCount) * Math.PI - Math.PI / 2;
-        const x = centerX + Math.cos(angle) * baseRadius * 0.6;
-        const y = lotusY + Math.sin(angle) * baseRadius * 0.5;
-        
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(angle + Math.PI / 2);
-        
-        ctx.beginPath();
-        ctx.ellipse(0, 0, baseRadius * 0.5, baseRadius * 0.9, 0, 0, Math.PI * 2);
-        
-        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, baseRadius * 0.9);
-        gradient.addColorStop(0, `oklch(0.7 0.15 195 / ${0.4 + bloomProgress * 0.5})`);
-        gradient.addColorStop(1, `oklch(0.7 0.15 195 / ${0.1 + bloomProgress * 0.2})`);
-        ctx.fillStyle = gradient;
-        ctx.fill();
-        
-        ctx.strokeStyle = `oklch(0.7 0.15 195 / ${0.5 + bloomProgress * 0.4})`;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        
-        ctx.restore();
-      }
-
-      const glowRadius = (20 + bloomProgress * 30) * breathe;
-      const glowGradient = ctx.createRadialGradient(centerX, lotusY, 0, centerX, lotusY, glowRadius);
-      glowGradient.addColorStop(0, `oklch(0.8 0.2 195 / ${glowIntensity * breathe})`);
-      glowGradient.addColorStop(0.5, `oklch(0.75 0.18 195 / ${glowIntensity * 0.5})`);
-      glowGradient.addColorStop(1, 'oklch(0.7 0.15 195 / 0)');
-      ctx.fillStyle = glowGradient;
-      ctx.beginPath();
-      ctx.arc(centerX, lotusY, glowRadius, 0, Math.PI * 2);
-      ctx.fill();
-
-      for (let i = 0; i < 3; i++) {
-        const ringRadius = glowRadius + (i + 1) * 15;
-        const ringOpacity = (glowIntensity * 0.3) / (i + 1);
-        ctx.beginPath();
-        ctx.arc(centerX, lotusY, ringRadius * breathe, 0, Math.PI * 2);
-        ctx.strokeStyle = `oklch(0.7 0.15 195 / ${ringOpacity})`;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      }
-
-      animationFrame = requestAnimationFrame(animate);
-    }
-
-    animate();
-
-    return () => {
-      if (animationFrame) {
-        cancelAnimationFrame(animationFrame);
-      }
-    };
-  }, [hasData, totalMinutes]);
-
-  const currentRank = getCurrentRank();
-  const currentRankIndex = getRankIndex();
+  const currentRank = getCurrentRank(totalMinutes);
+  const currentRankIndex = getRankIndex(totalMinutes);
+  const nextRank = getNextRank(totalMinutes);
+  const minutesUntilNext = getMinutesUntilNextRank(totalMinutes);
+  const bloomPercent = Math.min(Math.round((totalMinutes / 20000) * 100), 100);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#040f13] to-background">
-      <div className="fixed top-0 left-0 w-96 h-96 opacity-10 dark:opacity-8 pointer-events-none">
+    <div className="relative min-h-screen overflow-x-hidden bg-background dark:bg-gradient-to-br dark:from-[#040f13] dark:to-background">
+      <div className="fixed top-0 left-0 w-96 h-96 opacity-15 dark:opacity-10 pointer-events-none">
         <LotusCanvas variant="enhanced" />
       </div>
-      <div className="fixed bottom-0 right-0 w-96 h-96 opacity-10 dark:opacity-8 pointer-events-none">
+      <div className="fixed bottom-0 right-0 w-96 h-96 opacity-15 dark:opacity-10 pointer-events-none">
         <LotusCanvas variant="enhanced" />
       </div>
 
@@ -431,29 +290,32 @@ export default function ProgressPage() {
             </div>
           ) : (
             <>
-              <div className="flex justify-center">
-                <div className="relative">
-                  <canvas
-                    ref={lotusCanvasRef}
-                    className="w-72 h-72 sm:w-80 sm:h-80"
-                    style={{
-                      filter: 'drop-shadow(0 0 40px oklch(0.7 0.15 195 / 0.4))',
-                    }}
-                  />
-                  <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center pointer-events-none">
-                    <div className="text-2xl sm:text-3xl font-bold text-accent-cyan">
-                      {Math.round((totalMinutes / 10000) * 100)}% Bloomed
-                    </div>
-                    <div className="text-sm text-description-gray mt-1">
-                      {totalMinutes} / 10,000 minutes
-                    </div>
+              <div className="flex flex-col items-center gap-6">
+                {/* Bowl visualization container with extra padding for shadow overflow */}
+                <div className="relative w-full max-w-[320px] h-[320px] flex items-center justify-center" style={{ padding: '60px' }}>
+                  {mounted && theme && (
+                    <ProgressBowl 
+                      totalMinutes={totalMinutes} 
+                      theme={theme} 
+                    />
+                  )}
+                </div>
+                
+                {/* Fill percentage text - below the bowl */}
+                <div className="text-center space-y-1 -mt-2">
+                  <div className="text-2xl sm:text-3xl font-bold text-accent-cyan drop-shadow-lg">
+                    {bloomPercent}% Filled
+                  </div>
+                  <div className="text-sm text-description-gray drop-shadow">
+                    {totalMinutes.toLocaleString()} / 20,000 minutes
                   </div>
                 </div>
               </div>
 
               <div className="max-w-3xl mx-auto space-y-6">
-                <div className="grid grid-cols-3 gap-4 sm:gap-6">
-                  <div className="text-center space-y-2 p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border/30">
+                {/* Stats cards with responsive layout */}
+                <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
+                  <div className="text-center space-y-2 p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border/30 flex-1 min-w-[140px] max-w-[200px]">
                     <TrendingUp className="w-8 h-8 text-accent-cyan mx-auto" />
                     <div className="text-3xl font-bold text-accent-cyan">
                       {totalMinutes.toLocaleString()}
@@ -461,7 +323,7 @@ export default function ProgressPage() {
                     <p className="text-sm text-muted-foreground">Total Minutes</p>
                   </div>
 
-                  <div className="text-center space-y-2 p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border/30">
+                  <div className="text-center space-y-2 p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border/30 flex-1 min-w-[140px] max-w-[200px]">
                     <Flame className="w-8 h-8 text-accent-cyan mx-auto" />
                     <div className="text-3xl font-bold text-accent-cyan">
                       {currentStreak}
@@ -469,7 +331,7 @@ export default function ProgressPage() {
                     <p className="text-sm text-muted-foreground">Day Streak</p>
                   </div>
 
-                  <div className="text-center space-y-2 p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border/30">
+                  <div className="text-center space-y-2 p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border/30 flex-1 min-w-[140px] max-w-[200px]">
                     <Award className="w-8 h-8 text-accent-cyan mx-auto" />
                     <div className="text-3xl font-bold text-accent-cyan">
                       {monthlyMinutes}
@@ -485,11 +347,11 @@ export default function ProgressPage() {
                   <div className="text-base text-muted-foreground italic font-playfair">
                     {currentRank.subtitle}
                   </div>
-                  {currentRankIndex < RANKS.length - 1 && (
+                  {nextRank && minutesUntilNext !== null && (
                     <div className="text-sm text-description-gray pt-3 border-t border-border/30">
-                      {RANKS[currentRankIndex + 1].minMinutes - totalMinutes} minutes until{' '}
+                      {minutesUntilNext.toLocaleString()} minutes until{' '}
                       <span className="text-accent-cyan font-semibold">
-                        {RANKS[currentRankIndex + 1].name}
+                        {nextRank.name}
                       </span>
                     </div>
                   )}

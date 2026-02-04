@@ -414,11 +414,11 @@ export default function JournalPage() {
   );
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#040f13] to-background">
-      <div className="fixed top-0 left-0 w-96 h-96 opacity-10 dark:opacity-8 pointer-events-none">
+    <div className="relative min-h-screen overflow-hidden bg-background dark:bg-gradient-to-br dark:from-[#040f13] dark:to-background">
+      <div className="fixed top-0 left-0 w-96 h-96 opacity-15 dark:opacity-10 pointer-events-none">
         <LotusCanvas variant="enhanced" />
       </div>
-      <div className="fixed bottom-0 right-0 w-96 h-96 opacity-10 dark:opacity-8 pointer-events-none">
+      <div className="fixed bottom-0 right-0 w-96 h-96 opacity-15 dark:opacity-10 pointer-events-none">
         <LotusCanvas variant="enhanced" />
       </div>
 
@@ -560,16 +560,16 @@ export default function JournalPage() {
             <div className="space-y-8">
               <Card className="bg-card/50 backdrop-blur-sm border-border/30">
                 <CardContent className="pt-6">
-                  <div className="grid grid-cols-3 gap-8">
-                    <div className="text-center space-y-2">
+                  <div className="flex flex-wrap justify-center gap-8">
+                    <div className="text-center space-y-2 min-w-[120px]">
                       <Skeleton className="h-4 w-24 mx-auto" />
                       <Skeleton className="h-8 w-16 mx-auto" />
                     </div>
-                    <div className="text-center space-y-2">
+                    <div className="text-center space-y-2 min-w-[120px]">
                       <Skeleton className="h-4 w-24 mx-auto" />
                       <Skeleton className="h-8 w-16 mx-auto" />
                     </div>
-                    <div className="text-center space-y-2">
+                    <div className="text-center space-y-2 min-w-[120px]">
                       <Skeleton className="h-4 w-24 mx-auto" />
                       <Skeleton className="h-8 w-16 mx-auto" />
                     </div>
@@ -602,16 +602,16 @@ export default function JournalPage() {
             <>
               <Card className="bg-card/50 backdrop-blur-sm border-border/30">
                 <CardContent className="pt-6">
-                  <div className="grid grid-cols-3 gap-8">
-                    <div className="text-center space-y-2">
+                  <div className="flex flex-wrap justify-center gap-8">
+                    <div className="text-center space-y-2 min-w-[120px]">
                       <CardTitle className="text-sm font-medium text-muted-foreground">Total Sessions</CardTitle>
                       <div className="text-3xl font-bold text-accent-cyan">{totalSessions}</div>
                     </div>
-                    <div className="text-center space-y-2">
+                    <div className="text-center space-y-2 min-w-[120px]">
                       <CardTitle className="text-sm font-medium text-muted-foreground">Avg Duration</CardTitle>
                       <div className="text-3xl font-bold text-accent-cyan">{avgDuration} min</div>
                     </div>
-                    <div className="text-center space-y-2">
+                    <div className="text-center space-y-2 min-w-[120px]">
                       <CardTitle className="text-sm font-medium text-muted-foreground">Favorites</CardTitle>
                       <div className="text-3xl font-bold text-accent-cyan">{favoriteEntries.length}</div>
                     </div>
@@ -626,7 +626,7 @@ export default function JournalPage() {
                 </TabsList>
 
                 <div className="mt-6 space-y-4">
-                  <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex flex-col min-[800px]:flex-row gap-4">
                     <div className="relative flex-1">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
@@ -637,7 +637,7 @@ export default function JournalPage() {
                       />
                     </div>
                     <Select value={filterType} onValueChange={setFilterType}>
-                      <SelectTrigger className="w-full sm:w-40 bg-card/50 backdrop-blur-sm border-border/30">
+                      <SelectTrigger className="w-full min-[800px]:w-40 bg-card/50 backdrop-blur-sm border-border/30">
                         <SelectValue placeholder="Filter by type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -649,7 +649,7 @@ export default function JournalPage() {
                       </SelectContent>
                     </Select>
                     <Select value={filterMood} onValueChange={setFilterMood}>
-                      <SelectTrigger className="w-full sm:w-40 bg-card/50 backdrop-blur-sm border-border/30">
+                      <SelectTrigger className="w-full min-[800px]:w-40 bg-card/50 backdrop-blur-sm border-border/30">
                         <SelectValue placeholder="Filter by mood" />
                       </SelectTrigger>
                       <SelectContent>
@@ -662,7 +662,7 @@ export default function JournalPage() {
                       </SelectContent>
                     </Select>
                     <Select value={filterEnergy} onValueChange={setFilterEnergy}>
-                      <SelectTrigger className="w-full sm:w-40 bg-card/50 backdrop-blur-sm border-border/30">
+                      <SelectTrigger className="w-full min-[800px]:w-40 bg-card/50 backdrop-blur-sm border-border/30">
                         <SelectValue placeholder="Filter by energy" />
                       </SelectTrigger>
                       <SelectContent>

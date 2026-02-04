@@ -12,6 +12,7 @@ import AmbientMusicCarousel from '../components/AmbientMusicCarousel';
 import SessionIndicator from '../components/SessionIndicator';
 import HamburgerMenu from '../components/HamburgerMenu';
 import MobileBackButton from '../components/MobileBackButton';
+import MeditationGuideStepper from '../components/MeditationGuideStepper';
 import { useMeditationTypes, useRecordSession, useSaveJournalEntry } from '../hooks/useQueries';
 import type { MeditationType, MoodState, EnergyState } from '../backend';
 
@@ -20,19 +21,19 @@ const detailedGuides: Record<string, { steps: Array<{ title: string; content: st
     steps: [
       {
         title: 'Find Your Posture',
-        content: 'Sit comfortably with your back straight but not rigid. You can sit on a chair with feet flat on the floor or cross-legged on a cushion. Rest your hands gently on your lap or knees.',
+        content: 'Sit comfortably with your back straight but not rigid—imagine a string gently pulling the crown of your head toward the sky. You can sit on a chair with feet flat on the floor, or cross-legged on a cushion with your hips slightly elevated. Rest your hands gently on your lap or knees, palms facing down for grounding or up for receptivity. Let your shoulders relax away from your ears, and soften your jaw and facial muscles.',
       },
       {
         title: 'Begin with Breath Awareness',
-        content: 'Close your eyes gently or maintain a soft downward gaze. Bring your attention to your natural breath. Notice the sensation of air entering and leaving your nostrils.',
+        content: 'Close your eyes gently or maintain a soft downward gaze about three feet in front of you. Bring your attention to your natural breath without trying to control it. Notice the cool sensation of air entering your nostrils and the warm sensation as you exhale. Feel your chest and belly rise and fall with each breath. If it helps, you can count breaths: "one" on the inhale, "two" on the exhale, up to ten, then start again.',
       },
       {
         title: 'Anchor in the Present',
-        content: 'When your mind wanders—and it will—gently acknowledge the thought without judgment and return your focus to your breath. This is the practice.',
+        content: 'When your mind wanders—and it will, this is completely normal—gently acknowledge the thought without judgment. You might silently note "thinking" or "planning" and then kindly return your focus to your breath. Each time you notice you\'ve wandered and come back is a successful moment of practice. The breath is your anchor to the present moment. Be patient and compassionate with yourself.',
       },
       {
-        title: 'Transition Mindfully',
-        content: 'When ready to end, slowly deepen your breath, gently move your fingers and toes, and open your eyes. Take a moment to notice how you feel.',
+        title: 'Transition Mindfully & Benefits',
+        content: 'When ready to end, slowly deepen your breath for three cycles. Gently wiggle your fingers and toes, roll your shoulders, and when you feel ready, open your eyes softly. Take a moment to notice how you feel—any shifts in your body, mind, or emotions.\n\nBenefits: Regular mindfulness practice reduces stress and anxiety, improves focus and concentration, enhances emotional regulation, increases self-awareness, and promotes overall mental clarity and well-being.',
       },
     ],
   },
@@ -40,19 +41,19 @@ const detailedGuides: Record<string, { steps: Array<{ title: string; content: st
     steps: [
       {
         title: 'Settle into Comfort',
-        content: 'Sit in a comfortable position with your spine upright. Place your hands over your heart or rest them gently on your lap. Maintain a gentle, soft expression.',
+        content: 'Sit in a comfortable position with your spine upright yet relaxed. You might place your hands over your heart center or rest them gently on your lap. Allow your face to soften into a gentle, natural smile—even a subtle one can shift your internal state. Take a few deep breaths to settle in, releasing any tension you notice in your body. Create a sense of warmth and safety within yourself.',
       },
       {
         title: 'Begin with Yourself',
-        content: 'Start by directing loving-kindness toward yourself. Silently repeat: "May I be happy. May I be healthy. May I be safe. May I live with ease."',
+        content: 'Start by directing loving-kindness toward yourself—this is often the hardest but most important step. Visualize yourself as you are right now, or as a younger version of yourself. Silently repeat these phrases with genuine intention: "May I be happy. May I be healthy. May I be safe. May I live with ease." Let the words resonate in your heart. If resistance arises, acknowledge it with compassion and continue. You deserve this kindness.',
       },
       {
         title: 'Extend to Others',
-        content: 'Bring to mind someone you care about deeply. Visualize them clearly and direct the same phrases toward them with warmth and compassion.',
+        content: 'Bring to mind someone you care about deeply—a loved one, friend, or mentor. Visualize them clearly: their face, their presence, how they make you feel. Now direct the same loving phrases toward them with warmth and sincerity: "May you be happy. May you be healthy. May you be safe. May you live with ease." Feel the genuine wish for their well-being radiating from your heart. You can extend this practice to neutral people, difficult people, and eventually all beings.',
       },
       {
-        title: 'Rest in Loving-Kindness',
-        content: 'Conclude by resting in the warm feeling of universal compassion. Notice any shifts in your emotional state before gently opening your eyes.',
+        title: 'Rest in Loving-Kindness & Benefits',
+        content: 'Conclude by expanding your awareness to include all beings everywhere—near and far, known and unknown. Silently offer: "May all beings be happy. May all beings be healthy. May all beings be safe. May all beings live with ease." Rest in the warm, expansive feeling of universal compassion. Notice any shifts in your emotional state—perhaps more openness, warmth, or connection. When ready, gently open your eyes.\n\nBenefits: Metta practice cultivates compassion and empathy, reduces negative emotions like anger and resentment, increases positive emotions and life satisfaction, improves relationships and social connection, and enhances overall emotional resilience and well-being.',
       },
     ],
   },
@@ -60,19 +61,19 @@ const detailedGuides: Record<string, { steps: Array<{ title: string; content: st
     steps: [
       {
         title: 'Create Your Sacred Space',
-        content: 'Find a quiet, comfortable space where you won\'t be disturbed. You can sit or lie down—whatever helps you relax most deeply. Close your eyes gently.',
+        content: 'Find a quiet, comfortable space where you won\'t be disturbed for the duration of your practice. You can sit upright or lie down—choose whatever position helps you relax most deeply while staying alert. Dim the lights if possible. Close your eyes gently and take three slow, deep breaths, allowing each exhale to release any tension or stress you\'re holding. Set an intention for this practice: perhaps healing, clarity, peace, or simply deep rest.',
       },
       {
         title: 'Deepen Your Relaxation',
-        content: 'Take several slow, deep breaths. With each exhale, release tension from your body. Feel yourself becoming heavier and more relaxed.',
+        content: 'Take several slow, deep breaths—inhaling through your nose for a count of four, holding gently for four, and exhaling through your mouth for six. With each exhale, consciously release tension from different parts of your body: your forehead, jaw, shoulders, arms, chest, belly, hips, legs, and feet. Feel yourself becoming heavier and more relaxed, as if you\'re sinking into the surface beneath you. Let go of any need to control or analyze—simply allow yourself to be.',
       },
       {
         title: 'Build Your Mental Sanctuary',
-        content: 'Begin to visualize a peaceful place—perhaps a beach, forest, mountain, or garden. Make it as vivid as possible. Notice the colors, the light, the details.',
+        content: 'Begin to visualize a peaceful place—this could be somewhere real you\'ve been, or entirely imagined. Perhaps a quiet beach with gentle waves, a serene forest with dappled sunlight, a mountain meadow with wildflowers, or a cozy sanctuary. Make it as vivid as possible using all your senses: What do you see? What colors and light? What do you hear—birds, water, wind? What do you smell and feel on your skin? What emotions arise in this place? Spend time here, exploring and deepening the experience. This is your refuge.',
       },
       {
-        title: 'Return Gently',
-        content: 'When ready, slowly bring your awareness back to your physical body. Wiggle your fingers and toes, take a deep breath, and open your eyes.',
+        title: 'Return Gently & Benefits',
+        content: 'When you feel complete, take a moment to appreciate this inner sanctuary—knowing you can return here anytime you need peace or clarity. Slowly begin to bring your awareness back to your physical body. Notice the surface beneath you, the temperature of the air, sounds in the room. Wiggle your fingers and toes gently. Take a deep, nourishing breath. When you\'re ready, slowly open your eyes and take a moment to reorient yourself before moving.\n\nBenefits: Visualization practice reduces stress and promotes deep relaxation, enhances creativity and problem-solving abilities, improves focus and mental clarity, supports goal achievement and positive mindset, and can aid in physical healing and pain management through mind-body connection.',
       },
     ],
   },
@@ -80,19 +81,19 @@ const detailedGuides: Record<string, { steps: Array<{ title: string; content: st
     steps: [
       {
         title: 'Ground Yourself',
-        content: 'Sit or lie down in a comfortable position. Keep your body relaxed and open. You might place one hand on your heart and one on your belly.',
+        content: 'Sit or lie down in a comfortable position where you feel safe and supported. Keep your body relaxed and open—uncross your arms and legs if possible. You might place one hand on your heart center and one on your belly to create a sense of connection and self-compassion. Take several deep breaths, feeling your body settle. Remind yourself that this is a practice of curiosity and kindness toward all parts of yourself, without judgment or agenda.',
       },
       {
         title: 'Cultivate Self-Compassion',
-        content: 'Begin by acknowledging that all parts of you are welcome in this practice. Approach yourself with curiosity and kindness, not judgment.',
+        content: 'Begin by acknowledging that all parts of you—even the ones you might judge as "bad" or "difficult"—are welcome in this practice and are trying to help you in some way. Approach yourself with genuine curiosity and kindness, as you would a dear friend. Take a moment to connect with your core Self—the calm, compassionate, curious awareness that can witness all your parts without being overwhelmed by them. This is your wise, centered presence.',
       },
       {
         title: 'Meet Your Parts',
-        content: 'If a particular emotion or thought feels strong, imagine it as a "part" of you. Ask it: "What do you want me to know?" Listen with an open heart.',
+        content: 'If a particular emotion, thought pattern, or sensation feels strong right now, gently turn your attention toward it. Instead of pushing it away or getting lost in it, imagine it as a "part" of you—perhaps with an age, appearance, or voice. With curiosity and compassion, ask it: "What do you want me to know?" or "What are you trying to protect me from?" Listen with an open heart, without judgment. You might sense an answer through words, images, feelings, or just a knowing. Thank this part for sharing and for trying to help you, even if its methods are painful.',
       },
       {
-        title: 'Integrate and Harmonize',
-        content: 'Recognize that you are more than any single part—you are the compassionate awareness that can hold all parts with love. Rest in this wholeness.',
+        title: 'Integrate and Harmonize & Benefits',
+        content: 'Recognize that you are more than any single part—you are the compassionate, spacious awareness that can hold all parts with love and understanding. Each part has a role and a story. As you acknowledge and listen to them, they can relax and trust your Self to lead. Take a moment to appreciate the complexity and wisdom of your inner system. When you\'re ready, thank all your parts for their presence and slowly return your awareness to your breath and body. Open your eyes gently when ready.\n\nBenefits: IFS meditation promotes deep self-understanding and inner harmony, heals emotional wounds and trauma by addressing root causes, reduces internal conflict and self-criticism, enhances emotional regulation and resilience, improves relationships by understanding your reactive patterns, and fosters genuine self-compassion and wholeness.',
       },
     ],
   },
@@ -388,13 +389,8 @@ export default function PreMeditationPage() {
     const breatheScale = 1 + Math.sin(Date.now() / 2000) * 0.05;
 
     return (
-      <div className="relative min-h-screen overflow-x-hidden bg-gradient-to-br from-[#040f13] to-background">
-        <div className="fixed top-0 left-0 w-96 h-96 opacity-5 pointer-events-none">
-          <LotusCanvas />
-        </div>
-        <div className="fixed bottom-0 right-0 w-96 h-96 opacity-5 pointer-events-none">
-          <LotusCanvas />
-        </div>
+      <div className="relative min-h-screen overflow-x-hidden bg-background dark:bg-gradient-to-br dark:from-[#040f13] dark:to-background">
+        <LotusCanvas variant="premed" intensity={0.7} />
 
         {/* Desktop Session Indicator */}
         {mounted && (
@@ -423,14 +419,26 @@ export default function PreMeditationPage() {
 
         <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6">
           <div className="flex flex-col items-center space-y-12 animate-fade-in">
-            <div className="relative">
+            <div className="relative" style={{ padding: '30px' }}>
               <svg
                 width="320"
                 height="320"
                 viewBox="0 0 320 320"
                 className="transform transition-transform duration-1000"
-                style={{ transform: `scale(${breatheScale})` }}
+                style={{ 
+                  transform: `scale(${breatheScale})`,
+                  overflow: 'visible',
+                }}
               >
+                <defs>
+                  <filter id="timer-glow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
                 <circle
                   cx="160"
                   cy="160"
@@ -451,9 +459,7 @@ export default function PreMeditationPage() {
                   strokeLinecap="round"
                   transform="rotate(-90 160 160)"
                   className="transition-all duration-1000"
-                  style={{
-                    filter: 'drop-shadow(0 0 20px oklch(0.7 0.15 195 / 0.5))',
-                  }}
+                  filter="url(#timer-glow)"
                 />
                 <circle
                   cx="160"
@@ -464,7 +470,7 @@ export default function PreMeditationPage() {
                 />
               </svg>
 
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center" style={{ padding: '30px' }}>
                 <div className="text-center">
                   <div className="text-6xl sm:text-7xl font-bold text-accent-cyan-tinted">
                     {formatTime(timeRemaining)}
@@ -527,13 +533,8 @@ export default function PreMeditationPage() {
     const currentQ = moodQuestions[currentQuestion];
 
     return (
-      <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#040f13] to-background">
-        <div className="fixed top-0 left-0 w-96 h-96 opacity-5 pointer-events-none">
-          <LotusCanvas />
-        </div>
-        <div className="fixed bottom-0 right-0 w-96 h-96 opacity-5 pointer-events-none">
-          <LotusCanvas />
-        </div>
+      <div className="relative min-h-screen overflow-hidden bg-background dark:bg-gradient-to-br dark:from-[#040f13] dark:to-background">
+        <LotusCanvas variant="premed" intensity={0.7} />
 
         {/* Desktop Session Indicator */}
         {mounted && (
@@ -598,7 +599,7 @@ export default function PreMeditationPage() {
                           onCheckedChange={() => handleMoodToggle(option.value)}
                           id={option.value}
                         />
-                        <IconComponent className="w-6 h-6 text-accent-cyan flex-shrink-0" />
+                        <IconComponent className="w-6 h-6 text-accent-cyan shrink-0" />
                         <Label
                           htmlFor={option.value}
                           className="text-base cursor-pointer text-foreground flex-1"
@@ -647,7 +648,7 @@ export default function PreMeditationPage() {
                         }`}>
                           {isSelected && <div className="w-3 h-3 rounded-full bg-accent-cyan" />}
                         </div>
-                        <IconComponent className="w-6 h-6 text-accent-cyan flex-shrink-0" />
+                        <IconComponent className="w-6 h-6 text-accent-cyan shrink-0" />
                         <Label
                           className="text-base cursor-pointer text-foreground flex-1"
                         >
@@ -718,13 +719,8 @@ export default function PreMeditationPage() {
 
   // Setup view (default)
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#040f13] to-background">
-      <div className="fixed top-0 left-0 w-96 h-96 opacity-5 pointer-events-none">
-        <LotusCanvas />
-      </div>
-      <div className="fixed bottom-0 right-0 w-96 h-96 opacity-5 pointer-events-none">
-        <LotusCanvas />
-      </div>
+    <div className="relative min-h-screen overflow-hidden bg-background dark:bg-gradient-to-br dark:from-[#040f13] dark:to-background">
+      <LotusCanvas variant="premed" intensity={0.7} />
 
       {/* Desktop Session Indicator */}
       {mounted && (
@@ -776,26 +772,10 @@ export default function PreMeditationPage() {
             )}
           </div>
 
-          <div className="space-y-6 pt-2">
-            <h2 className="text-xl sm:text-2xl font-semibold text-foreground mb-8">Meditation Guide</h2>
-            <div className="space-y-8">
-              {getGuideSteps().map((step, index) => (
-                <div key={index} className="flex gap-4 items-start">
-                  <div 
-                    className="flex-shrink-0 w-12 h-12 rounded-full bg-accent-cyan/20 border-2 border-accent-cyan flex items-center justify-center"
-                    style={{
-                      boxShadow: '0 0 12px oklch(0.7 0.15 195 / 0.4)',
-                    }}
-                  >
-                    <span className="text-accent-cyan font-bold text-lg">{index + 1}</span>
-                  </div>
-                  
-                  <div className="flex-1 space-y-2 pt-1">
-                    <h3 className="text-lg sm:text-xl font-semibold text-accent-cyan">{step.title}</h3>
-                    <p className="text-sm sm:text-base text-selected-element-light dark:text-guide-text leading-relaxed">{step.content}</p>
-                  </div>
-                </div>
-              ))}
+          <div className="space-y-6 pt-4">
+            <h2 className="text-2xl sm:text-3xl font-semibold text-foreground text-center">Meditation Guides</h2>
+            <div className="bg-card/40 backdrop-blur-sm border border-border/50 rounded-2xl p-6 sm:p-8 shadow-lg">
+              <MeditationGuideStepper steps={getGuideSteps()} />
             </div>
           </div>
 

@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useNavigate } from '@tanstack/react-router';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import LotusCanvas from '../components/LotusCanvas';
 import MeditationCarousel from '../components/MeditationCarousel';
 import FloatingNav from '../components/FloatingNav';
@@ -11,6 +13,7 @@ import SessionIndicator from '../components/SessionIndicator';
 import HamburgerMenu from '../components/HamburgerMenu';
 import SavedRitualsCarousel from '../components/SavedRitualsCarousel';
 import { useDailyQuotes, useRituals, useDeleteRitual } from '../hooks/useQueries';
+import { useLocalStorageState } from '../hooks/useLocalStorageState';
 import { toast } from 'sonner';
 
 export default function DashboardPage() {
@@ -20,6 +23,7 @@ export default function DashboardPage() {
   const [dailyQuote, setDailyQuote] = useState('');
   const [selectedMeditation, setSelectedMeditation] = useState('mindfulness');
   const [showQuiz, setShowQuiz] = useState(false);
+  const [showRitualArrows, setShowRitualArrows] = useLocalStorageState('ritual-arrows-enabled', true);
 
   const { data: quotes = [] } = useDailyQuotes();
   const { data: rituals = [], isLoading: ritualsLoading } = useRituals();
@@ -121,14 +125,32 @@ export default function DashboardPage() {
           {/* Rituals Section - Only shown when rituals exist */}
           {!ritualsLoading && rituals.length > 0 && (
             <div className="space-y-3 mb-6">
-              <h2 className="text-xl sm:text-2xl font-semibold text-foreground text-center">
-                Your Rituals
-              </h2>
+              <div className="flex items-center justify-center gap-4 flex-wrap">
+                <h2 className="text-xl sm:text-2xl font-semibold text-foreground text-center">
+                  Your Rituals
+                </h2>
+                {rituals.length >= 2 && (
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="show-arrows"
+                      checked={showRitualArrows}
+                      onCheckedChange={(checked) => setShowRitualArrows(checked === true)}
+                    />
+                    <Label
+                      htmlFor="show-arrows"
+                      className="text-sm text-muted-foreground cursor-pointer"
+                    >
+                      Show navigation arrows
+                    </Label>
+                  </div>
+                )}
+              </div>
               <SavedRitualsCarousel
                 rituals={rituals}
                 onStart={handleStartRitual}
                 onDelete={handleDeleteRitual}
                 isDeleting={deleteRitual.isPending}
+                showArrows={showRitualArrows}
               />
             </div>
           )}

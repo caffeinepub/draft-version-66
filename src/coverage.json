@@ -1,58 +1,85 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-04T12:58:53.189Z",
+  "generatedAt": "2026-02-04T13:20:30.750Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 4,
+    "implemented": 4,
     "items": [
       {
         "id": "REQ-10",
-        "summary": "Fix the toast/notification styling for ritual saved/deleted notifications so they are not transparent: toasts must render with a solid, theme-consistent background color and a visible border that matches the app theme in both light and dark modes. Apply this specifically to the notifications shown when a ritual is saved or deleted.",
+        "summary": "Implement authenticated journal persistence end-to-end so that completed meditation reflections are saved to the backend for logged-in users and reliably appear on the Journal page (including edit/delete/favorite toggle actions).",
         "status": "implemented",
         "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts",
           "frontend/src/pages/PreMeditationPage.tsx",
-          "frontend/src/pages/DashboardPage.tsx"
+          "frontend/src/pages/JournalPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx",
-          "frontend/src/pages/DashboardPage.tsx"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/PreMeditationPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-11",
+        "summary": "Fix authenticated progress persistence so that total minutes, streak, and monthly minutes update correctly after each session and reliably appear on the Progress page (and in exported backend data).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/ProgressPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts"
         ]
       },
       {
         "id": "REQ-8",
-        "summary": "Add horizontal swipe navigation (Prev/Next) to the meditation guide container shown on the Pre‑Meditation page (the \"Meditation Guides\" card that renders `MeditationGuideStepper`). Swiping left must go to the next step; swiping right must go to the previous step, with a reasonable minimum swipe distance threshold, and must respect first/last step boundaries (no wraparound). Swipe navigation must stay in sync with the existing Prev/Next buttons and dot navigation.",
+        "summary": "Add explicit left/right ritual navigation controls (arrow buttons/icons) that work on all screen sizes, and provide a user-controlled option to show/hide these ritual navigation buttons while keeping swipe navigation available.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/MeditationGuideStepper.tsx"
+          "frontend/src/components/SavedRitualsCarousel.tsx",
+          "frontend/src/pages/DashboardPage.tsx",
+          "frontend/src/hooks/useLocalStorageState.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/MeditationGuideStepper.tsx"
+          "frontend/src/components/SavedRitualsCarousel.tsx",
+          "frontend/src/pages/DashboardPage.tsx",
+          "frontend/src/hooks/useLocalStorageState.ts"
         ]
       },
       {
         "id": "REQ-9",
-        "summary": "In the post-session reflection flow on the Pre‑Meditation page, restrict mood/state selection so the user can select at most 2 mood states total. The energy level selection must remain single-choice exactly as it is now (no behavioral changes to energy selection). Update any on-screen instruction text for mood selection to clearly indicate the \"up to 2\" limit in English.",
+        "summary": "Fix the incorrect ritual-save error toast that shows \"This ritual already exists in your collection.\" when the user has no visible rituals, and ensure ritual duplicate detection/handling is consistent between guest (localStorage) and authenticated (backend) modes without cross-contamination.",
         "status": "implemented",
         "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts",
           "frontend/src/pages/PreMeditationPage.tsx"
         ],
         "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts",
           "frontend/src/pages/PreMeditationPage.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/MeditationGuideStepper.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/SavedRitualsCarousel.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useLocalStorageState.ts",
+    "frontend/src/hooks/useQueries.ts",
     "frontend/src/pages/DashboardPage.tsx",
     "frontend/src/pages/PreMeditationPage.tsx",
     "project_state.json",

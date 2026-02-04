@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 39,
+  "projectStateVersion": 43,
   "summary": "Inner Bloom is a React + TypeScript single-page meditation companion with an Internet Computer (Motoko) canister backend. The app supports Internet Identity authentication plus a guest/offline mode backed by localStorage. Users can pick a meditation type (or take a recommendation quiz), follow a step-by-step guide, choose duration and ambient audio, run a timed meditation session with controls, then record a post-session reflection (mood(s), energy, notes, favorite) into a journal. The app tracks progress (total minutes, streak, last-30-days minutes), computes rank tiers for a 0–20,000-minute cap, renders progress visuals (animated canvas bowl; lotus background; progress lotus via SVG and optional 3D R3F), and offers unified JSON export/import (guest uses localStorage; authenticated users use canister export/import). A curated book recommendations page is served from a static frontend dataset (Amazon links), while the backend also provides a static books list (Goodreads links).",
   "existing_features": [
     {
@@ -559,26 +559,34 @@
       "version": 1
     },
     {
-      "id": "feature-add-horizontal-swipe-navigation-prev-next-to-the-meditation-guide-container-shown-on-the-pre-meditation-page-the-meditation-guides-card-that-renders-meditationguidestepper-swiping-left-must-go-to-the-next-step-swiping-right-must-go-to-the-previous-step-with-a-reasonable-minimum-swipe-distance-threshold-and-must-respect-first-last-step-boundaries-no-wraparound-swipe-navigation-must-stay-in-sync-with-the-existing-prev-next-buttons-and-dot-navigation",
-      "title": "Add horizontal swipe navigation (Prev/Next) to the meditation guide container shown on the Pre‑Meditation page (the \"Meditation Guides\" card that renders `MeditationGuideStepper`). Swiping left must go to the next step; swiping right must go to the previous step, with a reasonable minimum swipe distance threshold, and must respect first/last step boundaries (no wraparound). Swipe navigation must stay in sync with the existing Prev/Next buttons and dot navigation.",
+      "id": "feature-add-explicit-left-right-ritual-navigation-controls-arrow-buttons-icons-that-work-on-all-screen-sizes-and-provide-a-user-controlled-option-to-show-hide-these-ritual-navigation-buttons-while-keeping-swipe-navigation-available",
+      "title": "Add explicit left/right ritual navigation controls (arrow buttons/icons) that work on all screen sizes, and provide a user-controlled option to show/hide these ritual navigation buttons while keeping swipe navigation available.",
       "reqIds": [
         "REQ-8"
       ],
       "version": 1
     },
     {
-      "id": "feature-in-the-post-session-reflection-flow-on-the-pre-meditation-page-restrict-mood-state-selection-so-the-user-can-select-at-most-2-mood-states-total-the-energy-level-selection-must-remain-single-choice-exactly-as-it-is-now-no-behavioral-changes-to-energy-selection-update-any-on-screen-instruction-text-for-mood-selection-to-clearly-indicate-the-up-to-2-limit-in-english",
-      "title": "In the post-session reflection flow on the Pre‑Meditation page, restrict mood/state selection so the user can select at most 2 mood states total. The energy level selection must remain single-choice exactly as it is now (no behavioral changes to energy selection). Update any on-screen instruction text for mood selection to clearly indicate the \"up to 2\" limit in English.",
+      "id": "feature-fix-the-incorrect-ritual-save-error-toast-that-shows-this-ritual-already-exists-in-your-collection-when-the-user-has-no-visible-rituals-and-ensure-ritual-duplicate-detection-handling-is-consistent-between-guest-localstorage-and-authenticated-backend-modes-without-cross-contamination",
+      "title": "Fix the incorrect ritual-save error toast that shows \"This ritual already exists in your collection.\" when the user has no visible rituals, and ensure ritual duplicate detection/handling is consistent between guest (localStorage) and authenticated (backend) modes without cross-contamination.",
       "reqIds": [
         "REQ-9"
       ],
       "version": 1
     },
     {
-      "id": "feature-fix-the-toast-notification-styling-for-ritual-saved-deleted-notifications-so-they-are-not-transparent-toasts-must-render-with-a-solid-theme-consistent-background-color-and-a-visible-border-that-matches-the-app-theme-in-both-light-and-dark-modes-apply-this-specifically-to-the-notifications-shown-when-a-ritual-is-saved-or-deleted",
-      "title": "Fix the toast/notification styling for ritual saved/deleted notifications so they are not transparent: toasts must render with a solid, theme-consistent background color and a visible border that matches the app theme in both light and dark modes. Apply this specifically to the notifications shown when a ritual is saved or deleted.",
+      "id": "feature-implement-authenticated-journal-persistence-end-to-end-so-that-completed-meditation-reflections-are-saved-to-the-backend-for-logged-in-users-and-reliably-appear-on-the-journal-page-including-edit-delete-favorite-toggle-actions",
+      "title": "Implement authenticated journal persistence end-to-end so that completed meditation reflections are saved to the backend for logged-in users and reliably appear on the Journal page (including edit/delete/favorite toggle actions).",
       "reqIds": [
         "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-authenticated-progress-persistence-so-that-total-minutes-streak-and-monthly-minutes-update-correctly-after-each-session-and-reliably-appear-on-the-progress-page-and-in-exported-backend-data",
+      "title": "Fix authenticated progress persistence so that total minutes, streak, and monthly minutes update correctly after each session and reliably appear on the Progress page (and in exported backend data).",
+      "reqIds": [
+        "REQ-11"
       ],
       "version": 1
     }
@@ -593,36 +601,6 @@
     {
       "id": "AR-3",
       "summary": "Add a gentle weekly reflection summary card (dashboard) generated from existing session/journal data; dismissible for the week; optional link to view details in journal",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Rituals UX polish: in-card loading/disabled states during ritual save/delete to prevent duplicate actions; theme-aware ritual saved/deleted toasts (background + border); smooth prev/next transition animations for Saved Rituals carousel",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Add unified mobile-first drag/swipe gesture support (kept in sync with arrows/buttons) for key carousels: Books page books carousel, Dashboard meditation + saved rituals carousels, and Pre-meditation ambient sounds carousel",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Add swipe/drag navigation to the Pre‑Meditation guide step container (Prev/Next via horizontal swipe)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-7",
-      "summary": "Limit post-session reflection mood selection to at most 2 moods while keeping energy level as a single-choice field",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Fix ritual saved/deleted toast styling: ensure solid, theme-consistent background and border (not transparent)",
       "reqIds": [],
       "status": "pending"
     }

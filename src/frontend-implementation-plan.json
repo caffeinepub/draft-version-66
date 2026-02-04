@@ -1,60 +1,104 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Pre‑Meditation UX polish: swipeable guides, mood cap, solid ritual toasts",
+  "title": "Ritual navigation controls + fix ritual duplicate toast + persist journal & progress correctly (frontend-only)",
   "requirements": [
     {
       "id": "REQ-8",
-      "summary": "Add horizontal swipe navigation to the Pre‑Meditation MeditationGuideStepper container, synced with existing Prev/Next and dot navigation, respecting boundaries.",
+      "summary": "Add left/right ritual navigation arrow controls on all screen sizes and provide a user toggle to show/hide them while keeping swipe navigation.",
       "acceptanceCriteria": [
-        "On mobile/touch devices, swiping left on the guide content advances exactly one step (unless already on the last step).",
-        "On mobile/touch devices, swiping right on the guide content goes back exactly one step (unless already on the first step).",
-        "Prev/Next buttons and dot indicators continue to work and reflect the same current step index used by swipes.",
-        "Swiping does not cause step wraparound from last to first (or first to last)."
+        "On mobile and desktop, when the user has 2+ saved rituals, the UI provides visible left/right arrow controls that move to the previous/next ritual and stay in sync with swipe navigation and dot indicators.",
+        "A user-facing toggle exists to enable/disable showing the ritual left/right arrow controls (default behavior must be defined and consistent).",
+        "When the toggle is off, swipe navigation still works and the carousel remains usable.",
+        "When the user has 0 or 1 ritual, navigation controls do not appear (or appear disabled) and do not cause layout glitches."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/MeditationGuideStepper.tsx",
+          "path": "frontend/src/components/SavedRitualsCarousel.tsx",
           "operation": "modify",
-          "description": "Implement touch swipe handling (touch start/move/end) on the guide content container with a reasonable minimum horizontal swipe distance threshold; map left swipe to the existing Next behavior and right swipe to the existing Previous behavior; ensure swipes call the same navigation handlers so state remains in sync with buttons and dot navigation, and boundaries are respected (no wraparound). Verify the component's usage instructions before implementing."
+          "description": "Add a prop to control whether left/right arrow navigation buttons are rendered; when enabled and rituals.length >= 2, render arrow controls for both mobile and desktop while keeping swipe + dot navigation in sync. Use existing shadcn-ui Button and lucide icons; Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/DashboardPage.tsx",
+          "operation": "modify",
+          "description": "Add a user-facing toggle in the Rituals section to show/hide the carousel arrow controls (default on/off must be consistent), persist the preference locally, and pass the flag into SavedRitualsCarousel. Use existing shadcn-ui Checkbox/Label (or other existing UI components) for the toggle UI; Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useLocalStorageState.ts",
+          "operation": "create",
+          "description": "Create a small hook to read/write a boolean preference from localStorage for the ritual navigation arrows toggle, with a safe default and SSR/mount guards appropriate for this app."
         }
       ]
     },
     {
       "id": "REQ-9",
-      "summary": "Limit reflection mood selection to at most 2 items while keeping energy selection single-choice unchanged, and update the mood instruction text to say “up to 2”.",
+      "summary": "Fix incorrect ritual duplicate toast and ensure duplicate detection is consistent and isolated between guest (localStorage) and authenticated (backend) modes.",
       "acceptanceCriteria": [
-        "It is impossible to end up with more than 2 items in the selected moods list via any UI interaction.",
-        "Energy selection remains single-choice and continues to behave exactly as before.",
-        "The mood question text indicates the limit (e.g., \"Select up to 2\").",
-        "Saving the reflection/journal entry persists at most 2 moods (or defaults as currently implemented when none are selected)."
+        "When a user has no rituals in the active mode (guest vs authenticated), saving a new ritual succeeds and shows a success toast (no duplicate toast).",
+        "The duplicate toast \"This ritual already exists in your collection.\" is only shown when an exact duplicate ritual already exists in the active store for the current mode.",
+        "Authenticated ritual save/list/delete operations never read from or write to guest localStorage keys, and guest ritual operations never call backend ritual endpoints.",
+        "If a backend call fails for reasons other than a duplicate, the UI shows a generic failure toast (not the duplicate toast) and logs the underlying error to the console."
       ],
       "file_operations": [
         {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Update ritual save behavior to perform exact duplicate detection against the active store only (guest: localStorage rituals; authenticated: cached/fetched backend rituals), and normalize backend duplicate failures to a single explicit error (e.g., 'DUPLICATE_RITUAL') while rethrowing non-duplicate failures for generic UI handling. Ensure authenticated ritual flows do not touch guest localStorage keys and guest ritual flows do not call backend capabilities."
+        },
+        {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Update the mood question prompt text to clearly indicate the \"up to 2\" selection limit in English; adjust the mood toggle handler so it prevents selecting more than 2 moods (while still allowing deselection); ensure the saved reflection payload persists no more than 2 moods (defensively cap to 2 at save time) without changing the existing single-choice energy selection behavior."
+          "description": "Adjust ritual-save toast logic to show the duplicate toast only for the explicit duplicate signal (e.g., 'DUPLICATE_RITUAL'); for all other errors, show a generic failure toast and log the underlying error to the console. Use the existing toast system and existing shadcn-ui Button components; Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
       "id": "REQ-10",
-      "summary": "Make ritual saved/deleted toasts opaque with a theme-consistent solid background and visible border in both light and dark modes.",
+      "summary": "Implement authenticated journal persistence so reflections reliably save and appear on the Journal page with edit/delete/favorite actions, while keeping guest behavior localStorage-based.",
       "acceptanceCriteria": [
-        "When saving a ritual, the success toast has an opaque (non-transparent) background in both light and dark themes and includes a visible border.",
-        "When deleting a ritual, the corresponding toast also has an opaque background and visible border in both light and dark themes.",
-        "Toast text remains readable and consistent with the existing theme tokens."
+        "When authenticated, saving a post-session reflection persists to the canister and the new entry appears on the Journal page after navigation/refresh.",
+        "When authenticated, editing a journal entry reflection persists to the canister and is reflected after reload.",
+        "When authenticated, deleting a journal entry removes it from the canister and the Journal page after reload.",
+        "When authenticated, toggling favorite persists to the canister and the Journal page reflects the change after reload.",
+        "Guest mode behavior remains localStorage-based and unchanged except for any necessary bug fixes requested in this build."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/PreMeditationPage.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Adjust the toast options used for the ritual saved notification so the toast uses a solid, theme-consistent background (no transparency/backdrop blur dependency) and a clearly visible border in both light and dark modes, while keeping text readable with existing theme tokens."
+          "description": "Replace the current authenticated journal 'workarounds' with real authenticated persistence using available backendInterface methods (add, update, delete action, toggle favorite action) while keeping guest mode on localStorage. Ensure React Query invalidations refresh the Journal page after mutations and add robust error handling with console logging."
         },
         {
-          "path": "frontend/src/pages/DashboardPage.tsx",
+          "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Adjust the toast options used for the ritual deleted notification so the toast uses a solid, theme-consistent background (no transparency/backdrop blur dependency) and a clearly visible border in both light and dark modes, while keeping text readable with existing theme tokens."
+          "description": "Ensure the post-session reflection save flow uses the updated authenticated journal save hook and that navigation away does not mask save failures (surface failure states via toasts if needed). Use existing shadcn-ui components and toast system; Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/JournalPage.tsx",
+          "operation": "modify",
+          "description": "Ensure edit/delete/favorite UI actions surface authenticated persistence failures appropriately (generic error toast + console log) and that successful actions are reflected via query refresh. Use existing shadcn-ui components (Card, Button, AlertDialog, etc.) without editing frontend/src/components/ui; Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "summary": "Fix authenticated progress persistence so total minutes, streak, and monthly minutes update correctly after each session and appear correctly on Progress and in exported data.",
+      "acceptanceCriteria": [
+        "When authenticated, completing a meditation session increases the backend-stored lifetime total minutes by the session duration (does not overwrite lifetime totals with monthly minutes).",
+        "When authenticated, the Progress page reflects updated total minutes and streak after completing a session and revisiting the Progress page.",
+        "Monthly minutes represent minutes in the last 30 days (or the existing app definition) and do not incorrectly replace lifetime totals.",
+        "Exporting data while authenticated includes the up-to-date backend progress stats and session records."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Update authenticated session recording to compute monthly minutes and streak from authenticated backend session records/state (not from guest localStorage), then call the backend recording capability with correct values. Invalidate progress stats, session record related queries, and export-related queries as needed so Progress and export reflect the latest authenticated data."
+        },
+        {
+          "path": "frontend/src/pages/ProgressPage.tsx",
+          "operation": "modify",
+          "description": "Confirm Progress page refresh behavior aligns with updated query invalidations (e.g., revisiting the page shows updated totals/streak) and surface any authenticated load failures gracefully (generic error messaging + console log) without changing guest behavior. Use existing shadcn-ui components and toast system; Verify the component's usage instructions before implementing."
         }
       ]
     }

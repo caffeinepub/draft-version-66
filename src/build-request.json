@@ -1,73 +1,95 @@
 {
   "kind": "build_request",
-  "title": "Add swipe navigation to Pre‑Meditation guide, limit reflection mood selection to 2, and fix ritual toast styling",
-  "priority": "normal",
+  "title": "Ritual navigation controls + fix ritual duplicate toast + persist journal & progress correctly",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-8",
-      "text": "Add horizontal swipe navigation (Prev/Next) to the meditation guide container shown on the Pre‑Meditation page (the \"Meditation Guides\" card that renders `MeditationGuideStepper`). Swiping left must go to the next step; swiping right must go to the previous step, with a reasonable minimum swipe distance threshold, and must respect first/last step boundaries (no wraparound). Swipe navigation must stay in sync with the existing Prev/Next buttons and dot navigation.",
+      "text": "Add explicit left/right ritual navigation controls (arrow buttons/icons) that work on all screen sizes, and provide a user-controlled option to show/hide these ritual navigation buttons while keeping swipe navigation available.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "Introduce also swiping in the meditation guide container. The container is in pre-meditation page."
+          "Now add buttons/icons/arrows left & right for ritual navigations, user should have an option for that too."
         ]
       },
       "acceptanceCriteria": [
-        "On mobile/touch devices, swiping left on the guide content advances exactly one step (unless already on the last step).",
-        "On mobile/touch devices, swiping right on the guide content goes back exactly one step (unless already on the first step).",
-        "Prev/Next buttons and dot indicators continue to work and reflect the same current step index used by swipes.",
-        "Swiping does not cause step wraparound from last to first (or first to last)."
+        "On mobile and desktop, when the user has 2+ saved rituals, the UI provides visible left/right arrow controls that move to the previous/next ritual and stay in sync with swipe navigation and dot indicators.",
+        "A user-facing toggle exists to enable/disable showing the ritual left/right arrow controls (default behavior must be defined and consistent).",
+        "When the toggle is off, swipe navigation still works and the carousel remains usable.",
+        "When the user has 0 or 1 ritual, navigation controls do not appear (or appear disabled) and do not cause layout glitches."
       ]
     },
     {
       "id": "REQ-9",
-      "text": "In the post-session reflection flow on the Pre‑Meditation page, restrict mood/state selection so the user can select at most 2 mood states total. The energy level selection must remain single-choice exactly as it is now (no behavioral changes to energy selection). Update any on-screen instruction text for mood selection to clearly indicate the \"up to 2\" limit in English.",
-      "target": "frontend",
+      "text": "Fix the incorrect ritual-save error toast that shows \"This ritual already exists in your collection.\" when the user has no visible rituals, and ensure ritual duplicate detection/handling is consistent between guest (localStorage) and authenticated (backend) modes without cross-contamination.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "Allow for those states, only 2 at most, and 1 for energy level (as it is now) so no changes for that at least."
+          "even I do not have any rituals, I get an notification error that \"This ritual already exists in your collection.\" Perhaps it has something to do with localstorage contradicting online data?"
         ]
       },
       "acceptanceCriteria": [
-        "It is impossible to end up with more than 2 items in the selected moods list via any UI interaction.",
-        "Energy selection remains single-choice and continues to behave exactly as before.",
-        "The mood question text indicates the limit (e.g., \"Select up to 2\").",
-        "Saving the reflection/journal entry persists at most 2 moods (or defaults as currently implemented when none are selected)."
+        "When a user has no rituals in the active mode (guest vs authenticated), saving a new ritual succeeds and shows a success toast (no duplicate toast).",
+        "The duplicate toast \"This ritual already exists in your collection.\" is only shown when an exact duplicate ritual already exists in the active store for the current mode.",
+        "Authenticated ritual save/list/delete operations never read from or write to guest localStorage keys, and guest ritual operations never call backend ritual endpoints.",
+        "If a backend call fails for reasons other than a duplicate, the UI shows a generic failure toast (not the duplicate toast) and logs the underlying error to the console."
       ]
     },
     {
       "id": "REQ-10",
-      "text": "Fix the toast/notification styling for ritual saved/deleted notifications so they are not transparent: toasts must render with a solid, theme-consistent background color and a visible border that matches the app theme in both light and dark modes. Apply this specifically to the notifications shown when a ritual is saved or deleted.",
-      "target": "frontend",
+      "text": "Implement authenticated journal persistence end-to-end so that completed meditation reflections are saved to the backend for logged-in users and reliably appear on the Journal page (including edit/delete/favorite toggle actions).",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "the notification backgrounds are transparent, add a solid bg color with border around it with fitting theme. Notifications I am talking about, are the ones that appear when ritual is saved or deleted."
+          "my meditations, and their feedbacks, do not save in the journal page"
         ]
       },
       "acceptanceCriteria": [
-        "When saving a ritual, the success toast has an opaque (non-transparent) background in both light and dark themes and includes a visible border.",
-        "When deleting a ritual, the corresponding toast also has an opaque background and visible border in both light and dark themes.",
-        "Toast text remains readable and consistent with the existing theme tokens."
+        "When authenticated, saving a post-session reflection persists to the canister and the new entry appears on the Journal page after navigation/refresh.",
+        "When authenticated, editing a journal entry reflection persists to the canister and is reflected after reload.",
+        "When authenticated, deleting a journal entry removes it from the canister and the Journal page after reload.",
+        "When authenticated, toggling favorite persists to the canister and the Journal page reflects the change after reload.",
+        "Guest mode behavior remains localStorage-based and unchanged except for any necessary bug fixes requested in this build."
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "text": "Fix authenticated progress persistence so that total minutes, streak, and monthly minutes update correctly after each session and reliably appear on the Progress page (and in exported backend data).",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "and progress page. Fix that too please"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When authenticated, completing a meditation session increases the backend-stored lifetime total minutes by the session duration (does not overwrite lifetime totals with monthly minutes).",
+        "When authenticated, the Progress page reflects updated total minutes and streak after completing a session and revisiting the Progress page.",
+        "Monthly minutes represent minutes in the last 30 days (or the existing app definition) and do not incorrectly replace lifetime totals.",
+        "Exporting data while authenticated includes the up-to-date backend progress stats and session records."
       ]
     }
   ],
   "constraints": [
-    "Frontend immutable paths must not be edited: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui",
-    "Keep the backend single-actor architecture unchanged; no backend changes are required for these UI/UX updates"
+    "Backend must remain a single Motoko actor with all logic in backend/main.mo.",
+    "Do not edit files under frontend/src/components/ui (compose them instead).",
+    "Do not edit frontend immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx."
   ],
   "nonGoals": [
-    "Do not change the energy level question/options or convert it to multi-select",
-    "Do not add new reflection questions or new mood/energy categories beyond enforcing the selection limit",
-    "Do not introduce new real-time systems or external integrations for notifications"
+    "Do not add new authentication providers beyond Internet Identity.",
+    "Do not add external databases or third-party storage.",
+    "Do not introduce new pages/features unrelated to ritual navigation and persistence bugs."
   ],
   "imageRequirements": {
     "required": [],

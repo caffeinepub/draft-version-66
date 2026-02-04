@@ -419,12 +419,13 @@ export default function PreMeditationPage() {
     } catch (error: any) {
       console.error('Error saving ritual:', error);
       
-      // Check for duplicate error
-      if (error.message === 'DUPLICATE_RITUAL' || error.message?.includes('DuplicateSoundscape')) {
+      // Check for duplicate error (explicit signal from mutation)
+      if (error.message === 'DUPLICATE_RITUAL') {
         toast.error('This ritual already exists in your collection.', {
           className: 'bg-card border-2 border-destructive/50 text-foreground',
         });
       } else {
+        // Generic failure for all other errors
         toast.error('Failed to save ritual. Please try again.', {
           className: 'bg-card border-2 border-destructive/50 text-foreground',
         });
@@ -432,21 +433,27 @@ export default function PreMeditationPage() {
     }
   };
 
-  const handleSaveAndContinue = () => {
+  const handleSaveAndContinue = async () => {
     // Defensively cap moods to 2 at save time
     const moodsToSave = selectedMoods.slice(0, 2);
     
     // Save to journal using backend/local storage with multiple moods and energy state
-    saveJournalEntry.mutate({
-      meditationType: meditationType as MeditationType,
-      duration: BigInt(duration),
-      mood: moodsToSave.length > 0 ? moodsToSave : ['neutral' as MoodState],
-      energy: selectedEnergy || ('balanced' as EnergyState),
-      reflection: personalNotes,
-      isFavorite,
-    });
-
-    navigate({ to: '/dashboard' });
+    try {
+      await saveJournalEntry.mutateAsync({
+        meditationType: meditationType as MeditationType,
+        duration: BigInt(duration),
+        mood: moodsToSave.length > 0 ? moodsToSave : ['neutral' as MoodState],
+        energy: selectedEnergy || ('balanced' as EnergyState),
+        reflection: personalNotes,
+        isFavorite,
+      });
+      navigate({ to: '/dashboard' });
+    } catch (error) {
+      console.error('Error saving journal entry:', error);
+      toast.error('Failed to save reflection. Please try again.', {
+        className: 'bg-card border-2 border-destructive/50 text-foreground',
+      });
+    }
   };
 
   // Render based on view state

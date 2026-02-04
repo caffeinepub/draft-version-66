@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { useInternetIdentity } from './useInternetIdentity';
-import type { ProgressStats, JournalEntry, MeditationType, MoodState, EnergyState, Book, ImportData, Ritual } from '../backend';
+import type { ProgressStats, JournalEntry, MeditationType, MoodState, EnergyState, Book, ImportData, Ritual, AddJournalEntryRequest, UpdateJournalEntryRequest, JournalEntryActionRequest } from '../backend';
+import { Variant_delete_toggleFavorite } from '../backend';
 import { BOOK_RECOMMENDATIONS } from '../lib/bookData';
 import { formatRankDisplay } from '../utils/progressRanks';
 import {
@@ -131,42 +132,53 @@ export function useRecordSession() {
   return useMutation({
     mutationFn: async (minutes: number) => {
       if (isAuthenticated && actor) {
-        // Authenticated: calculate stats and persist to backend
-        const guestProgress = getGuestProgressData();
+        // Authenticated: fetch existing sessions and calculate stats
+        const existingSessions = await actor.getCallerSessionRecords();
         const now = new Date();
         const today = now.toISOString().split('T')[0];
 
-        // Calculate streak
+        // Calculate streak from existing sessions
         let currentStreak = 1;
-        if (guestProgress.lastSessionDate) {
-          const lastDate = new Date(guestProgress.lastSessionDate);
+        if (existingSessions.length > 0) {
+          const sortedSessions = [...existingSessions].sort((a, b) => 
+            Number(b.timestamp) - Number(a.timestamp)
+          );
+          const lastSession = sortedSessions[0];
+          const lastDate = new Date(Number(lastSession.timestamp) / 1000000);
           const lastDateStr = lastDate.toISOString().split('T')[0];
           const yesterday = new Date(now);
           yesterday.setDate(yesterday.getDate() - 1);
           const yesterdayStr = yesterday.toISOString().split('T')[0];
 
           if (lastDateStr === today) {
-            currentStreak = guestProgress.currentStreak;
+            // Already meditated today, maintain streak
+            const existingStats = await actor.getCallerProgressStats();
+            currentStreak = Number(existingStats.currentStreak);
           } else if (lastDateStr === yesterdayStr) {
-            currentStreak = guestProgress.currentStreak + 1;
+            // Meditated yesterday, increment streak
+            const existingStats = await actor.getCallerProgressStats();
+            currentStreak = Number(existingStats.currentStreak) + 1;
           }
         }
 
-        const totalMinutes = guestProgress.totalMinutes + minutes;
+        // Calculate total minutes (add to existing)
+        const existingStats = await actor.getCallerProgressStats();
+        const totalMinutes = Number(existingStats.totalMinutes) + minutes;
 
-        // Calculate monthly minutes
+        // Calculate monthly minutes from all sessions in last 30 days
         const thirtyDaysAgo = new Date(now);
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const monthlyMinutes = [...guestProgress.sessions, { minutes, timestamp: now.toISOString() }]
-          .filter((session) => new Date(session.timestamp) >= thirtyDaysAgo)
-          .reduce((sum, session) => sum + session.minutes, 0);
+        const allSessions = [...existingSessions, { minutes: BigInt(minutes), timestamp: BigInt(Date.now() * 1000000) }];
+        const monthlyMinutes = allSessions
+          .filter((session) => new Date(Number(session.timestamp) / 1000000) >= thirtyDaysAgo)
+          .reduce((sum, session) => sum + Number(session.minutes), 0);
 
         await actor.recordMeditationSession(
           {
             minutes: BigInt(minutes),
             timestamp: BigInt(Date.now() * 1000000),
           },
-          BigInt(monthlyMinutes),
+          BigInt(totalMinutes),
           BigInt(currentStreak)
         );
       } else {
@@ -175,8 +187,10 @@ export function useRecordSession() {
       }
     },
     onSuccess: () => {
-      // Invalidate progress stats to trigger refresh
+      // Invalidate progress stats and session records to trigger refresh
       queryClient.invalidateQueries({ queryKey: ['progressStats', principalId || 'guest'] });
+      queryClient.invalidateQueries({ queryKey: ['sessionRecords', principalId || 'guest'] });
+      queryClient.invalidateQueries({ queryKey: ['exportData', principalId || 'guest'] });
     },
   });
 }
@@ -292,22 +306,15 @@ export function useSaveJournalEntry() {
   return useMutation({
     mutationFn: async (entry: Omit<JournalEntry, 'id' | 'user' | 'timestamp'>) => {
       if (isAuthenticated && actor) {
-        // Authenticated: save to backend (backend will handle ID generation)
-        // For now, we'll use a workaround since backend doesn't have a direct save method
-        console.warn('Backend journal save not yet implemented, using guest storage');
-        const entries = getGuestJournalEntries();
-        const newEntry = {
-          id: entries.length.toString(),
+        // Authenticated: save to backend using addJournalEntry
+        const request: AddJournalEntryRequest = {
           meditationType: entry.meditationType,
-          duration: entry.duration.toString(),
+          duration: entry.duration,
           mood: entry.mood,
           energy: entry.energy,
           reflection: entry.reflection,
-          timestamp: Date.now().toString() + '000000',
-          isFavorite: entry.isFavorite,
         };
-        entries.push(newEntry);
-        setGuestJournalEntries(entries);
+        await actor.addJournalEntry(request);
       } else {
         // Guest: save to localStorage
         const entries = getGuestJournalEntries();
@@ -328,6 +335,9 @@ export function useSaveJournalEntry() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries', principalId || 'guest'] });
     },
+    onError: (error) => {
+      console.error('Error saving journal entry:', error);
+    },
   });
 }
 
@@ -341,14 +351,16 @@ export function useUpdateJournalEntry() {
   return useMutation({
     mutationFn: async ({ id, entry }: { id: bigint; entry: JournalEntry }) => {
       if (isAuthenticated && actor) {
-        // Authenticated: update in backend (not yet implemented)
-        console.warn('Backend journal update not yet implemented, using guest storage');
-        const entries = getGuestJournalEntries();
-        const index = entries.findIndex((e: any) => e.id === id.toString());
-        if (index !== -1) {
-          entries[index] = serializeJournalEntryUnified(entry);
-          setGuestJournalEntries(entries);
-        }
+        // Authenticated: update in backend using updateJournalEntry
+        const request: UpdateJournalEntryRequest = {
+          id,
+          meditationType: entry.meditationType,
+          duration: entry.duration,
+          mood: entry.mood,
+          energy: entry.energy,
+          reflection: entry.reflection,
+        };
+        await actor.updateJournalEntry(request);
       } else {
         // Guest: update in localStorage
         const entries = getGuestJournalEntries();
@@ -361,6 +373,9 @@ export function useUpdateJournalEntry() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries', principalId || 'guest'] });
+    },
+    onError: (error) => {
+      console.error('Error updating journal entry:', error);
     },
   });
 }
@@ -375,11 +390,15 @@ export function useDeleteJournalEntry() {
   return useMutation({
     mutationFn: async (id: bigint) => {
       if (isAuthenticated && actor) {
-        // Authenticated: delete from backend (not yet implemented)
-        console.warn('Backend journal delete not yet implemented, using guest storage');
-        const entries = getGuestJournalEntries();
-        const filtered = entries.filter((e: any) => e.id !== id.toString());
-        setGuestJournalEntries(filtered);
+        // Authenticated: delete from backend using performJournalEntryAction
+        const request: JournalEntryActionRequest = {
+          entryIdentifier: {
+            user: identity!.getPrincipal(),
+            id,
+          },
+          action: Variant_delete_toggleFavorite.delete_,
+        };
+        await actor.performJournalEntryAction(request);
       } else {
         // Guest: delete from localStorage
         const entries = getGuestJournalEntries();
@@ -389,6 +408,9 @@ export function useDeleteJournalEntry() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries', principalId || 'guest'] });
+    },
+    onError: (error) => {
+      console.error('Error deleting journal entry:', error);
     },
   });
 }
@@ -403,14 +425,15 @@ export function useToggleFavoriteJournal() {
   return useMutation({
     mutationFn: async (id: bigint) => {
       if (isAuthenticated && actor) {
-        // Authenticated: toggle in backend (not yet implemented)
-        console.warn('Backend journal toggle favorite not yet implemented, using guest storage');
-        const entries = getGuestJournalEntries();
-        const index = entries.findIndex((e: any) => e.id === id.toString());
-        if (index !== -1) {
-          entries[index].isFavorite = !entries[index].isFavorite;
-          setGuestJournalEntries(entries);
-        }
+        // Authenticated: toggle in backend using performJournalEntryAction
+        const request: JournalEntryActionRequest = {
+          entryIdentifier: {
+            user: identity!.getPrincipal(),
+            id,
+          },
+          action: Variant_delete_toggleFavorite.toggleFavorite,
+        };
+        await actor.performJournalEntryAction(request);
       } else {
         // Guest: toggle in localStorage
         const entries = getGuestJournalEntries();
@@ -423,6 +446,9 @@ export function useToggleFavoriteJournal() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries', principalId || 'guest'] });
+    },
+    onError: (error) => {
+      console.error('Error toggling favorite:', error);
     },
   });
 }
@@ -637,7 +663,7 @@ export function useRituals() {
     queryKey: ['rituals', principalId || 'guest'],
     queryFn: async () => {
       if (isAuthenticated && actor) {
-        // Authenticated: fetch from backend
+        // Authenticated: fetch from backend ONLY (never read guest localStorage)
         try {
           const backendRituals = await actor.listCallerRituals();
           return backendRituals.map((r) => ({
@@ -653,7 +679,7 @@ export function useRituals() {
           return [];
         }
       } else {
-        // Guest: read from localStorage
+        // Guest: read from localStorage ONLY (never call backend)
         const guestRituals = getGuestRituals();
         return guestRituals.map((r) => ({
           ...r,
@@ -679,7 +705,7 @@ export function useSaveRitual() {
   return useMutation({
     mutationFn: async (ritual: Omit<LocalRitual, 'timestamp'>) => {
       if (isAuthenticated && actor) {
-        // Authenticated: save to backend (backend handles duplicate check)
+        // Authenticated: save to backend (backend handles duplicate check and throws trap)
         const backendRitual: Ritual = {
           meditationType: ritual.meditationType as MeditationType,
           duration: BigInt(ritual.duration),
@@ -687,7 +713,17 @@ export function useSaveRitual() {
           ambientSoundVolume: BigInt(ritual.ambientSoundVolume),
           timestamp: BigInt(Date.now() * 1000000),
         };
-        await actor.saveRitual(backendRitual);
+        
+        try {
+          await actor.saveRitual(backendRitual);
+        } catch (error: any) {
+          // Backend traps with "DuplicateSoundscape" message
+          if (error.message && error.message.includes('DuplicateSoundscape')) {
+            throw new Error('DUPLICATE_RITUAL');
+          }
+          // Re-throw other errors for generic handling
+          throw error;
+        }
       } else {
         // Guest: check for duplicates in localStorage before saving
         const guestRituals = getGuestRituals();
@@ -723,7 +759,7 @@ export function useDeleteRitual() {
   return useMutation({
     mutationFn: async (ritual: LocalRitual) => {
       if (isAuthenticated && actor) {
-        // Authenticated: delete from backend
+        // Authenticated: delete from backend ONLY
         const backendRitual: Ritual = {
           meditationType: ritual.meditationType as MeditationType,
           duration: BigInt(ritual.duration),
@@ -733,7 +769,7 @@ export function useDeleteRitual() {
         };
         await actor.deleteRitual(backendRitual);
       } else {
-        // Guest: delete from localStorage
+        // Guest: delete from localStorage ONLY
         const guestRituals = getGuestRituals();
         const filteredRituals = guestRituals.filter((existing) => !areRitualsEqual(existing, ritual));
         setGuestRituals(filteredRituals);

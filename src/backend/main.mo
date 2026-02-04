@@ -1,19 +1,21 @@
 import Nat "mo:core/Nat";
 import Map "mo:core/Map";
 import List "mo:core/List";
+import Array "mo:core/Array";
 import Int "mo:core/Int";
 import Time "mo:core/Time";
 import Runtime "mo:core/Runtime";
-import Array "mo:core/Array";
 import Iter "mo:core/Iter";
 import Order "mo:core/Order";
 import Principal "mo:core/Principal";
-
 import AccessControl "authorization/access-control";
+import Migration "migration";
 import MixinAuthorization "authorization/MixinAuthorization";
 import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
 
+// Enable data migration
+(with migration = Migration.run)
 actor {
   type Book = {
     title : Text;
@@ -95,6 +97,13 @@ actor {
     ambientSound : Text;
     ambientSoundVolume : Nat;
     timestamp : Int;
+  };
+
+  type ExportData = {
+    journalEntries : [JournalEntry];
+    sessionRecords : [MeditationSession];
+    progressStats : ProgressStats;
+    userProfile : ?UserProfile;
   };
 
   let books = List.fromArray<Book>([
@@ -307,31 +316,227 @@ actor {
     };
   };
 
-  type ExportData = {
-    journalEntries : [JournalEntry];
-    sessionRecords : [MeditationSession];
-    progressStats : ProgressStats;
-    userProfile : ?UserProfile;
+  // JOURNAL (New)
+
+  type AddJournalEntryRequest = {
+    meditationType : MeditationType;
+    duration : Nat;
+    mood : [MoodState];
+    energy : EnergyState;
+    reflection : Text;
   };
 
-  // Fetch current user's journal entries (for export or persistent storage)
+  type UpdateJournalEntryRequest = {
+    id : Nat;
+    meditationType : MeditationType;
+    duration : Nat;
+    mood : [MoodState];
+    energy : EnergyState;
+    reflection : Text;
+  };
+
+  type JournalEntryIdentifier = {
+    user : Principal;
+    id : Nat;
+  };
+
+  type JournalEntryActionRequest = {
+    entryIdentifier : JournalEntryIdentifier;
+    action : {
+      #delete;
+      #toggleFavorite;
+    };
+  };
+
+  public shared ({ caller }) func addJournalEntry(request : AddJournalEntryRequest) : async JournalEntry {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
+
+    let newEntry = {
+      id = nextEntryId;
+      user = caller;
+      meditationType = request.meditationType;
+      duration = request.duration;
+      mood = request.mood;
+      energy = request.energy;
+      reflection = request.reflection;
+      timestamp = Int.abs(Time.now());
+      isFavorite = false;
+    };
+    nextEntryId += 1;
+
+    let currentEntries = switch (journalEntries.get(caller)) {
+      case (null) { List.empty<JournalEntry>() };
+      case (?existing) { existing };
+    };
+    currentEntries.add(newEntry);
+    journalEntries.add(caller, currentEntries);
+
+    newEntry;
+  };
+
+  public shared ({ caller }) func updateJournalEntry(request : UpdateJournalEntryRequest) : async JournalEntry {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
+
+    let entries = switch (journalEntries.get(caller)) {
+      case (null) {
+        Runtime.trap("NotFound: No journal entries found for user.");
+      };
+      case (?existing) { existing };
+    };
+
+    var entryFound = false;
+    let updatedEntries = entries.map<JournalEntry, JournalEntry>(
+      func(entry) {
+        if (entry.id == request.id) {
+          entryFound := true;
+          {
+            entry with
+            meditationType = request.meditationType;
+            duration = request.duration;
+            mood = request.mood;
+            energy = request.energy;
+            reflection = request.reflection;
+            timestamp = Time.now();
+          };
+        } else {
+          entry;
+        };
+      }
+    );
+
+    if (not entryFound) {
+      Runtime.trap("NotFound: Journal entry with this ID does not exist.");
+    };
+
+    journalEntries.add(caller, updatedEntries);
+
+    updatedEntries.filter(
+      func(entry) { entry.id == request.id }
+    ).toArray()[0];
+  };
+
+  public shared ({ caller }) func performJournalEntryAction(request : JournalEntryActionRequest) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
+    let user = request.entryIdentifier.user;
+    let entryId = request.entryIdentifier.id;
+
+    let entries = switch (journalEntries.get(user)) {
+      case (null) {
+        Runtime.trap("NotFound: No journal entries found for user.");
+      };
+      case (?existing) { existing };
+    };
+
+    switch (request.action) {
+      case (#delete) {
+        let sizeBefore = entries.size();
+        let filteredEntries = entries.filter(
+          func(entry) { entry.id != entryId }
+        );
+
+        if (filteredEntries.size() == entries.size()) {
+          Runtime.trap("NotFound: Journal entry with this ID does not exist.");
+        };
+
+        journalEntries.add(user, filteredEntries);
+
+        if (filteredEntries.size() < sizeBefore) {
+          return;
+        } else {
+          Runtime.trap("NotFound: No entry was deleted. Size difference expected.");
+        };
+      };
+      case (#toggleFavorite) {
+        var entryFound = false;
+        let updatedEntries = entries.map<JournalEntry, JournalEntry>(
+          func(entry) {
+            if (entry.id == entryId) {
+              entryFound := true;
+              { entry with isFavorite = not entry.isFavorite };
+            } else {
+              entry;
+            };
+          }
+        );
+
+        if (not entryFound) {
+          Runtime.trap("NotFound: Journal entry with this ID does not exist.");
+        };
+
+        journalEntries.add(user, updatedEntries);
+      };
+    };
+  };
+
   public query ({ caller }) func getCallerJournalEntries() : async [JournalEntry] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: User role required");
     };
-
     switch (journalEntries.get(caller)) {
       case (null) { [] };
-      case (?list) { list.toArray() };
+      case (?entries) { entries.toArray() };
     };
   };
 
-  // Fetch current user's progress data (for persistent profile)
+  public query ({ caller }) func getAllJournalEntries(user : Principal) : async [JournalEntry] {
+    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Cannot fetch other user's entries");
+    };
+    switch (journalEntries.get(user)) {
+      case (null) { [] };
+      case (?entries) { entries.toArray() };
+    };
+  };
+
+  public query ({ caller }) func getEntryById(entryId : Nat) : async ?JournalEntry {
+    for ((user, entries) in journalEntries.entries()) {
+      let foundEntry = entries.filter(
+        func(entry) { entry.id == entryId }
+      );
+      if (not foundEntry.isEmpty()) {
+        return ?foundEntry.toArray()[0];
+      };
+    };
+    null;
+  };
+
+  public query ({ caller }) func getCallerFavoriteEntries() : async [JournalEntry] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
+    switch (journalEntries.get(caller)) {
+      case (null) { [] };
+      case (?entries) {
+        let filtered = entries.filter(
+          func(entry) { entry.isFavorite }
+        );
+        filtered.toArray();
+      };
+    };
+  };
+
+  public shared ({ caller }) func synchronizeJournalEntries(entries : [JournalEntry]) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
+    nextEntryId += entries.size();
+
+    let validEntries = List.fromArray<JournalEntry>(entries.filter(
+      func(entry) { entry.user == caller }
+    ));
+    journalEntries.add(caller, validEntries);
+  };
+
   public query ({ caller }) func getCallerProgressStats() : async ProgressStats {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: User role required");
     };
-
     switch (progressCache.get(caller)) {
       case (null) {
         {
@@ -345,12 +550,10 @@ actor {
     };
   };
 
-  // Fetch current user's session records (for export or persistent storage)
   public query ({ caller }) func getCallerSessionRecords() : async [MeditationSession] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: User role required");
     };
-
     switch (sessionRecords.get(caller)) {
       case (null) { [] };
       case (?list) { list.toArray() };

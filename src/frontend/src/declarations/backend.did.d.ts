@@ -10,6 +10,13 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface AddJournalEntryRequest {
+  'duration' : bigint,
+  'mood' : Array<MoodState>,
+  'reflection' : string,
+  'meditationType' : MeditationType,
+  'energy' : EnergyState,
+}
 export interface Book {
   'title' : string,
   'goodreadsLink' : string,
@@ -46,6 +53,12 @@ export interface JournalEntry {
   'meditationType' : MeditationType,
   'energy' : EnergyState,
 }
+export interface JournalEntryActionRequest {
+  'action' : { 'delete' : null } |
+    { 'toggleFavorite' : null },
+  'entryIdentifier' : JournalEntryIdentifier,
+}
+export interface JournalEntryIdentifier { 'id' : bigint, 'user' : Principal }
 export interface MeditationSession { 'minutes' : bigint, 'timestamp' : bigint }
 export type MeditationType = { 'ifs' : null } |
   { 'metta' : null } |
@@ -68,6 +81,14 @@ export interface Ritual {
   'timestamp' : bigint,
   'ambientSound' : string,
   'meditationType' : MeditationType,
+}
+export interface UpdateJournalEntryRequest {
+  'id' : bigint,
+  'duration' : bigint,
+  'mood' : Array<MoodState>,
+  'reflection' : string,
+  'meditationType' : MeditationType,
+  'energy' : EnergyState,
 }
 export interface UserProfile {
   'name' : string,
@@ -105,9 +126,12 @@ export interface _SERVICE {
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'addJournalEntry' : ActorMethod<[AddJournalEntryRequest], JournalEntry>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'deleteRitual' : ActorMethod<[Ritual], undefined>,
+  'getAllJournalEntries' : ActorMethod<[Principal], Array<JournalEntry>>,
   'getBooks' : ActorMethod<[], Array<Book>>,
+  'getCallerFavoriteEntries' : ActorMethod<[], Array<JournalEntry>>,
   'getCallerJournalEntries' : ActorMethod<[], Array<JournalEntry>>,
   'getCallerProgressStats' : ActorMethod<[], ProgressStats>,
   'getCallerSessionRecords' : ActorMethod<[], Array<MeditationSession>>,
@@ -115,16 +139,23 @@ export interface _SERVICE {
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getCurrentUserExportData' : ActorMethod<[], ExportData>,
   'getDailyQuotes' : ActorMethod<[], Array<string>>,
+  'getEntryById' : ActorMethod<[bigint], [] | [JournalEntry]>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'importData' : ActorMethod<[ImportData, boolean], undefined>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'listCallerRituals' : ActorMethod<[], Array<Ritual>>,
+  'performJournalEntryAction' : ActorMethod<
+    [JournalEntryActionRequest],
+    undefined
+  >,
   'recordMeditationSession' : ActorMethod<
     [MeditationSession, bigint, bigint],
     ProgressStats
   >,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'saveRitual' : ActorMethod<[Ritual], undefined>,
+  'synchronizeJournalEntries' : ActorMethod<[Array<JournalEntry>], undefined>,
+  'updateJournalEntry' : ActorMethod<[UpdateJournalEntryRequest], JournalEntry>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

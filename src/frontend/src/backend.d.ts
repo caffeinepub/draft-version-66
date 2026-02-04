@@ -34,9 +34,25 @@ export interface ProgressStats {
     currentStreak: bigint;
     totalMinutes: bigint;
 }
+export interface JournalEntryActionRequest {
+    action: Variant_delete_toggleFavorite;
+    entryIdentifier: JournalEntryIdentifier;
+}
+export interface JournalEntryIdentifier {
+    id: bigint;
+    user: Principal;
+}
 export interface MeditationSession {
     minutes: bigint;
     timestamp: bigint;
+}
+export interface UpdateJournalEntryRequest {
+    id: bigint;
+    duration: bigint;
+    mood: Array<MoodState>;
+    reflection: string;
+    meditationType: MeditationType;
+    energy: EnergyState;
 }
 export interface JournalEntry {
     id: bigint;
@@ -45,6 +61,13 @@ export interface JournalEntry {
     user: Principal;
     isFavorite: boolean;
     timestamp: bigint;
+    reflection: string;
+    meditationType: MeditationType;
+    energy: EnergyState;
+}
+export interface AddJournalEntryRequest {
+    duration: bigint;
+    mood: Array<MoodState>;
     reflection: string;
     meditationType: MeditationType;
     energy: EnergyState;
@@ -91,10 +114,17 @@ export enum UserRole {
     user = "user",
     guest = "guest"
 }
+export enum Variant_delete_toggleFavorite {
+    delete_ = "delete",
+    toggleFavorite = "toggleFavorite"
+}
 export interface backendInterface {
+    addJournalEntry(request: AddJournalEntryRequest): Promise<JournalEntry>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     deleteRitual(ritualToDelete: Ritual): Promise<void>;
+    getAllJournalEntries(user: Principal): Promise<Array<JournalEntry>>;
     getBooks(): Promise<Array<Book>>;
+    getCallerFavoriteEntries(): Promise<Array<JournalEntry>>;
     getCallerJournalEntries(): Promise<Array<JournalEntry>>;
     getCallerProgressStats(): Promise<ProgressStats>;
     getCallerSessionRecords(): Promise<Array<MeditationSession>>;
@@ -102,11 +132,15 @@ export interface backendInterface {
     getCallerUserRole(): Promise<UserRole>;
     getCurrentUserExportData(): Promise<ExportData>;
     getDailyQuotes(): Promise<Array<string>>;
+    getEntryById(entryId: bigint): Promise<JournalEntry | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     importData(importData: ImportData, overwrite: boolean): Promise<void>;
     isCallerAdmin(): Promise<boolean>;
     listCallerRituals(): Promise<Array<Ritual>>;
+    performJournalEntryAction(request: JournalEntryActionRequest): Promise<void>;
     recordMeditationSession(session: MeditationSession, _monthlyStats: bigint, _currentStreak: bigint): Promise<ProgressStats>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     saveRitual(ritual: Ritual): Promise<void>;
+    synchronizeJournalEntries(entries: Array<JournalEntry>): Promise<void>;
+    updateJournalEntry(request: UpdateJournalEntryRequest): Promise<JournalEntry>;
 }

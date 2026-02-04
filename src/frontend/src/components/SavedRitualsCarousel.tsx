@@ -26,9 +26,16 @@ interface SavedRitualsCarouselProps {
   onStart: (ritual: Ritual) => void;
   onDelete: (ritual: Ritual) => void;
   isDeleting?: boolean;
+  showArrows?: boolean;
 }
 
-export default function SavedRitualsCarousel({ rituals, onStart, onDelete, isDeleting = false }: SavedRitualsCarouselProps) {
+export default function SavedRitualsCarousel({ 
+  rituals, 
+  onStart, 
+  onDelete, 
+  isDeleting = false,
+  showArrows = true 
+}: SavedRitualsCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [ritualToDelete, setRitualToDelete] = useState<Ritual | null>(null);
@@ -160,6 +167,7 @@ export default function SavedRitualsCarousel({ rituals, onStart, onDelete, isDel
 
   // Multiple rituals: carousel with navigation
   const currentRitual = rituals[activeIndex];
+  const showNavigationArrows = showArrows && rituals.length >= 2;
 
   return (
     <>
@@ -208,29 +216,58 @@ export default function SavedRitualsCarousel({ rituals, onStart, onDelete, isDel
           </div>
         </div>
 
-        {/* Desktop Arrow Controls */}
-        <div className="hidden md:flex absolute top-1/2 -translate-y-1/2 left-0 right-0 justify-between pointer-events-none">
-          <Button
-            onClick={handlePrevious}
-            variant="ghost"
-            size="icon"
-            className="pointer-events-auto -ml-12 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card hover:scale-110 transition-all duration-300"
-            aria-label="Previous ritual"
-            disabled={isDeleting}
-          >
-            <ChevronLeft className="w-5 h-5 text-accent-cyan" />
-          </Button>
-          <Button
-            onClick={handleNext}
-            variant="ghost"
-            size="icon"
-            className="pointer-events-auto -mr-12 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card hover:scale-110 transition-all duration-300"
-            aria-label="Next ritual"
-            disabled={isDeleting}
-          >
-            <ChevronRight className="w-5 h-5 text-accent-cyan" />
-          </Button>
-        </div>
+        {/* Arrow Controls - shown on all screen sizes when enabled */}
+        {showNavigationArrows && (
+          <>
+            {/* Mobile Arrow Controls */}
+            <div className="flex md:hidden absolute top-1/2 -translate-y-1/2 left-0 right-0 justify-between pointer-events-none px-2">
+              <Button
+                onClick={handlePrevious}
+                variant="ghost"
+                size="icon"
+                className="pointer-events-auto rounded-full bg-card/90 backdrop-blur-sm border border-border/50 hover:bg-card hover:scale-110 transition-all duration-300 w-10 h-10"
+                aria-label="Previous ritual"
+                disabled={isDeleting}
+              >
+                <ChevronLeft className="w-5 h-5 text-accent-cyan" />
+              </Button>
+              <Button
+                onClick={handleNext}
+                variant="ghost"
+                size="icon"
+                className="pointer-events-auto rounded-full bg-card/90 backdrop-blur-sm border border-border/50 hover:bg-card hover:scale-110 transition-all duration-300 w-10 h-10"
+                aria-label="Next ritual"
+                disabled={isDeleting}
+              >
+                <ChevronRight className="w-5 h-5 text-accent-cyan" />
+              </Button>
+            </div>
+
+            {/* Desktop Arrow Controls */}
+            <div className="hidden md:flex absolute top-1/2 -translate-y-1/2 left-0 right-0 justify-between pointer-events-none">
+              <Button
+                onClick={handlePrevious}
+                variant="ghost"
+                size="icon"
+                className="pointer-events-auto -ml-12 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card hover:scale-110 transition-all duration-300"
+                aria-label="Previous ritual"
+                disabled={isDeleting}
+              >
+                <ChevronLeft className="w-5 h-5 text-accent-cyan" />
+              </Button>
+              <Button
+                onClick={handleNext}
+                variant="ghost"
+                size="icon"
+                className="pointer-events-auto -mr-12 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card hover:scale-110 transition-all duration-300"
+                aria-label="Next ritual"
+                disabled={isDeleting}
+              >
+                <ChevronRight className="w-5 h-5 text-accent-cyan" />
+              </Button>
+            </div>
+          </>
+        )}
 
         {/* Dot Indicators */}
         <div className="flex justify-center gap-2 mt-4">

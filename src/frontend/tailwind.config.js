@@ -16,24 +16,23 @@ export default {
         },
         extend: {
             colors: {
-                border: 'oklch(var(--border))',
-                input: 'oklch(var(--input))',
+                border: 'oklch(var(--border) / <alpha-value>)',
+                input: 'oklch(var(--input) / <alpha-value>)',
                 ring: 'oklch(var(--ring) / <alpha-value>)',
-                background: 'oklch(var(--background))',
-                foreground: 'oklch(var(--foreground))',
+                background: 'oklch(var(--background) / <alpha-value>)',
+                foreground: 'oklch(var(--foreground) / <alpha-value>)',
                 primary: {
                     DEFAULT: 'oklch(var(--primary) / <alpha-value>)',
-                    foreground: 'oklch(var(--primary-foreground))',
-                    dark: 'oklch(var(--primary-dark))',
-                    gray: 'oklch(var(--primary-gray))'
+                    foreground: 'oklch(var(--primary-foreground) / <alpha-value>)',
+                    dark: 'oklch(var(--primary-dark) / <alpha-value>)'
                 },
                 secondary: {
                     DEFAULT: 'oklch(var(--secondary) / <alpha-value>)',
-                    foreground: 'oklch(var(--secondary-foreground))'
+                    foreground: 'oklch(var(--secondary-foreground) / <alpha-value>)'
                 },
                 destructive: {
                     DEFAULT: 'oklch(var(--destructive) / <alpha-value>)',
-                    foreground: 'oklch(var(--destructive-foreground))'
+                    foreground: 'oklch(var(--destructive-foreground) / <alpha-value>)'
                 },
                 muted: {
                     DEFAULT: 'oklch(var(--muted) / <alpha-value>)',
@@ -41,38 +40,26 @@ export default {
                 },
                 accent: {
                     DEFAULT: 'oklch(var(--accent) / <alpha-value>)',
-                    foreground: 'oklch(var(--accent-foreground))',
-                    cyan: 'oklch(var(--accent-cyan))',
-                    'cyan-tinted': 'oklch(var(--accent-cyan-tinted))',
-                    lavender: 'oklch(var(--accent-lavender))',
-                    green: 'oklch(var(--accent-green))'
+                    foreground: 'oklch(var(--accent-foreground) / <alpha-value>)',
+                    cyan: 'oklch(var(--accent-cyan) / <alpha-value>)',
+                    'cyan-tinted': 'oklch(var(--accent-cyan-tinted) / <alpha-value>)'
                 },
                 popover: {
-                    DEFAULT: 'oklch(var(--popover))',
-                    foreground: 'oklch(var(--popover-foreground))'
+                    DEFAULT: 'oklch(var(--popover) / <alpha-value>)',
+                    foreground: 'oklch(var(--popover-foreground) / <alpha-value>)'
                 },
                 card: {
-                    DEFAULT: 'oklch(var(--card))',
-                    foreground: 'oklch(var(--card-foreground))'
+                    DEFAULT: 'oklch(var(--card) / <alpha-value>)',
+                    foreground: 'oklch(var(--card-foreground) / <alpha-value>)'
                 },
                 chart: {
-                    1: 'oklch(var(--chart-1))',
-                    2: 'oklch(var(--chart-2))',
-                    3: 'oklch(var(--chart-3))',
-                    4: 'oklch(var(--chart-4))',
-                    5: 'oklch(var(--chart-5))'
+                    1: 'oklch(var(--chart-1) / <alpha-value>)',
+                    2: 'oklch(var(--chart-2) / <alpha-value>)',
+                    3: 'oklch(var(--chart-3) / <alpha-value>)',
+                    4: 'oklch(var(--chart-4) / <alpha-value>)',
+                    5: 'oklch(var(--chart-5) / <alpha-value>)'
                 },
-                sidebar: {
-                    DEFAULT: 'oklch(var(--sidebar))',
-                    foreground: 'oklch(var(--sidebar-foreground))',
-                    primary: 'oklch(var(--sidebar-primary))',
-                    'primary-foreground': 'oklch(var(--sidebar-primary-foreground))',
-                    accent: 'oklch(var(--sidebar-accent))',
-                    'accent-foreground': 'oklch(var(--sidebar-accent-foreground))',
-                    border: 'oklch(var(--sidebar-border))',
-                    ring: 'oklch(var(--sidebar-ring))'
-                },
-                'description-gray': 'oklch(var(--description-gray))'
+                'description-gray': 'oklch(var(--description-gray) / <alpha-value>)'
             },
             borderRadius: {
                 lg: 'var(--radius)',
@@ -81,8 +68,8 @@ export default {
             },
             boxShadow: {
                 xs: '0 1px 2px 0 rgba(0,0,0,0.05)',
-                glow: '0 4px 20px oklch(var(--accent-cyan) / 0.3), 0 0 40px oklch(var(--accent-lavender) / 0.2)',
-                'glow-lg': '0 8px 30px oklch(var(--accent-cyan) / 0.4), 0 0 60px oklch(var(--accent-lavender) / 0.3)'
+                glow: '0 4px 20px oklch(var(--accent-cyan) / 0.3), 0 0 40px oklch(var(--accent-cyan-tinted) / 0.2)',
+                'glow-lg': '0 8px 30px oklch(var(--accent-cyan) / 0.4), 0 0 60px oklch(var(--accent-cyan-tinted) / 0.3)'
             },
             keyframes: {
                 'accordion-down': {

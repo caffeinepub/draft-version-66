@@ -1,12 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Improve ritual navigation usability and fix authenticated/guest data persistence issues so rituals, journal entries, and progress reliably save and display.
+**Goal:** Revert the app’s UI theming back to Draft 94 by undoing Draft 95 theme-token changes so colors, backgrounds, and text are consistent across the application.
 
 **Planned changes:**
-- Add visible left/right ritual navigation arrow controls that work across screen sizes, and add a user-facing toggle to show/hide these arrows while keeping swipe navigation available.
-- Fix ritual duplicate detection/toast so the “already exists” message only appears when a true duplicate exists in the active mode (guest localStorage vs authenticated backend), with strict separation between guest and authenticated storage/requests.
-- Implement authenticated journal persistence end-to-end so post-session reflections reliably save to the backend and journal edit/delete/favorite actions persist and appear after refresh.
-- Fix authenticated progress persistence so total minutes, streak, and monthly minutes update correctly after each session and reliably display on the Progress page and in exported data.
+- Restore Draft 94 theme token values for light and dark modes (background/foreground, card/popover, border/input/ring, primary/secondary/muted/accent/destructive) to eliminate mismatched surfaces and inconsistent text colors.
+- Ensure there is a single authoritative global CSS theme token source used by Tailwind, and remove/stop importing any duplicate or unused token definitions that could conflict at runtime.
+- Audit core pages and major surfaces to remove hardcoded color overrides and ensure they use shared theme utilities/tokens (e.g., bg-background, text-foreground, bg-card, text-muted-foreground) for consistent rendering across pages.
 
-**User-visible outcome:** Users can navigate between saved rituals with optional arrow controls (and still swipe), save rituals without incorrect duplicate errors, and—when logged in—see journal reflections and progress stats persist correctly across refreshes (while guest behavior remains localStorage-based).
+**User-visible outcome:** In both light and dark mode, pages and components (Landing, Dashboard, Pre-meditation, Progress, Journal, Books) display consistent backgrounds and readable, matching text colors without mixed or drifting theme states.

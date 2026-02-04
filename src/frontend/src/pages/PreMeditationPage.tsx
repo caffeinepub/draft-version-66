@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { Moon, Sun, ArrowLeft, Play, Pause, Heart, Smile, Meh, Frown, Zap, Battery, BatteryCharging, Sparkles } from 'lucide-react';
+import { Moon, Sun, ArrowLeft, Play, Pause, Heart, Smile, Meh, Frown, Zap, Battery, BatteryCharging, Sparkles, Loader2 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -424,6 +424,10 @@ export default function PreMeditationPage() {
         toast.error('This ritual already exists in your collection.', {
           className: 'bg-card border-2 border-destructive/50 text-foreground',
         });
+      } else if (error.message === 'RITUAL_LIMIT') {
+        toast.error('You can only save up to 5 rituals.', {
+          className: 'bg-card border-2 border-destructive/50 text-foreground',
+        });
       } else {
         // Generic failure for all other errors
         toast.error('Failed to save ritual. Please try again.', {
@@ -784,8 +788,17 @@ export default function PreMeditationPage() {
                     disabled={saveRitual.isPending}
                     className="w-full sm:w-auto border-2 border-accent-cyan/50 hover:border-accent-cyan hover:bg-accent-cyan/10 text-foreground font-semibold rounded-full transition-all duration-300"
                   >
-                    <Sparkles className="w-5 h-5 mr-2 text-accent-cyan" />
-                    Save this as my ritual
+                    {saveRitual.isPending ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 text-accent-cyan animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-5 h-5 mr-2 text-accent-cyan" />
+                        Save this as my ritual
+                      </>
+                    )}
                   </Button>
 
                   <Button
@@ -794,7 +807,14 @@ export default function PreMeditationPage() {
                     className="w-full sm:w-auto bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark font-semibold px-8 py-6 text-lg rounded-full shadow-glow hover:shadow-glow-lg transition-all duration-300"
                     disabled={saveJournalEntry.isPending}
                   >
-                    Save & Continue
+                    {saveJournalEntry.isPending ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      'Save & Continue'
+                    )}
                   </Button>
                 </div>
               </div>

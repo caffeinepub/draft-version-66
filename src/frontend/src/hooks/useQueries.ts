@@ -694,7 +694,7 @@ export function useRituals() {
   });
 }
 
-// Hook to save a ritual - branches by auth state with duplicate detection
+// Hook to save a ritual - branches by auth state with duplicate detection and 5-ritual limit
 export function useSaveRitual() {
   const { actor } = useActor();
   const { identity } = useInternetIdentity();
@@ -705,7 +705,7 @@ export function useSaveRitual() {
   return useMutation({
     mutationFn: async (ritual: Omit<LocalRitual, 'timestamp'>) => {
       if (isAuthenticated && actor) {
-        // Authenticated: save to backend (backend handles duplicate check and throws trap)
+        // Authenticated: save to backend (backend handles duplicate check and limit, throws trap)
         const backendRitual: Ritual = {
           meditationType: ritual.meditationType as MeditationType,
           duration: BigInt(ritual.duration),
@@ -717,25 +717,34 @@ export function useSaveRitual() {
         try {
           await actor.saveRitual(backendRitual);
         } catch (error: any) {
-          // Backend traps with "DuplicateSoundscape" message
+          // Backend traps with "DuplicateSoundscape" or "RitualLimitExceeded" message
           if (error.message && error.message.includes('DuplicateSoundscape')) {
             throw new Error('DUPLICATE_RITUAL');
+          }
+          if (error.message && error.message.includes('RitualLimitExceeded')) {
+            throw new Error('RITUAL_LIMIT');
           }
           // Re-throw other errors for generic handling
           throw error;
         }
       } else {
-        // Guest: check for duplicates in localStorage before saving
+        // Guest: check for duplicates and limit in localStorage before saving
         const guestRituals = getGuestRituals();
         const newRitual: LocalRitual = {
           ...ritual,
           timestamp: new Date().toISOString(),
         };
         
+        // Check for duplicates first (higher priority)
         const isDuplicate = guestRituals.some((existing) => areRitualsEqual(existing, newRitual));
         
         if (isDuplicate) {
           throw new Error('DUPLICATE_RITUAL');
+        }
+        
+        // Check for limit (5 rituals max)
+        if (guestRituals.length >= 5) {
+          throw new Error('RITUAL_LIMIT');
         }
         
         guestRituals.push(newRitual);

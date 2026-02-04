@@ -9,13 +9,11 @@ import Iter "mo:core/Iter";
 import Order "mo:core/Order";
 import Principal "mo:core/Principal";
 import AccessControl "authorization/access-control";
-import Migration "migration";
+
 import MixinAuthorization "authorization/MixinAuthorization";
 import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
 
-// Enable data migration
-(with migration = Migration.run)
 actor {
   type Book = {
     title : Text;
@@ -91,19 +89,19 @@ actor {
     userProfile : ?UserProfile;
   };
 
+  type ExportData = {
+    journalEntries : [JournalEntry];
+    sessionRecords : [MeditationSession];
+    progressStats : ProgressStats;
+    userProfile : ?UserProfile;
+  };
+
   type Ritual = {
     meditationType : MeditationType;
     duration : Nat;
     ambientSound : Text;
     ambientSoundVolume : Nat;
     timestamp : Int;
-  };
-
-  type ExportData = {
-    journalEntries : [JournalEntry];
-    sessionRecords : [MeditationSession];
-    progressStats : ProgressStats;
-    userProfile : ?UserProfile;
   };
 
   let books = List.fromArray<Book>([
@@ -220,6 +218,7 @@ actor {
   include MixinAuthorization(accessControlState);
   include MixinStorage();
 
+  let maxRituals = 5;
   let ritualsStore = Map.empty<Principal, List.List<Ritual>>();
 
   public query ({ caller }) func getBooks() : async ([Book]) {
@@ -647,6 +646,10 @@ actor {
     let existingRituals = switch (ritualsStore.get(caller)) {
       case (null) { List.empty<Ritual>() };
       case (?list) { list };
+    };
+
+    if (existingRituals.size() >= maxRituals) {
+      Runtime.trap("RitualLimitExceeded: You can only save up to 5 rituals. Please delete an existing ritual before adding a new one.");
     };
 
     // Check for duplicates

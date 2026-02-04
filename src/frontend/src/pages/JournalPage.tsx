@@ -179,21 +179,11 @@ export default function JournalPage() {
     try {
       await exportData.mutateAsync();
       toast.success('Meditation data exported successfully', {
-        className: 'border-2 border-accent-cyan/50 bg-accent-cyan/10',
-        style: {
-          background: 'oklch(0.65 0.12 195 / 0.1)',
-          borderColor: 'oklch(0.65 0.12 195 / 0.5)',
-          color: theme === 'dark' ? 'oklch(0.93 0.01 210)' : 'oklch(0.145 0.02 210)',
-        },
+        className: 'bg-card border-2 border-accent-cyan/50 text-foreground',
       });
     } catch (error) {
       toast.error('Failed to export meditation data', {
-        className: 'border-2 border-destructive/50 bg-destructive/10',
-        style: {
-          background: 'oklch(var(--destructive) / 0.1)',
-          borderColor: 'oklch(var(--destructive) / 0.5)',
-          color: theme === 'dark' ? 'oklch(0.93 0.01 210)' : 'oklch(0.145 0.02 210)',
-        },
+        className: 'bg-card border-2 border-destructive/50 text-foreground',
       });
       console.error('Export error:', error);
     }
@@ -217,21 +207,11 @@ export default function JournalPage() {
     try {
       await importData.mutateAsync(pendingFile);
       toast.success('Meditation data imported successfully', {
-        className: 'border-2 border-accent-cyan/50 bg-accent-cyan/10',
-        style: {
-          background: 'oklch(0.65 0.12 195 / 0.1)',
-          borderColor: 'oklch(0.65 0.12 195 / 0.5)',
-          color: theme === 'dark' ? 'oklch(0.93 0.01 210)' : 'oklch(0.145 0.02 210)',
-        },
+        className: 'bg-card border-2 border-accent-cyan/50 text-foreground',
       });
     } catch (error) {
       toast.error('Failed to import meditation data. Please check the file format.', {
-        className: 'border-2 border-destructive/50 bg-destructive/10',
-        style: {
-          background: 'oklch(var(--destructive) / 0.1)',
-          borderColor: 'oklch(var(--destructive) / 0.5)',
-          color: theme === 'dark' ? 'oklch(0.93 0.01 210)' : 'oklch(0.145 0.02 210)',
-        },
+        className: 'bg-card border-2 border-destructive/50 text-foreground',
       });
       console.error('Import error:', error);
     } finally {

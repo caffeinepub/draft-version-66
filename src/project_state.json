@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 43,
+  "projectStateVersion": 53,
   "summary": "Inner Bloom is a React + TypeScript single-page meditation companion with an Internet Computer (Motoko) canister backend. The app supports Internet Identity authentication plus a guest/offline mode backed by localStorage. Users can pick a meditation type (or take a recommendation quiz), follow a step-by-step guide, choose duration and ambient audio, run a timed meditation session with controls, then record a post-session reflection (mood(s), energy, notes, favorite) into a journal. The app tracks progress (total minutes, streak, last-30-days minutes), computes rank tiers for a 0–20,000-minute cap, renders progress visuals (animated canvas bowl; lotus background; progress lotus via SVG and optional 3D R3F), and offers unified JSON export/import (guest uses localStorage; authenticated users use canister export/import). A curated book recommendations page is served from a static frontend dataset (Amazon links), while the backend also provides a static books list (Goodreads links).",
   "existing_features": [
     {
@@ -559,34 +559,18 @@
       "version": 1
     },
     {
-      "id": "feature-add-explicit-left-right-ritual-navigation-controls-arrow-buttons-icons-that-work-on-all-screen-sizes-and-provide-a-user-controlled-option-to-show-hide-these-ritual-navigation-buttons-while-keeping-swipe-navigation-available",
-      "title": "Add explicit left/right ritual navigation controls (arrow buttons/icons) that work on all screen sizes, and provide a user-controlled option to show/hide these ritual navigation buttons while keeping swipe navigation available.",
+      "id": "feature-eliminate-theme-token-drift-by-ensuring-there-is-a-single-authoritative-source-of-global-css-theme-variables-used-by-tailwind-oklch-tokens-and-prevent-unused-duplicate-token-files-from-inadvertently-affecting-builds-e-g-ensure-the-app-imports-and-relies-on-only-the-intended-theme-token-file-and-that-token-naming-matches-what-tailwind-expects",
+      "title": "Eliminate theme-token drift by ensuring there is a single authoritative source of global CSS theme variables used by Tailwind (OKLCH tokens), and prevent unused/duplicate token files from inadvertently affecting builds (e.g., ensure the app imports and relies on only the intended theme token file and that token naming matches what Tailwind expects).",
       "reqIds": [
-        "REQ-8"
+        "REQ-15"
       ],
       "version": 1
     },
     {
-      "id": "feature-fix-the-incorrect-ritual-save-error-toast-that-shows-this-ritual-already-exists-in-your-collection-when-the-user-has-no-visible-rituals-and-ensure-ritual-duplicate-detection-handling-is-consistent-between-guest-localstorage-and-authenticated-backend-modes-without-cross-contamination",
-      "title": "Fix the incorrect ritual-save error toast that shows \"This ritual already exists in your collection.\" when the user has no visible rituals, and ensure ritual duplicate detection/handling is consistent between guest (localStorage) and authenticated (backend) modes without cross-contamination.",
+      "id": "feature-audit-key-ui-surfaces-to-ensure-they-exclusively-use-the-shared-theme-tokens-e-g-bg-background-text-foreground-bg-card-text-muted-foreground-rather-than-hardcoded-colors-that-could-cause-draft-95-style-inconsistencies-update-any-offending-styles-so-component-backgrounds-and-text-colors-remain-consistent-with-the-restored-draft-94-theme",
+      "title": "Audit key UI surfaces to ensure they exclusively use the shared theme tokens (e.g., bg-background, text-foreground, bg-card, text-muted-foreground) rather than hardcoded colors that could cause Draft 95-style inconsistencies; update any offending styles so component backgrounds and text colors remain consistent with the restored Draft 94 theme.",
       "reqIds": [
-        "REQ-9"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-authenticated-journal-persistence-end-to-end-so-that-completed-meditation-reflections-are-saved-to-the-backend-for-logged-in-users-and-reliably-appear-on-the-journal-page-including-edit-delete-favorite-toggle-actions",
-      "title": "Implement authenticated journal persistence end-to-end so that completed meditation reflections are saved to the backend for logged-in users and reliably appear on the Journal page (including edit/delete/favorite toggle actions).",
-      "reqIds": [
-        "REQ-10"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-fix-authenticated-progress-persistence-so-that-total-minutes-streak-and-monthly-minutes-update-correctly-after-each-session-and-reliably-appear-on-the-progress-page-and-in-exported-backend-data",
-      "title": "Fix authenticated progress persistence so that total minutes, streak, and monthly minutes update correctly after each session and reliably appear on the Progress page (and in exported backend data).",
-      "reqIds": [
-        "REQ-11"
+        "REQ-16"
       ],
       "version": 1
     }
@@ -602,6 +586,86 @@
       "id": "AR-3",
       "summary": "Add a gentle weekly reflection summary card (dashboard) generated from existing session/journal data; dismissible for the week; optional link to view details in journal",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Rituals carousel UX polish: always-visible left/right arrows positioned below the ritual card between dot indicators; smooth animated transitions on prev/next; remove any 'show navigation' toggle",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Limit saved rituals to a maximum of 5 per user/store (guest localStorage and authenticated backend), with appropriate UX when limit is reached",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Add loading feedback on 'Save & Continue' after meditation and on 'Save as ritual' actions (button-level spinner/disabled state)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Disable text selection (user-select) on meditation selection carousel and ambient sound selection carousel to avoid accidental highlighting during swipe/drag",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Update the Saved Rituals carousel so navigation arrows are always visible (remove any 'show navigation' option/toggle and do not support hiding arrows via props).",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Reposition the Saved Rituals carousel arrows below the ritual container and place them on the same row as the dot indicators, with arrows visually between the dots and the edges of the ritual card area (i.e., a single control row beneath the card that contains: left arrow, dot indicators, right arrow).",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Add smooth animated transitions when navigating to the next/previous ritual in the Saved Rituals carousel (both arrow clicks and swipe navigation).",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Enforce a maximum of 5 saved rituals per user for both guest mode (localStorage) and authenticated mode (canister). When the limit is reached, prevent saving a new ritual and show an English error message/toast explaining the limit.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Add button-level loading feedback for the Reflection flow actions on PreMeditationPage: (1) when user clicks 'Save & Continue' after meditation, and (2) when user clicks 'Save this as my ritual'. The buttons must show a spinner/loading state and be disabled while the respective mutation is pending.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Disable text selection (CSS user-select) for the Meditation selection carousel and the Ambient sound selection carousel to prevent accidental highlighting during swipe/drag interactions.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Restore the application’s color system to match Draft 94 by reverting any Draft 95 changes that altered theme tokens (backgrounds, foreground/text colors, card/popover colors, border/input/ring, accent/secondary/muted, destructive) so that the UI no longer shows mismatched backgrounds and inconsistent text colors across pages and components.",
+      "reqIds": [
+        "REQ-14"
+      ],
       "status": "pending"
     }
   ],

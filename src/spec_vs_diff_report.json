@@ -1,56 +1,63 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-04T13:20:30.701Z",
-  "summary": "REQ-8 appears implemented via explicit ChevronLeft/ChevronRight arrow controls in SavedRitualsCarousel plus a user-facing persisted toggle on DashboardPage. REQ-9/10/11 are described as implemented in the useQueries.ts summary (strict guest/auth branching, duplicate detection, authenticated journal CRUD/favorite persistence, and authenticated progress accumulation), but the provided diff excerpts do not include enough concrete backend/main.mo changes to verify the required backend endpoints/persistence behavior end-to-end. One unrequested backend change (adding/enabling migration) is present.",
+  "generatedAt": "2026-02-04T13:56:56.913Z",
+  "summary": "Diff focuses on theming token updates (index.css + Tailwind color mappings) and some page-level class tweaks, but does not clearly demonstrate the full “Draft 94 revert” across all requested surfaces nor the “single authoritative token source” cleanup. It also appears to introduce extra styling/animation/font changes not requested in a theming regression fix.",
   "missing_requirements": [
     {
-      "id": "REQ-10",
-      "requirement": "Implement authenticated journal persistence end-to-end so that completed meditation reflections are saved to the backend for logged-in users and reliably appear on the Journal page (including edit/delete/favorite toggle actions).",
-      "reason": "The diff summary claims frontend hooks call backend endpoints, but the provided backend/main.mo excerpt is truncated and does not show the add/update/delete/toggle-favorite journal endpoints or persistence logic. Without those method definitions in the diff evidence, end-to-end authenticated persistence cannot be confirmed.",
+      "id": "REQ-15",
+      "requirement": "Eliminate theme-token drift by ensuring there is a single authoritative source of global CSS theme variables used by Tailwind, and prevent unused/duplicate token files from affecting builds.",
+      "reason": "The diff shows updates to `frontend/index.css` and `frontend/tailwind.config.js`, but provides no evidence of removing/neutralizing duplicate theme token definitions, nor of auditing imports to ensure only one token file is applied at runtime (e.g., preventing multiple :root/.dark sets from competing).",
       "evidence": [
-        "backend/main.mo (truncated; no journal endpoint changes shown)",
-        "frontend/src/hooks/useQueries.ts (truncated; describes journal hooks but backend implementation not evidenced)"
+        "frontend/index.css",
+        "frontend/tailwind.config.js"
       ]
     },
     {
-      "id": "REQ-11",
-      "requirement": "Fix authenticated progress persistence so that total minutes, streak, and monthly minutes update correctly after each session and reliably appear on the Progress page (and in exported backend data).",
-      "reason": "The diff summary describes updated client-side logic in useRecordSession, but the backend/main.mo excerpt is truncated and does not show the progress/session persistence methods or export logic needed to confirm lifetime totals aren’t overwritten and that authenticated export includes up-to-date progress/session records.",
+      "id": "REQ-16",
+      "requirement": "Audit key UI surfaces to ensure they exclusively use shared theme tokens rather than hardcoded colors; update offending styles so backgrounds/text remain consistent with Draft 94 tokens.",
+      "reason": "Only Journal and Progress pages are shown as modified, and at least one hardcoded color utility remains (`text-orange-500`), which conflicts with the requirement to avoid hardcoded colors that can cause theme drift/inconsistency. There is also no diff evidence of auditing/fixing other key pages (Landing, Dashboard, Pre-meditation, Books) for hardcoded overrides.",
       "evidence": [
-        "backend/main.mo (truncated; no progress/session/export endpoint changes shown)",
-        "frontend/src/hooks/useQueries.ts (truncated; describes progress logic)"
+        "frontend/src/pages/JournalPage.tsx",
+        "frontend/src/pages/ProgressPage.tsx"
       ]
     },
     {
-      "id": "REQ-8",
-      "requirement": "Arrow controls stay in sync with swipe navigation and dot indicators.",
-      "reason": "SavedRitualsCarousel.tsx excerpt shows activeIndex updates via swipe and arrow handlers, but the diff excerpt is truncated before any dot indicator rendering/logic. Sync with dot indicators cannot be verified from the provided evidence.",
+      "id": "REQ-14",
+      "requirement": "Restore the application’s color system to match Draft 94 by reverting Draft 95 changes that altered theme tokens so UI no longer shows mismatched backgrounds/text colors across pages/components (light and dark).",
+      "reason": "`frontend/src/index.css` is described as restoring Draft 94 OKLCH tokens, but the diff evidence is insufficient to confirm all required surfaces/pages (Landing, Dashboard, Pre-meditation, Progress, Journal, Books) are now consistent in both light and dark mode, or that no unreadable contrast remains. Only two pages are directly shown as modified in code snippets.",
       "evidence": [
-        "frontend/src/components/SavedRitualsCarousel.tsx (truncated; dot indicator logic not visible)"
+        "frontend/index.css",
+        "frontend/src/pages/JournalPage.tsx",
+        "frontend/src/pages/ProgressPage.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Introduced and enabled a Motoko canister state migration module (backend/migration.mo) and wired it into backend/main.mo via `(with migration = Migration.run)`.",
-      "reason": "The BuildRequest did not ask for data migrations explicitly; it requested specific ritual/journal/progress fixes. Migration support may be related, but it is an additional feature/change beyond the stated requirements.",
+      "description": "Added/changed typography and font setup (Playfair Display import and Tailwind font family extension).",
+      "reason": "The BuildRequest is a theming regression fix limited to restoring Draft 94 theme tokens and eliminating token drift; adding a new/explicit font import and Tailwind font family configuration is not requested and could be considered a new styling feature.",
       "evidence": [
-        "backend/migration.mo",
-        "backend/main.mo (with migration = Migration.run)"
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js"
+      ]
+    },
+    {
+      "description": "Introduced/extended additional animations and visual effects (e.g., slide-in transitions, carousel slideIn keyframe, glow shadows, breathe/glow/float animations).",
+      "reason": "Non-goal states no new features; these animation/shadow additions go beyond restoring theme tokens and may alter UI behavior/feel outside a strict regression fix.",
+      "evidence": [
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js"
       ]
     }
   ],
   "confidence": 0.62,
   "changed_files": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/SavedRitualsCarousel.tsx",
-    "frontend/src/hooks/useLocalStorageState.ts",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/DashboardPage.tsx",
-    "frontend/src/pages/PreMeditationPage.tsx",
+    "frontend/index.css",
+    "frontend/src/pages/JournalPage.tsx",
+    "frontend/src/pages/ProgressPage.tsx",
+    "frontend/tailwind.config.js",
     "project_state.json"
   ]
 }

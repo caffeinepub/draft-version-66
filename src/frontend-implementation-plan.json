@@ -1,104 +1,87 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Ritual navigation controls + fix ritual duplicate toast + persist journal & progress correctly (frontend-only)",
+  "title": "Revert theming to Draft 94 and remove token drift",
   "requirements": [
     {
-      "id": "REQ-8",
-      "summary": "Add left/right ritual navigation arrow controls on all screen sizes and provide a user toggle to show/hide them while keeping swipe navigation.",
+      "id": "REQ-14",
+      "summary": "Restore Draft 94 theme tokens so light/dark surfaces and text colors are consistent across the app.",
       "acceptanceCriteria": [
-        "On mobile and desktop, when the user has 2+ saved rituals, the UI provides visible left/right arrow controls that move to the previous/next ritual and stay in sync with swipe navigation and dot indicators.",
-        "A user-facing toggle exists to enable/disable showing the ritual left/right arrow controls (default behavior must be defined and consistent).",
-        "When the toggle is off, swipe navigation still works and the carousel remains usable.",
-        "When the user has 0 or 1 ritual, navigation controls do not appear (or appear disabled) and do not cause layout glitches."
+        "In both light and dark mode, background, card, and popover surfaces visually match each other as intended (no unexpected shifts between sections of the same page).",
+        "Text colors (default, muted, and on-primary/on-accent) are consistent across Landing, Dashboard, Pre-meditation, Progress, Journal, and Books pages.",
+        "No UI element renders with unreadable contrast due to incorrect token values (e.g., light text on light background or dark text on dark background)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/SavedRitualsCarousel.tsx",
+          "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Add a prop to control whether left/right arrow navigation buttons are rendered; when enabled and rituals.length >= 2, render arrow controls for both mobile and desktop while keeping swipe + dot navigation in sync. Use existing shadcn-ui Button and lucide icons; Verify the component's usage instructions before implementing."
+          "description": "Revert the light/dark theme variable values to match Draft 94 and ensure they represent Tailwind-ready OKLCH channel values (so background/foreground/card/popover/border/input/ring/primary/secondary/muted/accent/destructive and their foregrounds produce consistent surfaces and readable contrast). Also ensure any extra app-specific tokens used by the UI (e.g., primary-dark, accent-cyan, accent-cyan-tinted, description-gray) match Draft 94. Verify the component's usage instructions before implementing (shadcn-ui token conventions)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "summary": "Ensure a single authoritative theme token source is used by Tailwind and remove/neutralize duplicate token definitions to prevent drift.",
+      "acceptanceCriteria": [
+        "Only one global theme token definition is effectively applied at runtime (no conflicting :root/.dark variable sets).",
+        "Tailwind color utilities resolve to the expected CSS variables for background/foreground/card/popover/primary/secondary/muted/accent/destructive/border/input/ring.",
+        "Switching themes (dark/light) updates the same set of tokens consistently without leaving components in mixed theme states."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/index.css",
+          "operation": "delete",
+          "description": "Remove the duplicate global theme-token file so builds cannot accidentally pick up conflicting :root/.dark variable sets, ensuring the app relies on a single authoritative token source. Verify the component's usage instructions before implementing (shadcn-ui token conventions)."
+        },
+        {
+          "path": "frontend/src/main.tsx",
+          "operation": "modify",
+          "description": "Confirm the app imports only the intended global theme token file (frontend/src/index.css) and does not import any other theme-token CSS that could reintroduce conflicting variables. Verify the component's usage instructions before implementing (initial-app / build-template-react entry-point conventions)."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Align Tailwind color mappings with the authoritative CSS variable naming and OKLCH token format used in frontend/src/index.css, removing/adjusting any mappings that reference missing or legacy token names and ensuring alpha-enabled utilities work consistently. Verify the component's usage instructions before implementing (shadcn-ui token conventions)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "summary": "Replace hardcoded colors on key UI surfaces with shared theme tokens so components render consistently across pages.",
+      "acceptanceCriteria": [
+        "No core page container or major card-like surface uses hardcoded colors that diverge from theme tokens.",
+        "After the fixes, the same component looks consistent when rendered on different pages (no different background/text coloring due to local overrides)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/LandingPage.tsx",
+          "operation": "modify",
+          "description": "Replace hardcoded gradient hex colors and any non-token background/text styling on the main page container and key surfaces with theme-token utilities (e.g., bg-background, text-foreground, bg-card, text-muted-foreground) so light/dark modes remain consistent with the restored Draft 94 theme. Verify the component's usage instructions before implementing (shadcn-ui theming patterns)."
         },
         {
           "path": "frontend/src/pages/DashboardPage.tsx",
           "operation": "modify",
-          "description": "Add a user-facing toggle in the Rituals section to show/hide the carousel arrow controls (default on/off must be consistent), persist the preference locally, and pass the flag into SavedRitualsCarousel. Use existing shadcn-ui Checkbox/Label (or other existing UI components) for the toggle UI; Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/hooks/useLocalStorageState.ts",
-          "operation": "create",
-          "description": "Create a small hook to read/write a boolean preference from localStorage for the ritual navigation arrows toggle, with a safe default and SSR/mount guards appropriate for this app."
-        }
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "summary": "Fix incorrect ritual duplicate toast and ensure duplicate detection is consistent and isolated between guest (localStorage) and authenticated (backend) modes.",
-      "acceptanceCriteria": [
-        "When a user has no rituals in the active mode (guest vs authenticated), saving a new ritual succeeds and shows a success toast (no duplicate toast).",
-        "The duplicate toast \"This ritual already exists in your collection.\" is only shown when an exact duplicate ritual already exists in the active store for the current mode.",
-        "Authenticated ritual save/list/delete operations never read from or write to guest localStorage keys, and guest ritual operations never call backend ritual endpoints.",
-        "If a backend call fails for reasons other than a duplicate, the UI shows a generic failure toast (not the duplicate toast) and logs the underlying error to the console."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Update ritual save behavior to perform exact duplicate detection against the active store only (guest: localStorage rituals; authenticated: cached/fetched backend rituals), and normalize backend duplicate failures to a single explicit error (e.g., 'DUPLICATE_RITUAL') while rethrowing non-duplicate failures for generic UI handling. Ensure authenticated ritual flows do not touch guest localStorage keys and guest ritual flows do not call backend capabilities."
+          "description": "Update the page container and major surfaces to remove hardcoded background overrides (including dark gradient hex) and rely exclusively on shared theme tokens; ensure toast styling uses theme tokens rather than hardcoded colors where applicable. Verify the component's usage instructions before implementing (shadcn-ui theming patterns)."
         },
         {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Adjust ritual-save toast logic to show the duplicate toast only for the explicit duplicate signal (e.g., 'DUPLICATE_RITUAL'); for all other errors, show a generic failure toast and log the underlying error to the console. Use the existing toast system and existing shadcn-ui Button components; Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-10",
-      "summary": "Implement authenticated journal persistence so reflections reliably save and appear on the Journal page with edit/delete/favorite actions, while keeping guest behavior localStorage-based.",
-      "acceptanceCriteria": [
-        "When authenticated, saving a post-session reflection persists to the canister and the new entry appears on the Journal page after navigation/refresh.",
-        "When authenticated, editing a journal entry reflection persists to the canister and is reflected after reload.",
-        "When authenticated, deleting a journal entry removes it from the canister and the Journal page after reload.",
-        "When authenticated, toggling favorite persists to the canister and the Journal page reflects the change after reload.",
-        "Guest mode behavior remains localStorage-based and unchanged except for any necessary bug fixes requested in this build."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Replace the current authenticated journal 'workarounds' with real authenticated persistence using available backendInterface methods (add, update, delete action, toggle favorite action) while keeping guest mode on localStorage. Ensure React Query invalidations refresh the Journal page after mutations and add robust error handling with console logging."
-        },
-        {
-          "path": "frontend/src/pages/PreMeditationPage.tsx",
-          "operation": "modify",
-          "description": "Ensure the post-session reflection save flow uses the updated authenticated journal save hook and that navigation away does not mask save failures (surface failure states via toasts if needed). Use existing shadcn-ui components and toast system; Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/JournalPage.tsx",
-          "operation": "modify",
-          "description": "Ensure edit/delete/favorite UI actions surface authenticated persistence failures appropriately (generic error toast + console log) and that successful actions are reflected via query refresh. Use existing shadcn-ui components (Card, Button, AlertDialog, etc.) without editing frontend/src/components/ui; Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-11",
-      "summary": "Fix authenticated progress persistence so total minutes, streak, and monthly minutes update correctly after each session and appear correctly on Progress and in exported data.",
-      "acceptanceCriteria": [
-        "When authenticated, completing a meditation session increases the backend-stored lifetime total minutes by the session duration (does not overwrite lifetime totals with monthly minutes).",
-        "When authenticated, the Progress page reflects updated total minutes and streak after completing a session and revisiting the Progress page.",
-        "Monthly minutes represent minutes in the last 30 days (or the existing app definition) and do not incorrectly replace lifetime totals.",
-        "Exporting data while authenticated includes the up-to-date backend progress stats and session records."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Update authenticated session recording to compute monthly minutes and streak from authenticated backend session records/state (not from guest localStorage), then call the backend recording capability with correct values. Invalidate progress stats, session record related queries, and export-related queries as needed so Progress and export reflect the latest authenticated data."
+          "description": "Remove hardcoded OKLCH/hex values from major surfaces (page container gradients and the active-timer SVG strokes/fills) by switching to shared theme tokens via Tailwind utilities or CSS variables, ensuring consistent background/text contrast across modes and pages. Verify the component's usage instructions before implementing (shadcn-ui theming patterns)."
         },
         {
           "path": "frontend/src/pages/ProgressPage.tsx",
           "operation": "modify",
-          "description": "Confirm Progress page refresh behavior aligns with updated query invalidations (e.g., revisiting the page shows updated totals/streak) and surface any authenticated load failures gracefully (generic error messaging + console log) without changing guest behavior. Use existing shadcn-ui components and toast system; Verify the component's usage instructions before implementing."
+          "description": "Replace any hardcoded toast inline styles and any non-token background/text colors on core surfaces with shared theme tokens so the Progress page matches the restored Draft 94 theme in light/dark modes. Verify the component's usage instructions before implementing (shadcn-ui theming patterns)."
+        },
+        {
+          "path": "frontend/src/pages/JournalPage.tsx",
+          "operation": "modify",
+          "description": "Replace hardcoded toast inline styles and any non-token core surface styling (containers, overlays, prominent cards) with shared theme token utilities to prevent page-specific drift; ensure icon accent colors that affect readability are token-based where appropriate. Verify the component's usage instructions before implementing (shadcn-ui theming patterns)."
+        },
+        {
+          "path": "frontend/src/pages/BookRecommendationsPage.tsx",
+          "operation": "modify",
+          "description": "Remove hardcoded background overrides (including dark gradient hex) and ensure the page container and major card surfaces rely on shared theme tokens for consistent backgrounds and text colors across modes. Verify the component's usage instructions before implementing (shadcn-ui theming patterns)."
         }
       ]
     }

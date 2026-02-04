@@ -26,7 +26,6 @@ interface SavedRitualsCarouselProps {
   onStart: (ritual: Ritual) => void;
   onDelete: (ritual: Ritual) => void;
   isDeleting?: boolean;
-  showArrows?: boolean;
 }
 
 export default function SavedRitualsCarousel({ 
@@ -34,13 +33,13 @@ export default function SavedRitualsCarousel({
   onStart, 
   onDelete, 
   isDeleting = false,
-  showArrows = true 
 }: SavedRitualsCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [ritualToDelete, setRitualToDelete] = useState<Ritual | null>(null);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Minimum swipe distance (in px)
@@ -54,13 +53,24 @@ export default function SavedRitualsCarousel({
   }, [rituals.length, activeIndex]);
 
   const handlePrevious = () => {
-    if (isDeleting) return;
+    if (isDeleting || isTransitioning) return;
+    setIsTransitioning(true);
     setActiveIndex((prev) => (prev === 0 ? rituals.length - 1 : prev - 1));
+    setTimeout(() => setIsTransitioning(false), 300);
   };
 
   const handleNext = () => {
-    if (isDeleting) return;
+    if (isDeleting || isTransitioning) return;
+    setIsTransitioning(true);
     setActiveIndex((prev) => (prev === rituals.length - 1 ? 0 : prev + 1));
+    setTimeout(() => setIsTransitioning(false), 300);
+  };
+
+  const handleDotClick = (index: number) => {
+    if (isDeleting || isTransitioning || index === activeIndex) return;
+    setIsTransitioning(true);
+    setActiveIndex(index);
+    setTimeout(() => setIsTransitioning(false), 300);
   };
 
   const handleDeleteClick = (ritual: Ritual) => {
@@ -78,18 +88,18 @@ export default function SavedRitualsCarousel({
   };
 
   const onTouchStart = (e: React.TouchEvent) => {
-    if (isDeleting) return;
+    if (isDeleting || isTransitioning) return;
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    if (isDeleting) return;
+    if (isDeleting || isTransitioning) return;
     setTouchEnd(e.targetTouches[0].clientX);
   };
 
   const onTouchEnd = () => {
-    if (isDeleting || !touchStart || !touchEnd) return;
+    if (isDeleting || isTransitioning || !touchStart || !touchEnd) return;
     
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
@@ -167,12 +177,12 @@ export default function SavedRitualsCarousel({
 
   // Multiple rituals: carousel with navigation
   const currentRitual = rituals[activeIndex];
-  const showNavigationArrows = showArrows && rituals.length >= 2;
+  const showNavigationArrows = rituals.length >= 2;
 
   return (
     <>
       <div className={`relative max-w-2xl mx-auto ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}>
-        {/* Carousel Container */}
+        {/* Carousel Container with slide animation */}
         <div
           ref={containerRef}
           className="relative overflow-hidden"
@@ -180,7 +190,12 @@ export default function SavedRitualsCarousel({
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
-          <div className="bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-between">
+          <div 
+            className="bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-between"
+            style={{
+              animation: isTransitioning ? 'slideIn 0.3s ease-out' : 'none',
+            }}
+          >
             <div className="flex-1">
               <p className="text-base sm:text-lg font-medium text-foreground">
                 {currentRitual.displayName}
@@ -216,75 +231,49 @@ export default function SavedRitualsCarousel({
           </div>
         </div>
 
-        {/* Arrow Controls - shown on all screen sizes when enabled */}
+        {/* Controls Row: Left Arrow, Dots, Right Arrow */}
         {showNavigationArrows && (
-          <>
-            {/* Mobile Arrow Controls */}
-            <div className="flex md:hidden absolute top-1/2 -translate-y-1/2 left-0 right-0 justify-between pointer-events-none px-2">
-              <Button
-                onClick={handlePrevious}
-                variant="ghost"
-                size="icon"
-                className="pointer-events-auto rounded-full bg-card/90 backdrop-blur-sm border border-border/50 hover:bg-card hover:scale-110 transition-all duration-300 w-10 h-10"
-                aria-label="Previous ritual"
-                disabled={isDeleting}
-              >
-                <ChevronLeft className="w-5 h-5 text-accent-cyan" />
-              </Button>
-              <Button
-                onClick={handleNext}
-                variant="ghost"
-                size="icon"
-                className="pointer-events-auto rounded-full bg-card/90 backdrop-blur-sm border border-border/50 hover:bg-card hover:scale-110 transition-all duration-300 w-10 h-10"
-                aria-label="Next ritual"
-                disabled={isDeleting}
-              >
-                <ChevronRight className="w-5 h-5 text-accent-cyan" />
-              </Button>
+          <div className="flex items-center justify-center gap-3 mt-4">
+            <Button
+              onClick={handlePrevious}
+              variant="ghost"
+              size="icon"
+              className="rounded-full bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card hover:scale-110 transition-all duration-300 w-8 h-8 shrink-0"
+              aria-label="Previous ritual"
+              disabled={isDeleting || isTransitioning}
+            >
+              <ChevronLeft className="w-5 h-5 text-accent-cyan" />
+            </Button>
+
+            {/* Dot Indicators */}
+            <div className="flex justify-center gap-2">
+              {rituals.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleDotClick(index)}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    index === activeIndex
+                      ? 'bg-accent-cyan w-6'
+                      : 'bg-border hover:bg-accent-cyan/50'
+                  }`}
+                  aria-label={`Go to ritual ${index + 1}`}
+                  disabled={isDeleting || isTransitioning}
+                />
+              ))}
             </div>
 
-            {/* Desktop Arrow Controls */}
-            <div className="hidden md:flex absolute top-1/2 -translate-y-1/2 left-0 right-0 justify-between pointer-events-none">
-              <Button
-                onClick={handlePrevious}
-                variant="ghost"
-                size="icon"
-                className="pointer-events-auto -ml-12 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card hover:scale-110 transition-all duration-300"
-                aria-label="Previous ritual"
-                disabled={isDeleting}
-              >
-                <ChevronLeft className="w-5 h-5 text-accent-cyan" />
-              </Button>
-              <Button
-                onClick={handleNext}
-                variant="ghost"
-                size="icon"
-                className="pointer-events-auto -mr-12 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card hover:scale-110 transition-all duration-300"
-                aria-label="Next ritual"
-                disabled={isDeleting}
-              >
-                <ChevronRight className="w-5 h-5 text-accent-cyan" />
-              </Button>
-            </div>
-          </>
+            <Button
+              onClick={handleNext}
+              variant="ghost"
+              size="icon"
+              className="rounded-full bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card hover:scale-110 transition-all duration-300 w-8 h-8 shrink-0"
+              aria-label="Next ritual"
+              disabled={isDeleting || isTransitioning}
+            >
+              <ChevronRight className="w-5 h-5 text-accent-cyan" />
+            </Button>
+          </div>
         )}
-
-        {/* Dot Indicators */}
-        <div className="flex justify-center gap-2 mt-4">
-          {rituals.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => !isDeleting && setActiveIndex(index)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index === activeIndex
-                  ? 'bg-accent-cyan w-6'
-                  : 'bg-border hover:bg-accent-cyan/50'
-              }`}
-              aria-label={`Go to ritual ${index + 1}`}
-              disabled={isDeleting}
-            />
-          ))}
-        </div>
       </div>
 
       {/* Delete Confirmation Dialog */}

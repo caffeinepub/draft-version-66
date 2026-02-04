@@ -1,95 +1,70 @@
 {
   "kind": "build_request",
-  "title": "Ritual navigation controls + fix ritual duplicate toast + persist journal & progress correctly",
+  "title": "Revert UI theming to Draft 94 (fix mismatched colors and backgrounds)",
   "priority": "high",
   "requirements": [
     {
-      "id": "REQ-8",
-      "text": "Add explicit left/right ritual navigation controls (arrow buttons/icons) that work on all screen sizes, and provide a user-controlled option to show/hide these ritual navigation buttons while keeping swipe navigation available.",
+      "id": "REQ-14",
+      "text": "Restore the application’s color system to match Draft 94 by reverting any Draft 95 changes that altered theme tokens (backgrounds, foreground/text colors, card/popover colors, border/input/ring, accent/secondary/muted, destructive) so that the UI no longer shows mismatched backgrounds and inconsistent text colors across pages and components.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "Now add buttons/icons/arrows left & right for ritual navigations, user should have an option for that too."
+          "Can you revert to draft 94, everything is bugged in terms of colors, backgrounds do not match, text colors are different.",
+          "Almost all colors are different and backgrounds changes"
         ]
       },
       "acceptanceCriteria": [
-        "On mobile and desktop, when the user has 2+ saved rituals, the UI provides visible left/right arrow controls that move to the previous/next ritual and stay in sync with swipe navigation and dot indicators.",
-        "A user-facing toggle exists to enable/disable showing the ritual left/right arrow controls (default behavior must be defined and consistent).",
-        "When the toggle is off, swipe navigation still works and the carousel remains usable.",
-        "When the user has 0 or 1 ritual, navigation controls do not appear (or appear disabled) and do not cause layout glitches."
+        "In both light and dark mode, background, card, and popover surfaces visually match each other as intended (no unexpected shifts between sections of the same page).",
+        "Text colors (default, muted, and on-primary/on-accent) are consistent across Landing, Dashboard, Pre-meditation, Progress, Journal, and Books pages.",
+        "No UI element renders with unreadable contrast due to incorrect token values (e.g., light text on light background or dark text on dark background)."
       ]
     },
     {
-      "id": "REQ-9",
-      "text": "Fix the incorrect ritual-save error toast that shows \"This ritual already exists in your collection.\" when the user has no visible rituals, and ensure ritual duplicate detection/handling is consistent between guest (localStorage) and authenticated (backend) modes without cross-contamination.",
-      "target": "both",
+      "id": "REQ-15",
+      "text": "Eliminate theme-token drift by ensuring there is a single authoritative source of global CSS theme variables used by Tailwind (OKLCH tokens), and prevent unused/duplicate token files from inadvertently affecting builds (e.g., ensure the app imports and relies on only the intended theme token file and that token naming matches what Tailwind expects).",
+      "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "even I do not have any rituals, I get an notification error that \"This ritual already exists in your collection.\" Perhaps it has something to do with localstorage contradicting online data?"
+          "everything is bugged in terms of colors, backgrounds do not match, text colors are different"
         ]
       },
       "acceptanceCriteria": [
-        "When a user has no rituals in the active mode (guest vs authenticated), saving a new ritual succeeds and shows a success toast (no duplicate toast).",
-        "The duplicate toast \"This ritual already exists in your collection.\" is only shown when an exact duplicate ritual already exists in the active store for the current mode.",
-        "Authenticated ritual save/list/delete operations never read from or write to guest localStorage keys, and guest ritual operations never call backend ritual endpoints.",
-        "If a backend call fails for reasons other than a duplicate, the UI shows a generic failure toast (not the duplicate toast) and logs the underlying error to the console."
+        "Only one global theme token definition is effectively applied at runtime (no conflicting :root/.dark variable sets).",
+        "Tailwind color utilities resolve to the expected CSS variables for background/foreground/card/popover/primary/secondary/muted/accent/destructive/border/input/ring.",
+        "Switching themes (dark/light) updates the same set of tokens consistently without leaving components in mixed theme states."
       ]
     },
     {
-      "id": "REQ-10",
-      "text": "Implement authenticated journal persistence end-to-end so that completed meditation reflections are saved to the backend for logged-in users and reliably appear on the Journal page (including edit/delete/favorite toggle actions).",
-      "target": "both",
+      "id": "REQ-16",
+      "text": "Audit key UI surfaces to ensure they exclusively use the shared theme tokens (e.g., bg-background, text-foreground, bg-card, text-muted-foreground) rather than hardcoded colors that could cause Draft 95-style inconsistencies; update any offending styles so component backgrounds and text colors remain consistent with the restored Draft 94 theme.",
+      "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "my meditations, and their feedbacks, do not save in the journal page"
+          "backgrounds do not match, text colors are different"
         ]
       },
       "acceptanceCriteria": [
-        "When authenticated, saving a post-session reflection persists to the canister and the new entry appears on the Journal page after navigation/refresh.",
-        "When authenticated, editing a journal entry reflection persists to the canister and is reflected after reload.",
-        "When authenticated, deleting a journal entry removes it from the canister and the Journal page after reload.",
-        "When authenticated, toggling favorite persists to the canister and the Journal page reflects the change after reload.",
-        "Guest mode behavior remains localStorage-based and unchanged except for any necessary bug fixes requested in this build."
-      ]
-    },
-    {
-      "id": "REQ-11",
-      "text": "Fix authenticated progress persistence so that total minutes, streak, and monthly minutes update correctly after each session and reliably appear on the Progress page (and in exported backend data).",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "and progress page. Fix that too please"
-        ]
-      },
-      "acceptanceCriteria": [
-        "When authenticated, completing a meditation session increases the backend-stored lifetime total minutes by the session duration (does not overwrite lifetime totals with monthly minutes).",
-        "When authenticated, the Progress page reflects updated total minutes and streak after completing a session and revisiting the Progress page.",
-        "Monthly minutes represent minutes in the last 30 days (or the existing app definition) and do not incorrectly replace lifetime totals.",
-        "Exporting data while authenticated includes the up-to-date backend progress stats and session records."
+        "No core page container or major card-like surface uses hardcoded colors that diverge from theme tokens.",
+        "After the fixes, the same component looks consistent when rendered on different pages (no different background/text coloring due to local overrides)."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor with all logic in backend/main.mo.",
-    "Do not edit files under frontend/src/components/ui (compose them instead).",
-    "Do not edit frontend immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx."
+    "Do not edit any files under frontend/src/components/ui (compose with them as-is).",
+    "Do not edit immutable hook files listed in SYSTEM_CONTEXT."
   ],
   "nonGoals": [
-    "Do not add new authentication providers beyond Internet Identity.",
-    "Do not add external databases or third-party storage.",
-    "Do not introduce new pages/features unrelated to ritual navigation and persistence bugs."
+    "Do not add new features (e.g., onboarding, weekly summary, ritual limit changes) as part of this request.",
+    "Do not change backend logic or data models; this is a theming regression fix only."
   ],
   "imageRequirements": {
     "required": [],

@@ -8,6 +8,7 @@ import SessionIndicator from '../components/SessionIndicator';
 import HamburgerMenu from '../components/HamburgerMenu';
 import MobileBackButton from '../components/MobileBackButton';
 import ProgressBowl from '../components/ProgressBowl';
+import CloudSyncErrorBanner from '../components/CloudSyncErrorBanner';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useProgressStats, useExportMeditationData, useImportMeditationData } from '../hooks/useQueries';
 import type { ProgressStats } from '../backend';
@@ -31,7 +32,7 @@ export default function ProgressPage() {
   const [showImportConfirm, setShowImportConfirm] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   
-  const { data: stats, isLoading } = useProgressStats();
+  const { data: stats, isLoading, isError, error, refetch } = useProgressStats();
   const exportData = useExportMeditationData();
   const importData = useImportMeditationData();
 
@@ -63,11 +64,21 @@ export default function ProgressPage() {
     try {
       await exportData.mutateAsync();
       toast.success('Meditation data exported successfully', {
-        className: 'bg-card border-2 border-accent-cyan/50 text-foreground',
+        className: 'border-2 border-accent-cyan/50 bg-accent-cyan/10',
+        style: {
+          background: 'oklch(0.65 0.12 195 / 0.1)',
+          borderColor: 'oklch(0.65 0.12 195 / 0.5)',
+          color: theme === 'dark' ? 'oklch(0.93 0.01 210)' : 'oklch(0.145 0.02 210)',
+        },
       });
     } catch (error) {
       toast.error('Failed to export meditation data', {
-        className: 'bg-card border-2 border-destructive/50 text-foreground',
+        className: 'border-2 border-destructive/50 bg-destructive/10',
+        style: {
+          background: 'oklch(var(--destructive) / 0.1)',
+          borderColor: 'oklch(var(--destructive) / 0.5)',
+          color: theme === 'dark' ? 'oklch(0.93 0.01 210)' : 'oklch(0.145 0.02 210)',
+        },
       });
       console.error('Export error:', error);
     }
@@ -91,17 +102,26 @@ export default function ProgressPage() {
     try {
       await importData.mutateAsync(pendingFile);
       toast.success('Meditation data imported successfully', {
-        className: 'bg-card border-2 border-accent-cyan/50 text-foreground',
+        className: 'border-2 border-accent-cyan/50 bg-accent-cyan/10',
+        style: {
+          background: 'oklch(0.65 0.12 195 / 0.1)',
+          borderColor: 'oklch(0.65 0.12 195 / 0.5)',
+          color: theme === 'dark' ? 'oklch(0.93 0.01 210)' : 'oklch(0.145 0.02 210)',
+        },
       });
     } catch (error) {
       toast.error('Failed to import meditation data. Please check the file format.', {
-        className: 'bg-card border-2 border-destructive/50 text-foreground',
+        className: 'border-2 border-destructive/50 bg-destructive/10',
+        style: {
+          background: 'oklch(var(--destructive) / 0.1)',
+          borderColor: 'oklch(var(--destructive) / 0.5)',
+          color: theme === 'dark' ? 'oklch(0.93 0.01 210)' : 'oklch(0.145 0.02 210)',
+        },
       });
       console.error('Import error:', error);
     } finally {
       setShowImportConfirm(false);
       setPendingFile(null);
-      // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -111,7 +131,6 @@ export default function ProgressPage() {
   const handleCancelImport = () => {
     setShowImportConfirm(false);
     setPendingFile(null);
-    // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -125,21 +144,14 @@ export default function ProgressPage() {
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-background dark:bg-gradient-to-br dark:from-[#040f13] dark:to-background">
-      <div className="fixed top-0 left-0 w-96 h-96 opacity-15 dark:opacity-10 pointer-events-none">
-        <LotusCanvas variant="enhanced" />
-      </div>
-      <div className="fixed bottom-0 right-0 w-96 h-96 opacity-15 dark:opacity-10 pointer-events-none">
-        <LotusCanvas variant="enhanced" />
-      </div>
+      <LotusCanvas variant="enhanced" />
 
-      {/* Desktop Session Indicator */}
       {mounted && (
         <div className="hidden md:block">
           <SessionIndicator />
         </div>
       )}
 
-      {/* Desktop Theme Toggle */}
       {mounted && (
         <button
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -154,7 +166,6 @@ export default function ProgressPage() {
         </button>
       )}
 
-      {/* Desktop Back Button */}
       <button
         onClick={() => navigate({ to: '/dashboard' })}
         className="hidden md:block fixed top-20 left-6 z-50 rounded-full bg-card/80 backdrop-blur-sm p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-border/50"
@@ -163,18 +174,14 @@ export default function ProgressPage() {
         <ArrowLeft className="h-5 w-5 text-accent-cyan" />
       </button>
 
-      {/* Mobile Back Button */}
       {mounted && <MobileBackButton show={true} />}
-
-      {/* Mobile Hamburger Menu */}
       {mounted && <HamburgerMenu />}
 
-      {/* Export/Import buttons */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
         <Button
           onClick={handleExport}
           size="sm"
-          className="bg-accent-cyan/90 hover:bg-accent-cyan text-primary-dark shadow-lg"
+          className="bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark shadow-lg"
           disabled={exportData.isPending}
         >
           {exportData.isPending ? (
@@ -207,7 +214,6 @@ export default function ProgressPage() {
         />
       </div>
 
-      {/* Import Confirmation Dialog */}
       <AlertDialog open={showImportConfirm} onOpenChange={setShowImportConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -243,7 +249,14 @@ export default function ProgressPage() {
             </p>
           </div>
 
-          {isLoading ? (
+          {isError ? (
+            <CloudSyncErrorBanner
+              onRetry={() => refetch()}
+              isRetrying={isLoading}
+              title="Failed to Load Progress"
+              description="We couldn't load your progress data. Please check your connection and try again."
+            />
+          ) : isLoading ? (
             <div className="flex justify-center py-20">
               <div className="text-center space-y-4">
                 <div className="w-12 h-12 border-4 border-accent-cyan/30 border-t-accent-cyan rounded-full animate-spin mx-auto"></div>
@@ -271,7 +284,6 @@ export default function ProgressPage() {
           ) : (
             <>
               <div className="flex flex-col items-center gap-6">
-                {/* Bowl visualization container with extra padding for shadow overflow */}
                 <div className="relative w-full max-w-[320px] h-[320px] flex items-center justify-center" style={{ padding: '60px' }}>
                   {mounted && theme && (
                     <ProgressBowl 
@@ -281,7 +293,6 @@ export default function ProgressPage() {
                   )}
                 </div>
                 
-                {/* Fill percentage text - below the bowl */}
                 <div className="text-center space-y-1 -mt-2">
                   <div className="text-2xl sm:text-3xl font-bold text-accent-cyan drop-shadow-lg">
                     {bloomPercent}% Filled
@@ -293,7 +304,6 @@ export default function ProgressPage() {
               </div>
 
               <div className="max-w-3xl mx-auto space-y-6">
-                {/* Stats cards with responsive layout */}
                 <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
                   <div className="text-center space-y-2 p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border/30 flex-1 min-w-[140px] max-w-[200px]">
                     <TrendingUp className="w-8 h-8 text-accent-cyan mx-auto" />

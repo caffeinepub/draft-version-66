@@ -19,47 +19,16 @@ export const _CaffeineStorageRefillResult = IDL.Record({
   'success' : IDL.Opt(IDL.Bool),
   'topped_up_amount' : IDL.Opt(IDL.Nat),
 });
-export const MoodState = IDL.Variant({
-  'sad' : IDL.Null,
-  'anxious' : IDL.Null,
-  'happy' : IDL.Null,
-  'calm' : IDL.Null,
-  'neutral' : IDL.Null,
+export const UserRole = IDL.Variant({
+  'admin' : IDL.Null,
+  'user' : IDL.Null,
+  'guest' : IDL.Null,
 });
 export const MeditationType = IDL.Variant({
   'ifs' : IDL.Null,
   'metta' : IDL.Null,
   'mindfulness' : IDL.Null,
   'visualization' : IDL.Null,
-});
-export const EnergyState = IDL.Variant({
-  'tired' : IDL.Null,
-  'energized' : IDL.Null,
-  'restless' : IDL.Null,
-  'balanced' : IDL.Null,
-});
-export const AddJournalEntryRequest = IDL.Record({
-  'duration' : IDL.Nat,
-  'mood' : IDL.Vec(MoodState),
-  'reflection' : IDL.Text,
-  'meditationType' : MeditationType,
-  'energy' : EnergyState,
-});
-export const JournalEntry = IDL.Record({
-  'id' : IDL.Nat,
-  'duration' : IDL.Nat,
-  'mood' : IDL.Vec(MoodState),
-  'user' : IDL.Principal,
-  'isFavorite' : IDL.Bool,
-  'timestamp' : IDL.Int,
-  'reflection' : IDL.Text,
-  'meditationType' : MeditationType,
-  'energy' : EnergyState,
-});
-export const UserRole = IDL.Variant({
-  'admin' : IDL.Null,
-  'user' : IDL.Null,
-  'guest' : IDL.Null,
 });
 export const Ritual = IDL.Record({
   'duration' : IDL.Nat,
@@ -75,6 +44,30 @@ export const Book = IDL.Record({
   'tags' : IDL.Vec(IDL.Text),
   'description' : IDL.Text,
   'author' : IDL.Text,
+});
+export const MoodState = IDL.Variant({
+  'sad' : IDL.Null,
+  'anxious' : IDL.Null,
+  'happy' : IDL.Null,
+  'calm' : IDL.Null,
+  'neutral' : IDL.Null,
+});
+export const EnergyState = IDL.Variant({
+  'tired' : IDL.Null,
+  'energized' : IDL.Null,
+  'restless' : IDL.Null,
+  'balanced' : IDL.Null,
+});
+export const JournalEntry = IDL.Record({
+  'id' : IDL.Nat,
+  'duration' : IDL.Nat,
+  'mood' : IDL.Vec(MoodState),
+  'user' : IDL.Principal,
+  'isFavorite' : IDL.Bool,
+  'timestamp' : IDL.Int,
+  'reflection' : IDL.Text,
+  'meditationType' : MeditationType,
+  'energy' : EnergyState,
 });
 export const ProgressStats = IDL.Record({
   'monthlyMinutes' : IDL.Nat,
@@ -103,22 +96,6 @@ export const ImportData = IDL.Record({
   'progressStats' : ProgressStats,
   'sessionRecords' : IDL.Vec(MeditationSession),
   'userProfile' : IDL.Opt(UserProfile),
-});
-export const JournalEntryIdentifier = IDL.Record({
-  'id' : IDL.Nat,
-  'user' : IDL.Principal,
-});
-export const JournalEntryActionRequest = IDL.Record({
-  'action' : IDL.Variant({ 'delete' : IDL.Null, 'toggleFavorite' : IDL.Null }),
-  'entryIdentifier' : JournalEntryIdentifier,
-});
-export const UpdateJournalEntryRequest = IDL.Record({
-  'id' : IDL.Nat,
-  'duration' : IDL.Nat,
-  'mood' : IDL.Vec(MoodState),
-  'reflection' : IDL.Text,
-  'meditationType' : MeditationType,
-  'energy' : EnergyState,
 });
 
 export const idlService = IDL.Service({
@@ -149,16 +126,9 @@ export const idlService = IDL.Service({
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-  'addJournalEntry' : IDL.Func([AddJournalEntryRequest], [JournalEntry], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'deleteRitual' : IDL.Func([Ritual], [], []),
-  'getAllJournalEntries' : IDL.Func(
-      [IDL.Principal],
-      [IDL.Vec(JournalEntry)],
-      ['query'],
-    ),
   'getBooks' : IDL.Func([], [IDL.Vec(Book)], ['query']),
-  'getCallerFavoriteEntries' : IDL.Func([], [IDL.Vec(JournalEntry)], ['query']),
   'getCallerJournalEntries' : IDL.Func([], [IDL.Vec(JournalEntry)], ['query']),
   'getCallerProgressStats' : IDL.Func([], [ProgressStats], ['query']),
   'getCallerSessionRecords' : IDL.Func(
@@ -170,7 +140,6 @@ export const idlService = IDL.Service({
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getCurrentUserExportData' : IDL.Func([], [ExportData], ['query']),
   'getDailyQuotes' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
-  'getEntryById' : IDL.Func([IDL.Nat], [IDL.Opt(JournalEntry)], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
@@ -179,7 +148,6 @@ export const idlService = IDL.Service({
   'importData' : IDL.Func([ImportData, IDL.Bool], [], []),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'listCallerRituals' : IDL.Func([], [IDL.Vec(Ritual)], ['query']),
-  'performJournalEntryAction' : IDL.Func([JournalEntryActionRequest], [], []),
   'recordMeditationSession' : IDL.Func(
       [MeditationSession, IDL.Nat, IDL.Nat],
       [ProgressStats],
@@ -187,12 +155,6 @@ export const idlService = IDL.Service({
     ),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'saveRitual' : IDL.Func([Ritual], [], []),
-  'synchronizeJournalEntries' : IDL.Func([IDL.Vec(JournalEntry)], [], []),
-  'updateJournalEntry' : IDL.Func(
-      [UpdateJournalEntryRequest],
-      [JournalEntry],
-      [],
-    ),
 });
 
 export const idlInitArgs = [];
@@ -209,47 +171,16 @@ export const idlFactory = ({ IDL }) => {
     'success' : IDL.Opt(IDL.Bool),
     'topped_up_amount' : IDL.Opt(IDL.Nat),
   });
-  const MoodState = IDL.Variant({
-    'sad' : IDL.Null,
-    'anxious' : IDL.Null,
-    'happy' : IDL.Null,
-    'calm' : IDL.Null,
-    'neutral' : IDL.Null,
+  const UserRole = IDL.Variant({
+    'admin' : IDL.Null,
+    'user' : IDL.Null,
+    'guest' : IDL.Null,
   });
   const MeditationType = IDL.Variant({
     'ifs' : IDL.Null,
     'metta' : IDL.Null,
     'mindfulness' : IDL.Null,
     'visualization' : IDL.Null,
-  });
-  const EnergyState = IDL.Variant({
-    'tired' : IDL.Null,
-    'energized' : IDL.Null,
-    'restless' : IDL.Null,
-    'balanced' : IDL.Null,
-  });
-  const AddJournalEntryRequest = IDL.Record({
-    'duration' : IDL.Nat,
-    'mood' : IDL.Vec(MoodState),
-    'reflection' : IDL.Text,
-    'meditationType' : MeditationType,
-    'energy' : EnergyState,
-  });
-  const JournalEntry = IDL.Record({
-    'id' : IDL.Nat,
-    'duration' : IDL.Nat,
-    'mood' : IDL.Vec(MoodState),
-    'user' : IDL.Principal,
-    'isFavorite' : IDL.Bool,
-    'timestamp' : IDL.Int,
-    'reflection' : IDL.Text,
-    'meditationType' : MeditationType,
-    'energy' : EnergyState,
-  });
-  const UserRole = IDL.Variant({
-    'admin' : IDL.Null,
-    'user' : IDL.Null,
-    'guest' : IDL.Null,
   });
   const Ritual = IDL.Record({
     'duration' : IDL.Nat,
@@ -265,6 +196,30 @@ export const idlFactory = ({ IDL }) => {
     'tags' : IDL.Vec(IDL.Text),
     'description' : IDL.Text,
     'author' : IDL.Text,
+  });
+  const MoodState = IDL.Variant({
+    'sad' : IDL.Null,
+    'anxious' : IDL.Null,
+    'happy' : IDL.Null,
+    'calm' : IDL.Null,
+    'neutral' : IDL.Null,
+  });
+  const EnergyState = IDL.Variant({
+    'tired' : IDL.Null,
+    'energized' : IDL.Null,
+    'restless' : IDL.Null,
+    'balanced' : IDL.Null,
+  });
+  const JournalEntry = IDL.Record({
+    'id' : IDL.Nat,
+    'duration' : IDL.Nat,
+    'mood' : IDL.Vec(MoodState),
+    'user' : IDL.Principal,
+    'isFavorite' : IDL.Bool,
+    'timestamp' : IDL.Int,
+    'reflection' : IDL.Text,
+    'meditationType' : MeditationType,
+    'energy' : EnergyState,
   });
   const ProgressStats = IDL.Record({
     'monthlyMinutes' : IDL.Nat,
@@ -293,25 +248,6 @@ export const idlFactory = ({ IDL }) => {
     'progressStats' : ProgressStats,
     'sessionRecords' : IDL.Vec(MeditationSession),
     'userProfile' : IDL.Opt(UserProfile),
-  });
-  const JournalEntryIdentifier = IDL.Record({
-    'id' : IDL.Nat,
-    'user' : IDL.Principal,
-  });
-  const JournalEntryActionRequest = IDL.Record({
-    'action' : IDL.Variant({
-      'delete' : IDL.Null,
-      'toggleFavorite' : IDL.Null,
-    }),
-    'entryIdentifier' : JournalEntryIdentifier,
-  });
-  const UpdateJournalEntryRequest = IDL.Record({
-    'id' : IDL.Nat,
-    'duration' : IDL.Nat,
-    'mood' : IDL.Vec(MoodState),
-    'reflection' : IDL.Text,
-    'meditationType' : MeditationType,
-    'energy' : EnergyState,
   });
   
   return IDL.Service({
@@ -342,20 +278,9 @@ export const idlFactory = ({ IDL }) => {
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-    'addJournalEntry' : IDL.Func([AddJournalEntryRequest], [JournalEntry], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'deleteRitual' : IDL.Func([Ritual], [], []),
-    'getAllJournalEntries' : IDL.Func(
-        [IDL.Principal],
-        [IDL.Vec(JournalEntry)],
-        ['query'],
-      ),
     'getBooks' : IDL.Func([], [IDL.Vec(Book)], ['query']),
-    'getCallerFavoriteEntries' : IDL.Func(
-        [],
-        [IDL.Vec(JournalEntry)],
-        ['query'],
-      ),
     'getCallerJournalEntries' : IDL.Func(
         [],
         [IDL.Vec(JournalEntry)],
@@ -371,7 +296,6 @@ export const idlFactory = ({ IDL }) => {
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getCurrentUserExportData' : IDL.Func([], [ExportData], ['query']),
     'getDailyQuotes' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
-    'getEntryById' : IDL.Func([IDL.Nat], [IDL.Opt(JournalEntry)], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
@@ -380,7 +304,6 @@ export const idlFactory = ({ IDL }) => {
     'importData' : IDL.Func([ImportData, IDL.Bool], [], []),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'listCallerRituals' : IDL.Func([], [IDL.Vec(Ritual)], ['query']),
-    'performJournalEntryAction' : IDL.Func([JournalEntryActionRequest], [], []),
     'recordMeditationSession' : IDL.Func(
         [MeditationSession, IDL.Nat, IDL.Nat],
         [ProgressStats],
@@ -388,12 +311,6 @@ export const idlFactory = ({ IDL }) => {
       ),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'saveRitual' : IDL.Func([Ritual], [], []),
-    'synchronizeJournalEntries' : IDL.Func([IDL.Vec(JournalEntry)], [], []),
-    'updateJournalEntry' : IDL.Func(
-        [UpdateJournalEntryRequest],
-        [JournalEntry],
-        [],
-      ),
   });
 };
 

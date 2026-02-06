@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { Moon, Sun, ArrowLeft, Play, Pause, Heart, Smile, Meh, Frown, Zap, Battery, BatteryCharging, Sparkles, Loader2 } from 'lucide-react';
+import { Moon, Sun, ArrowLeft, Play, Pause, Heart, Smile, Meh, Frown, Zap, Battery, BatteryCharging, Sparkles, Loader2, ExternalLink } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -16,6 +16,7 @@ import MeditationGuideStepper from '../components/MeditationGuideStepper';
 import { useMeditationTypes, useRecordSession, useSaveJournalEntry, useSaveRitual } from '../hooks/useQueries';
 import type { MeditationType, MoodState, EnergyState } from '../backend';
 import { toast } from 'sonner';
+import { getCloudSyncErrorMessage } from '../utils/cloudSync';
 
 const detailedGuides: Record<string, { steps: Array<{ title: string; content: string }> }> = {
   mindfulness: {
@@ -419,18 +420,19 @@ export default function PreMeditationPage() {
     } catch (error: any) {
       console.error('Error saving ritual:', error);
       
-      // Check for duplicate error (explicit signal from mutation)
+      // Check for specific error types first
       if (error.message === 'DUPLICATE_RITUAL') {
         toast.error('This ritual already exists in your collection.', {
           className: 'bg-card border-2 border-destructive/50 text-foreground',
         });
-      } else if (error.message === 'RITUAL_LIMIT') {
+      } else if (error.message === 'RITUAL_LIMIT_REACHED') {
         toast.error('You can only save up to 5 rituals.', {
           className: 'bg-card border-2 border-destructive/50 text-foreground',
         });
       } else {
-        // Generic failure for all other errors
-        toast.error('Failed to save ritual. Please try again.', {
+        // Use cloud sync error mapping for auth/readiness errors
+        const message = getCloudSyncErrorMessage(error);
+        toast.error(message, {
           className: 'bg-card border-2 border-destructive/50 text-foreground',
         });
       }
@@ -441,8 +443,8 @@ export default function PreMeditationPage() {
     // Defensively cap moods to 2 at save time
     const moodsToSave = selectedMoods.slice(0, 2);
     
-    // Save to journal using backend/local storage with multiple moods and energy state
     try {
+      // Wait for journal save to complete before navigating
       await saveJournalEntry.mutateAsync({
         meditationType: meditationType as MeditationType,
         duration: BigInt(duration),
@@ -451,12 +453,17 @@ export default function PreMeditationPage() {
         reflection: personalNotes,
         isFavorite,
       });
+
+      // Only navigate after successful save
       navigate({ to: '/dashboard' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving journal entry:', error);
-      toast.error('Failed to save reflection. Please try again.', {
+      // Use cloud sync error mapping for consistent error messages
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message, {
         className: 'bg-card border-2 border-destructive/50 text-foreground',
       });
+      // Stay on reflection view on error
     }
   };
 
@@ -572,7 +579,7 @@ export default function PreMeditationPage() {
                 )}
               </Button>
 
-              <div className="w-full max-[389px]:w-[85%] space-y-2">
+              <div className="w-full max-[389px]:w-[77%] space-y-2">
                 <label className="text-sm text-description-gray text-center block">
                   Volume: {volume}%
                 </label>
@@ -586,7 +593,7 @@ export default function PreMeditationPage() {
                 />
               </div>
 
-              <div className="w-full max-[389px]:w-[85%] space-y-2">
+              <div className="w-full max-[389px]:w-[77%] space-y-2">
                 <label className="text-sm text-description-gray text-center block">
                   Seek: {formatTime(timeRemaining)} / {formatTime(totalTime)}
                 </label>
@@ -791,7 +798,7 @@ export default function PreMeditationPage() {
                     {saveRitual.isPending ? (
                       <>
                         <Loader2 className="w-5 h-5 mr-2 text-accent-cyan animate-spin" />
-                        Saving...
+                        Saving ritual...
                       </>
                     ) : (
                       <>
@@ -881,8 +888,17 @@ export default function PreMeditationPage() {
           </div>
 
           <div className="space-y-6 pt-4">
-            <h2 className="text-2xl sm:text-3xl font-semibold text-foreground text-center">Meditation Guides</h2>
-            <div className="bg-card/40 backdrop-blur-sm border border-border/50 rounded-2xl p-6 sm:p-8 shadow-lg">
+            <h2 className="text-2xl sm:text-3xl font-semibold text-foreground text-center">Meditation Guide</h2>
+            <div className="bg-card/40 backdrop-blur-sm border border-border/50 rounded-2xl p-6 sm:p-8 shadow-lg relative pt-16 sm:pt-8">
+              {/* More details button inside container, top-right, with top-4 at all breakpoints */}
+              <button
+                onClick={() => navigate({ to: '/knowledge', search: { category: meditationType, scrollToContent: true } })}
+                className="absolute top-4 right-4 sm:right-6 inline-flex items-center gap-1.5 text-sm text-accent-cyan hover:text-accent-cyan/80 transition-colors group"
+                aria-label="View detailed guide on Knowledge page"
+              >
+                <span className="font-medium">More details</span>
+                <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              </button>
               <MeditationGuideStepper steps={getGuideSteps()} />
             </div>
           </div>

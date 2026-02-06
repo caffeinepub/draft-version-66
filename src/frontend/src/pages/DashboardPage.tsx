@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, Sparkles, RefreshCw } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useNavigate } from '@tanstack/react-router';
 import LotusCanvas from '../components/LotusCanvas';
@@ -9,9 +9,11 @@ import FloatingNav from '../components/FloatingNav';
 import QuizDialog from '../components/QuizDialog';
 import SessionIndicator from '../components/SessionIndicator';
 import HamburgerMenu from '../components/HamburgerMenu';
-import SavedRitualsCarousel from '../components/SavedRitualsCarousel';
+import RitualSelectionModal from '../components/RitualSelectionModal';
+import CloudSyncErrorBanner from '../components/CloudSyncErrorBanner';
 import { useDailyQuotes, useRituals, useDeleteRitual } from '../hooks/useQueries';
 import { toast } from 'sonner';
+import { getCloudSyncErrorMessage } from '../utils/cloudSync';
 
 export default function DashboardPage() {
   const { theme, setTheme } = useTheme();
@@ -20,17 +22,14 @@ export default function DashboardPage() {
   const [dailyQuote, setDailyQuote] = useState('');
   const [selectedMeditation, setSelectedMeditation] = useState('mindfulness');
   const [showQuiz, setShowQuiz] = useState(false);
+  const [showRitualsModal, setShowRitualsModal] = useState(false);
 
   const { data: quotes = [] } = useDailyQuotes();
-  const { data: rituals = [], isLoading: ritualsLoading } = useRituals();
+  const { data: rituals = [], isError: ritualsError, error: ritualsErrorObj, refetch: refetchRituals, isLoading: ritualsLoading } = useRituals();
   const deleteRitual = useDeleteRitual();
 
   useEffect(() => {
     setMounted(true);
-    // Cleanup legacy localStorage key for arrow visibility setting
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('ritual-arrows-enabled');
-    }
   }, []);
 
   useEffect(() => {
@@ -76,29 +75,37 @@ export default function DashboardPage() {
     try {
       await deleteRitual.mutateAsync(ritual);
       toast.success('Ritual deleted successfully', {
-        className: 'bg-card border-2 border-accent-cyan/50 text-foreground',
+        className: 'border-2 border-accent-cyan/50 bg-accent-cyan/10',
+        style: {
+          background: 'oklch(0.65 0.12 195 / 0.1)',
+          borderColor: 'oklch(0.65 0.12 195 / 0.5)',
+          color: theme === 'dark' ? 'oklch(0.93 0.01 210)' : 'oklch(0.145 0.02 210)',
+        },
       });
-    } catch (error) {
-      console.error('Error deleting ritual:', error);
-      toast.error('Failed to delete ritual. Please try again.', {
-        className: 'bg-card border-2 border-destructive/50 text-foreground',
+    } catch (error: any) {
+      console.error('Delete ritual error:', error);
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message, {
+        className: 'border-2 border-destructive/50 bg-destructive/10',
+        style: {
+          background: 'oklch(var(--destructive) / 0.1)',
+          borderColor: 'oklch(var(--destructive) / 0.5)',
+          color: theme === 'dark' ? 'oklch(0.93 0.01 210)' : 'oklch(0.145 0.02 210)',
+        },
       });
     }
   };
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background dark:bg-gradient-to-br dark:from-[#040f13] dark:to-background">
-      {/* Single centered Lotus Canvas with reduced intensity */}
       <LotusCanvas variant="enhanced" intensity={0.7} />
 
-      {/* Desktop Session Indicator */}
       {mounted && (
         <div className="hidden md:block">
           <SessionIndicator />
         </div>
       )}
 
-      {/* Desktop Theme Toggle */}
       {mounted && (
         <button
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -113,31 +120,20 @@ export default function DashboardPage() {
         </button>
       )}
 
-      {/* Mobile Hamburger Menu */}
       {mounted && <HamburgerMenu />}
-
-      {/* Floating Navigation - Always visible on all screen sizes */}
       <FloatingNav />
 
-      {/* Main Content */}
       <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 py-8">
         <div className="max-w-6xl mx-auto w-full space-y-4 sm:space-y-6 animate-fade-in">
-          {/* Rituals Section - Only shown when rituals exist */}
-          {!ritualsLoading && rituals.length > 0 && (
-            <div className="space-y-3 mb-6">
-              <h2 className="text-xl sm:text-2xl font-semibold text-foreground text-center">
-                Your Rituals
-              </h2>
-              <SavedRitualsCarousel
-                rituals={rituals}
-                onStart={handleStartRitual}
-                onDelete={handleDeleteRitual}
-                isDeleting={deleteRitual.isPending}
-              />
-            </div>
+          {ritualsError && (
+            <CloudSyncErrorBanner
+              onRetry={() => refetchRituals()}
+              isRetrying={ritualsLoading}
+              title="Rituals Unavailable"
+              description="We couldn't load your saved rituals. You can still start a meditation session normally."
+            />
           )}
 
-          {/* Daily Quote Banner - Reduced spacing */}
           <div className="text-center space-y-2 sm:space-y-3">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-playfair italic text-accent-cyan-tinted">
               Today's Inspiration
@@ -147,7 +143,6 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          {/* Meditation Picker Carousel */}
           <div className="pt-2">
             <MeditationCarousel
               selectedMeditation={selectedMeditation}
@@ -155,21 +150,39 @@ export default function DashboardPage() {
             />
           </div>
 
-          {/* Begin Button */}
-          <div className="flex justify-center pt-2">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-2">
             <Button
               size="lg"
               onClick={handleBegin}
-              className="bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark font-semibold px-8 sm:px-12 py-5 sm:py-6 text-base sm:text-lg rounded-full shadow-glow hover:shadow-glow-lg transition-all duration-300 hover:scale-105 animate-glow-pulse"
+              className="w-full sm:w-auto bg-accent-cyan/95 hover:bg-accent-cyan text-primary-dark font-semibold px-8 sm:px-12 py-5 sm:py-6 text-base sm:text-lg rounded-full shadow-glow hover:shadow-glow-strong transition-all duration-300 hover:scale-105"
             >
               Begin
             </Button>
+            {!ritualsError && rituals.length > 0 && (
+              <Button
+                size="lg"
+                onClick={() => setShowRitualsModal(true)}
+                variant="outline"
+                className="w-full sm:w-auto border-2 border-accent-cyan/50 hover:border-accent-cyan hover:bg-accent-cyan/10 text-foreground font-semibold px-8 sm:px-12 py-5 sm:py-6 text-base sm:text-lg rounded-full transition-all duration-300 hover:scale-105"
+              >
+                <Sparkles className="w-5 h-5 mr-2 text-accent-cyan" />
+                Your Rituals
+              </Button>
+            )}
           </div>
         </div>
       </main>
 
-      {/* Quiz Dialog */}
       <QuizDialog open={showQuiz} onClose={() => setShowQuiz(false)} onComplete={handleQuizComplete} />
+
+      <RitualSelectionModal
+        open={showRitualsModal}
+        onClose={() => setShowRitualsModal(false)}
+        rituals={rituals}
+        onStart={handleStartRitual}
+        onDelete={handleDeleteRitual}
+        isDeleting={deleteRitual.isPending}
+      />
     </div>
   );
 }

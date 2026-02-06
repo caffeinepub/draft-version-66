@@ -26,11 +26,20 @@ export default function BookRecommendationsPage() {
     setMounted(true);
   }, []);
 
+  // Clamp currentIndex to valid range when recommendations list changes
+  useEffect(() => {
+    if (currentIndex >= BOOK_RECOMMENDATIONS.length && BOOK_RECOMMENDATIONS.length > 0) {
+      setCurrentIndex(BOOK_RECOMMENDATIONS.length - 1);
+    }
+  }, [currentIndex]);
+
   const handlePrevious = () => {
+    if (BOOK_RECOMMENDATIONS.length <= 1) return;
     setCurrentIndex((prev) => (prev === 0 ? BOOK_RECOMMENDATIONS.length - 1 : prev - 1));
   };
 
   const handleNext = () => {
+    if (BOOK_RECOMMENDATIONS.length <= 1) return;
     setCurrentIndex((prev) => (prev === BOOK_RECOMMENDATIONS.length - 1 ? 0 : prev + 1));
   };
 
@@ -44,7 +53,7 @@ export default function BookRecommendationsPage() {
   };
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
+    if (!touchStart || !touchEnd || BOOK_RECOMMENDATIONS.length <= 1) return;
     
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
@@ -59,6 +68,18 @@ export default function BookRecommendationsPage() {
 
   const getCardStyle = (index: number) => {
     const totalItems = BOOK_RECOMMENDATIONS.length;
+    
+    // Handle single item case
+    if (totalItems === 1) {
+      return {
+        transform: 'translate(-50%, -50%) scale(1)',
+        opacity: 1,
+        zIndex: 30,
+        pointerEvents: 'auto' as const,
+        visibility: 'visible' as const,
+      };
+    }
+
     let diff = index - currentIndex;
     
     // Calculate shortest circular distance
@@ -103,14 +124,61 @@ export default function BookRecommendationsPage() {
     }
   };
 
+  // Empty state when no books available
+  if (BOOK_RECOMMENDATIONS.length === 0) {
+    return (
+      <div className="relative min-h-screen overflow-hidden bg-background dark:bg-gradient-to-br dark:from-[#040f13] dark:to-background">
+        <LotusCanvas variant="enhanced" />
+        
+        {mounted && (
+          <div className="hidden md:block">
+            <SessionIndicator />
+          </div>
+        )}
+
+        {mounted && (
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="hidden md:block fixed top-6 right-6 z-50 rounded-full bg-card/80 backdrop-blur-sm p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-border/50"
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? (
+              <Sun className="h-5 w-5 text-accent-cyan" />
+            ) : (
+              <Moon className="h-5 w-5 text-primary-dark" />
+            )}
+          </button>
+        )}
+
+        <button
+          onClick={() => navigate({ to: '/dashboard' })}
+          className="hidden md:block fixed top-20 left-6 z-50 rounded-full bg-card/80 backdrop-blur-sm p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-border/50"
+          aria-label="Back to dashboard"
+        >
+          <ArrowLeft className="h-5 w-5 text-accent-cyan" />
+        </button>
+
+        {mounted && <MobileBackButton show={true} />}
+        {mounted && <HamburgerMenu />}
+
+        <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-3 sm:px-4 py-8 sm:py-12">
+          <div className="text-center space-y-4">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-accent-cyan-tinted">
+              No Recommendations Available
+            </h1>
+            <p className="text-lg sm:text-xl text-description-gray max-w-3xl mx-auto">
+              Check back soon for curated meditation book recommendations.
+            </p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-background dark:bg-gradient-to-br dark:from-[#040f13] dark:to-background">
-      <div className="fixed top-0 left-0 w-96 h-96 opacity-15 dark:opacity-10 pointer-events-none">
-        <LotusCanvas variant="enhanced" />
-      </div>
-      <div className="fixed bottom-0 right-0 w-96 h-96 opacity-15 dark:opacity-10 pointer-events-none">
-        <LotusCanvas variant="enhanced" />
-      </div>
+      {/* Single centered Lotus Canvas */}
+      <LotusCanvas variant="enhanced" />
 
       {/* Desktop Session Indicator */}
       {mounted && (
@@ -156,7 +224,7 @@ export default function BookRecommendationsPage() {
               Recommended Reading
             </h1>
             <p className="text-lg sm:text-xl text-description-gray max-w-3xl mx-auto leading-relaxed font-medium">
-              Deepen your practice with these carefully selected books on meditation, mindfulness, and inner transformation
+              Deepen your practice with these carefully selected books on meditation techniques and mindfulness practices
             </p>
             <div className="w-24 h-1 bg-gradient-to-r from-transparent via-accent-cyan to-transparent mx-auto mt-6"></div>
           </div>

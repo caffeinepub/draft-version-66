@@ -1,53 +1,35 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-04T13:56:56.954Z",
+  "generatedAt": "2026-02-06T14:06:09.727Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
+    "total": 2,
     "implemented": 2,
     "items": [
       {
-        "id": "REQ-14",
-        "summary": "Restore the application’s color system to match Draft 94 by reverting any Draft 95 changes that altered theme tokens (backgrounds, foreground/text colors, card/popover colors, border/input/ring, accent/secondary/muted, destructive) so that the UI no longer shows mismatched backgrounds and inconsistent text colors across pages and components.",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/index.css"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-15",
-        "summary": "Eliminate theme-token drift by ensuring there is a single authoritative source of global CSS theme variables used by Tailwind (OKLCH tokens), and prevent unused/duplicate token files from inadvertently affecting builds (e.g., ensure the app imports and relies on only the intended theme token file and that token naming matches what Tailwind expects).",
+        "id": "REQ-1",
+        "summary": "Update the Pre-Meditation page “More details” button (the selected element) so it navigates to the Knowledge page with the category that corresponds to the current pre-meditation guide/meditation type (e.g., metta -> Metta category, ifs -> IFS category) instead of always landing on Mindfulness.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/index.css",
-          "frontend/src/main.tsx",
-          "frontend/tailwind.config.js"
+          "frontend/src/pages/PreMeditationPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/index.css",
-          "frontend/tailwind.config.js"
+          "frontend/src/pages/PreMeditationPage.tsx"
         ]
       },
       {
-        "id": "REQ-16",
-        "summary": "Audit key UI surfaces to ensure they exclusively use the shared theme tokens (e.g., bg-background, text-foreground, bg-card, text-muted-foreground) rather than hardcoded colors that could cause Draft 95-style inconsistencies; update any offending styles so component backgrounds and text colors remain consistent with the restored Draft 94 theme.",
+        "id": "REQ-2",
+        "summary": "Update the Knowledge page to accept a category identifier via route search params and initialize the selected category from it (if present and valid), while preserving the existing deep-link scroll behavior (`scrollToContent`).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/LandingPage.tsx",
-          "frontend/src/pages/DashboardPage.tsx",
-          "frontend/src/pages/PreMeditationPage.tsx",
-          "frontend/src/pages/ProgressPage.tsx",
-          "frontend/src/pages/JournalPage.tsx",
-          "frontend/src/pages/BookRecommendationsPage.tsx"
+          "frontend/src/pages/KnowledgePage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/ProgressPage.tsx",
-          "frontend/src/pages/JournalPage.tsx"
+          "frontend/src/pages/KnowledgePage.tsx"
         ]
       }
     ]
@@ -57,10 +39,8 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/index.css",
-    "frontend/src/pages/JournalPage.tsx",
-    "frontend/src/pages/ProgressPage.tsx",
-    "frontend/tailwind.config.js",
+    "frontend/src/pages/KnowledgePage.tsx",
+    "frontend/src/pages/PreMeditationPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

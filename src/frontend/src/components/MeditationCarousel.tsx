@@ -142,7 +142,7 @@ export default function MeditationCarousel({ selectedMeditation, onSelectMeditat
       {/* Carousel Container with strong overflow hidden */}
       <div 
         ref={containerRef}
-        className="relative h-[300px] sm:h-[350px] md:h-[400px] overflow-hidden"
+        className="relative h-[300px] sm:h-[350px] md:h-[400px] overflow-hidden select-none"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}

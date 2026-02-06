@@ -1,9 +1,7 @@
-import { StrictMode } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider, createRouter, createRootRoute, createRoute } from '@tanstack/react-router';
-import { InternetIdentityProvider } from './hooks/useInternetIdentity';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
+import AppErrorBoundary from './components/AppErrorBoundary';
 
 // Import pages
 import LandingPage from './pages/LandingPage';
@@ -12,6 +10,7 @@ import PreMeditationPage from './pages/PreMeditationPage';
 import ProgressPage from './pages/ProgressPage';
 import JournalPage from './pages/JournalPage';
 import BookRecommendationsPage from './pages/BookRecommendationsPage';
+import KnowledgePage from './pages/KnowledgePage';
 
 // Create root route
 const rootRoute = createRootRoute();
@@ -53,6 +52,12 @@ const booksRoute = createRoute({
   component: BookRecommendationsPage,
 });
 
+const knowledgeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/knowledge',
+  component: KnowledgePage,
+});
+
 // Create route tree
 const routeTree = rootRoute.addChildren([
   landingRoute,
@@ -61,6 +66,7 @@ const routeTree = rootRoute.addChildren([
   progressRoute,
   journalRoute,
   booksRoute,
+  knowledgeRoute,
 ]);
 
 // Create router instance
@@ -73,28 +79,14 @@ declare module '@tanstack/react-router' {
   }
 }
 
-// Create a client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      refetchOnWindowFocus: false,
-    },
-  },
-});
-
 function App() {
   return (
-    <StrictMode>
+    <AppErrorBoundary>
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-        <InternetIdentityProvider>
-          <QueryClientProvider client={queryClient}>
-            <RouterProvider router={router} />
-            <Toaster />
-          </QueryClientProvider>
-        </InternetIdentityProvider>
+        <RouterProvider router={router} />
+        <Toaster />
       </ThemeProvider>
-    </StrictMode>
+    </AppErrorBoundary>
   );
 }
 

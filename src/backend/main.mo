@@ -1,15 +1,14 @@
 import Nat "mo:core/Nat";
 import Map "mo:core/Map";
 import List "mo:core/List";
-import Array "mo:core/Array";
 import Int "mo:core/Int";
 import Time "mo:core/Time";
-import Runtime "mo:core/Runtime";
-import Iter "mo:core/Iter";
+import Array "mo:core/Array";
 import Order "mo:core/Order";
+import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
+import Iter "mo:core/Iter";
 import AccessControl "authorization/access-control";
-
 import MixinAuthorization "authorization/MixinAuthorization";
 import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
@@ -89,13 +88,6 @@ actor {
     userProfile : ?UserProfile;
   };
 
-  type ExportData = {
-    journalEntries : [JournalEntry];
-    sessionRecords : [MeditationSession];
-    progressStats : ProgressStats;
-    userProfile : ?UserProfile;
-  };
-
   type Ritual = {
     meditationType : MeditationType;
     duration : Nat;
@@ -104,71 +96,64 @@ actor {
     timestamp : Int;
   };
 
+  // Updated book list (no buddhism/spirituality)
   let books = List.fromArray<Book>([
-    {
-      title = "The Science of Enlightenment";
-      author = "Shinzen Young";
-      description = "A comprehensive guide to meditation, blending scientific insights with spiritual wisdom.";
-      goodreadsLink = "https://www.goodreads.com/book/show/34219827-the-science-of-enlightenment";
-      tags = ["Mindfulness", "Enlightenment", "Practice"];
-      icon = "lotus";
-    },
-    {
-      title = "Hardcore Teachings of the Buddha";
-      author = "Daniel Ingram";
-      description = "An in-depth exploration of advanced meditation practices from a practical, no-nonsense perspective.";
-      goodreadsLink = "https://www.goodreads.com/book/show/34721144-mastering-the-core-teachings-of-the-buddha";
-      tags = ["Buddhism", "Practice"];
-      icon = "brain";
-    },
-    {
-      title = "Mind Illuminated";
-      author = "Culadasa (John Yates), Matthew Immergut, Jeremy Graves";
-      description = "A detailed, step-by-step meditation manual combining Buddhist wisdom with neuroscience.";
-      goodreadsLink = "https://www.goodreads.com/book/show/30255509-the-mind-illuminated";
-      tags = ["Focus", "Mindfulness"];
-      icon = "book";
-    },
-    {
-      title = "The Power of Now";
-      author = "Eckhart Tolle";
-      description = "A spiritual guide focused on mindfulness, present moment awareness, and the transformative power of living mindfully.";
-      goodreadsLink = "https://www.goodreads.com/book/show/6708.The_Power_of_Now";
-      tags = ["Mindfulness", "Spirituality"];
-      icon = "heart";
-    },
     {
       title = "Ten Percent Happier";
       author = "Dan Harris";
       description = "A personal journey into mindfulness meditation, offering practical tips and insights for skeptics.";
       goodreadsLink = "https://www.goodreads.com/book/show/18505796-10-happier";
-      tags = ["Personal Growth", "Mindfulness"];
-      icon = "meditation";
+      tags = ["Mindfulness"];
+      icon = "focus";
     },
     {
       title = "Real Happiness";
       author = "Sharon Salzberg";
-      description = "An accessible guide introducing meditation techniques and principles for sustainable happiness.";
+      description = "An accessible guide introducing practical meditation techniques and principles for happiness.";
       goodreadsLink = "https://www.goodreads.com/book/show/8911865-real-happiness";
-      tags = ["Happiness", "Mindfulness"];
+      tags = ["Happiness"];
       icon = "book";
-    },
-    {
-      title = "Waking Up";
-      author = "Sam Harris";
-      description = "An exploration of meditation, mindfulness, and non-duality from a neuroscience and philosophy perspective.";
-      goodreadsLink = "https://www.goodreads.com/book/show/18774981-waking-up";
-      tags = ["Neuroscience", "Non-duality"];
-      icon = "meditation";
     },
     {
       title = "Wherever You Go, There You Are";
       author = "Jon Kabat-Zinn";
       description = "A classic introduction to mindfulness meditation and its practical application in daily life.";
       goodreadsLink = "https://www.goodreads.com/book/show/39080.Wherever_You_Go_There_You_Are";
-      tags = ["Mindful Living", "Self-help"];
-      icon = "lotus";
+      tags = ["Mindful Living"];
+      icon = "focus";
     },
+    {
+      title = "The Power of Now";
+      author = "Eckhart Tolle";
+      description = "A guide focused on present moment awareness and the benefits of mindful living.";
+      goodreadsLink = "https://www.goodreads.com/book/show/6708.The_Power_of_Now";
+      tags = ["Mindfulness"];
+      icon = "focus";
+    },
+    {
+      title = "The Headspace Guide to Meditation and Mindfulness";
+      author = "Andy Puddicombe";
+      description = "A practical, accessible guide to developing and maintaining a daily meditation practice.";
+      goodreadsLink = "https://www.goodreads.com/book/show/16248108-get-some-headspace";
+      tags = ["Mindfulness"];
+      icon = "focus";
+    },
+    {
+      title = "Waking Up";
+      author = "Sam Harris";
+      description = "An exploration of meditation, mindfulness, and conscious awareness from a scientific perspective.";
+      goodreadsLink = "https://www.goodreads.com/book/show/18774981-waking-up";
+      tags = ["Mindfulness"];
+      icon = "focus";
+    },
+    {
+      title = "Mindfulness for Beginners";
+      author = "Jon Kabat-Zinn";
+      description = "A practical introduction to mindfulness techniques and their everyday benefits.";
+      goodreadsLink = "https://www.goodreads.com/book/show/8439958-mindfulness-for-beginners";
+      tags = ["Mindfulness"];
+      icon = "focus";
+    }
   ]);
 
   let quotes = List.fromArray([
@@ -204,7 +189,7 @@ actor {
     "Your journey is uniquely yours; celebrate each step along the path."
   ]);
 
-  let journalEntries = Map.empty<Principal, List.List<JournalEntry>>();
+  var journalEntries = Map.empty<Principal, List.List<JournalEntry>>();
   let sessionRecords = Map.empty<Principal, List.List<MeditationSession>>();
   let progressStats = Map.empty<Principal, ProgressStore>();
   let progressCache = Map.empty<Principal, ProgressStats>();
@@ -218,20 +203,33 @@ actor {
   include MixinAuthorization(accessControlState);
   include MixinStorage();
 
-  let maxRituals = 5;
-  let ritualsStore = Map.empty<Principal, List.List<Ritual>>();
+  var ritualsStore = Map.empty<Principal, List.List<Ritual>>();
 
-  public query ({ caller }) func getBooks() : async ([Book]) {
+  // Utility function to ensure caller is initialized as a user
+  func ensureUserInitialized(caller : Principal) {
+    // Only non-anonymous callers can be initialized as users
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Authentication required");
+    };
+    // This will auto-provision the user if they haven't used the system before
+    ignore AccessControl.hasPermission(accessControlState, caller, #user);
+  };
+
+  // Public endpoints accessible to all users (including guests)
+  public query ({ caller }) func getBooks() : async [Book] {
+    // No authorization required - public content
     books.toArray();
   };
 
-  public query ({ caller }) func getDailyQuotes() : async ([Text]) {
+  public query ({ caller }) func getDailyQuotes() : async [Text] {
+    // No authorization required - public content
     quotes.toArray();
   };
 
+  // User profile endpoints - require authenticated user
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (caller.isAnonymous()) {
-      return null;
+      Runtime.trap("Unauthorized: Authentication required");
     };
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: User role required");
@@ -243,6 +241,10 @@ actor {
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Authentication required");
+    };
+    // Users can only view their own profile, admins can view any profile
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
     };
@@ -250,21 +252,22 @@ actor {
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    if (caller.isAnonymous()) { return };
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: User role required");
-    };
+    ensureUserInitialized(caller);
     userProfiles.add(caller, if (profile.name == "" and profile.avatar == null) { { name = "Anonymous"; email = null; avatar = null } } else { profile });
   };
 
+  // Import/Export endpoints - require authenticated user
   public shared ({ caller }) func importData(importData : ImportData, overwrite : Bool) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: User role required");
-    };
+    ensureUserInitialized(caller);
+
+    // Security: Ensure all imported journal entries are assigned to the caller
+    let sanitizedEntries = importData.journalEntries.map(func(entry : JournalEntry) : JournalEntry {
+      { entry with user = caller };
+    });
 
     if (overwrite) {
-      nextEntryId += importData.journalEntries.size();
-      journalEntries.add(caller, List.fromArray<JournalEntry>(importData.journalEntries));
+      nextEntryId += sanitizedEntries.size();
+      journalEntries.add(caller, List.fromArray<JournalEntry>(sanitizedEntries));
       sessionRecords.add(caller, List.fromArray<MeditationSession>(importData.sessionRecords));
 
       let progressStore : ProgressStore = {
@@ -280,8 +283,15 @@ actor {
         case (null) {};
       };
     } else {
-      let newEntries = List.fromArray<JournalEntry>(importData.journalEntries.map(func(entry) { { entry with id = nextEntryId } }));
-      nextEntryId += importData.journalEntries.size();
+      // Assign unique IDs to new entries to avoid collisions
+      let newEntries = List.fromArray<JournalEntry>(
+        sanitizedEntries.map(func(entry : JournalEntry) : JournalEntry {
+          let newId = nextEntryId;
+          nextEntryId += 1;
+          { entry with id = newId; user = caller };
+        })
+      );
+
       switch (journalEntries.get(caller)) {
         case (?existing) {
           existing.addAll(newEntries.values());
@@ -291,6 +301,7 @@ actor {
           journalEntries.add(caller, newEntries);
         };
       };
+
       let newSessions = List.fromArray<MeditationSession>(importData.sessionRecords);
       switch (sessionRecords.get(caller)) {
         case (?existing) {
@@ -301,6 +312,7 @@ actor {
           sessionRecords.add(caller, newSessions);
         };
       };
+
       let currentStats : ProgressStore = {
         currentStreak = importData.progressStats.currentStreak;
         totalMinutes = importData.progressStats.totalMinutes;
@@ -308,6 +320,7 @@ actor {
       };
       progressStats.add(caller, currentStats);
       progressCache.add(caller, importData.progressStats);
+
       switch (importData.userProfile) {
         case (?profile) { userProfiles.add(caller, profile) };
         case (null) {};
@@ -315,244 +328,41 @@ actor {
     };
   };
 
-  // JOURNAL (New)
-
-  type AddJournalEntryRequest = {
-    meditationType : MeditationType;
-    duration : Nat;
-    mood : [MoodState];
-    energy : EnergyState;
-    reflection : Text;
+  type ExportData = {
+    journalEntries : [JournalEntry];
+    sessionRecords : [MeditationSession];
+    progressStats : ProgressStats;
+    userProfile : ?UserProfile;
   };
 
-  type UpdateJournalEntryRequest = {
-    id : Nat;
-    meditationType : MeditationType;
-    duration : Nat;
-    mood : [MoodState];
-    energy : EnergyState;
-    reflection : Text;
-  };
-
-  type JournalEntryIdentifier = {
-    user : Principal;
-    id : Nat;
-  };
-
-  type JournalEntryActionRequest = {
-    entryIdentifier : JournalEntryIdentifier;
-    action : {
-      #delete;
-      #toggleFavorite;
-    };
-  };
-
-  public shared ({ caller }) func addJournalEntry(request : AddJournalEntryRequest) : async JournalEntry {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: User role required");
-    };
-
-    let newEntry = {
-      id = nextEntryId;
-      user = caller;
-      meditationType = request.meditationType;
-      duration = request.duration;
-      mood = request.mood;
-      energy = request.energy;
-      reflection = request.reflection;
-      timestamp = Int.abs(Time.now());
-      isFavorite = false;
-    };
-    nextEntryId += 1;
-
-    let currentEntries = switch (journalEntries.get(caller)) {
-      case (null) { List.empty<JournalEntry>() };
-      case (?existing) { existing };
-    };
-    currentEntries.add(newEntry);
-    journalEntries.add(caller, currentEntries);
-
-    newEntry;
-  };
-
-  public shared ({ caller }) func updateJournalEntry(request : UpdateJournalEntryRequest) : async JournalEntry {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: User role required");
-    };
-
-    let entries = switch (journalEntries.get(caller)) {
-      case (null) {
-        Runtime.trap("NotFound: No journal entries found for user.");
-      };
-      case (?existing) { existing };
-    };
-
-    var entryFound = false;
-    let updatedEntries = entries.map<JournalEntry, JournalEntry>(
-      func(entry) {
-        if (entry.id == request.id) {
-          entryFound := true;
-          {
-            entry with
-            meditationType = request.meditationType;
-            duration = request.duration;
-            mood = request.mood;
-            energy = request.energy;
-            reflection = request.reflection;
-            timestamp = Time.now();
-          };
-        } else {
-          entry;
-        };
-      }
-    );
-
-    if (not entryFound) {
-      Runtime.trap("NotFound: Journal entry with this ID does not exist.");
-    };
-
-    journalEntries.add(caller, updatedEntries);
-
-    updatedEntries.filter(
-      func(entry) { entry.id == request.id }
-    ).toArray()[0];
-  };
-
-  public shared ({ caller }) func performJournalEntryAction(request : JournalEntryActionRequest) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: User role required");
-    };
-    let user = request.entryIdentifier.user;
-    let entryId = request.entryIdentifier.id;
-
-    let entries = switch (journalEntries.get(user)) {
-      case (null) {
-        Runtime.trap("NotFound: No journal entries found for user.");
-      };
-      case (?existing) { existing };
-    };
-
-    switch (request.action) {
-      case (#delete) {
-        let sizeBefore = entries.size();
-        let filteredEntries = entries.filter(
-          func(entry) { entry.id != entryId }
-        );
-
-        if (filteredEntries.size() == entries.size()) {
-          Runtime.trap("NotFound: Journal entry with this ID does not exist.");
-        };
-
-        journalEntries.add(user, filteredEntries);
-
-        if (filteredEntries.size() < sizeBefore) {
-          return;
-        } else {
-          Runtime.trap("NotFound: No entry was deleted. Size difference expected.");
-        };
-      };
-      case (#toggleFavorite) {
-        var entryFound = false;
-        let updatedEntries = entries.map<JournalEntry, JournalEntry>(
-          func(entry) {
-            if (entry.id == entryId) {
-              entryFound := true;
-              { entry with isFavorite = not entry.isFavorite };
-            } else {
-              entry;
-            };
-          }
-        );
-
-        if (not entryFound) {
-          Runtime.trap("NotFound: Journal entry with this ID does not exist.");
-        };
-
-        journalEntries.add(user, updatedEntries);
-      };
-    };
-  };
-
+  // Fetch current user's journal entries (for export or persistent storage)
   public query ({ caller }) func getCallerJournalEntries() : async [JournalEntry] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: User role required");
-    };
+    ensureUserInitialized(caller);
     switch (journalEntries.get(caller)) {
       case (null) { [] };
-      case (?entries) { entries.toArray() };
+      case (?list) { list.toArray() };
     };
   };
 
-  public query ({ caller }) func getAllJournalEntries(user : Principal) : async [JournalEntry] {
-    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Cannot fetch other user's entries");
-    };
-    switch (journalEntries.get(user)) {
-      case (null) { [] };
-      case (?entries) { entries.toArray() };
-    };
-  };
-
-  public query ({ caller }) func getEntryById(entryId : Nat) : async ?JournalEntry {
-    for ((user, entries) in journalEntries.entries()) {
-      let foundEntry = entries.filter(
-        func(entry) { entry.id == entryId }
-      );
-      if (not foundEntry.isEmpty()) {
-        return ?foundEntry.toArray()[0];
-      };
-    };
-    null;
-  };
-
-  public query ({ caller }) func getCallerFavoriteEntries() : async [JournalEntry] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: User role required");
-    };
-    switch (journalEntries.get(caller)) {
-      case (null) { [] };
-      case (?entries) {
-        let filtered = entries.filter(
-          func(entry) { entry.isFavorite }
-        );
-        filtered.toArray();
-      };
-    };
-  };
-
-  public shared ({ caller }) func synchronizeJournalEntries(entries : [JournalEntry]) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: User role required");
-    };
-    nextEntryId += entries.size();
-
-    let validEntries = List.fromArray<JournalEntry>(entries.filter(
-      func(entry) { entry.user == caller }
-    ));
-    journalEntries.add(caller, validEntries);
-  };
-
+  // Fetch current user's progress data (for persistent profile)
   public query ({ caller }) func getCallerProgressStats() : async ProgressStats {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: User role required");
-    };
+    ensureUserInitialized(caller);
     switch (progressCache.get(caller)) {
       case (null) {
         {
           totalMinutes = 0;
           currentStreak = 0;
           monthlyMinutes = 0;
-          rank = "";
+          rank = "Beginner";
         };
       };
       case (?cache) { cache };
     };
   };
 
+  // Fetch current user's session records (for export or persistent storage)
   public query ({ caller }) func getCallerSessionRecords() : async [MeditationSession] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: User role required");
-    };
+    ensureUserInitialized(caller);
     switch (sessionRecords.get(caller)) {
       case (null) { [] };
       case (?list) { list.toArray() };
@@ -560,10 +370,7 @@ actor {
   };
 
   public query ({ caller }) func getCurrentUserExportData() : async ExportData {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: User role required");
-    };
-
+    ensureUserInitialized(caller);
     let entries = switch (journalEntries.get(caller)) {
       case (null) { [] };
       case (?list) { list.toArray() };
@@ -580,7 +387,7 @@ actor {
           totalMinutes = 0;
           currentStreak = 0;
           monthlyMinutes = 0;
-          rank = "";
+          rank = "Beginner";
         };
       };
       case (?cache) { cache };
@@ -596,12 +403,18 @@ actor {
     };
   };
 
+  // Helper function to calculate rank based on total minutes
+  private func calculateRank(totalMinutes : Nat) : Text {
+    if (totalMinutes >= 1000) { "Master" }
+    else if (totalMinutes >= 500) { "Expert" }
+    else if (totalMinutes >= 200) { "Advanced" }
+    else if (totalMinutes >= 50) { "Intermediate" }
+    else { "Beginner" };
+  };
+
   // Endpoint to persist client-calculated session progress
   public shared ({ caller }) func recordMeditationSession(session : MeditationSession, _monthlyStats : Nat, _currentStreak : Nat) : async ProgressStats {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: User role required");
-    };
-
+    ensureUserInitialized(caller);
     let sessions : List.List<MeditationSession> = switch (sessionRecords.get(caller)) {
       case (null) {
         let newSessions = List.empty<MeditationSession>();
@@ -615,41 +428,41 @@ actor {
     };
     sessionRecords.add(caller, sessions);
 
+    // Calculate total minutes from all sessions
+    var totalMinutes = 0;
+    for (s in sessions.values()) {
+      totalMinutes += s.minutes;
+    };
+
+    let rank = calculateRank(totalMinutes);
+
     let progressStore : ProgressStore = {
       currentStreak = _currentStreak;
-      totalMinutes = _monthlyStats;
+      totalMinutes = totalMinutes;
       sessions;
     };
     progressStats.add(caller, progressStore);
 
     let newStats : ProgressStats = {
-      totalMinutes = _monthlyStats;
+      totalMinutes = totalMinutes;
       currentStreak = _currentStreak;
       monthlyMinutes = _monthlyStats;
-      rank = "";
+      rank = rank;
     };
     progressCache.add(caller, newStats);
 
     newStats;
   };
 
-  // RITUALS FEATURE
-
+  // RITUALS FEATURE - require authenticated user
   public shared ({ caller }) func saveRitual(ritual : Ritual) : async () {
-    if (caller.isAnonymous()) { return };
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: User role required");
-    };
+    ensureUserInitialized(caller);
 
     let newRitual = { ritual with timestamp = Time.now() };
 
     let existingRituals = switch (ritualsStore.get(caller)) {
       case (null) { List.empty<Ritual>() };
       case (?list) { list };
-    };
-
-    if (existingRituals.size() >= maxRituals) {
-      Runtime.trap("RitualLimitExceeded: You can only save up to 5 rituals. Please delete an existing ritual before adding a new one.");
     };
 
     // Check for duplicates
@@ -666,16 +479,16 @@ actor {
       Runtime.trap("DuplicateSoundscape: An identical soundscape already exists in your rituals collection. You cannot save this an additional time.");
     };
 
+    if (existingRituals.size() >= 5) {
+      Runtime.trap("RitualLimitExceeded: You can only save up to 5 ritual soundscapes. Please delete one before saving a new one.");
+    };
+
     existingRituals.add(newRitual);
     ritualsStore.add(caller, existingRituals);
   };
 
   public query ({ caller }) func listCallerRituals() : async [Ritual] {
-    if (caller.isAnonymous()) { return [] };
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: User role required");
-    };
-
+    ensureUserInitialized(caller);
     switch (ritualsStore.get(caller)) {
       case (null) { [] };
       case (?list) {
@@ -690,11 +503,7 @@ actor {
   };
 
   public shared ({ caller }) func deleteRitual(ritualToDelete : Ritual) : async () {
-    if (caller.isAnonymous()) { return };
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: User role required");
-    };
-
+    ensureUserInitialized(caller);
     switch (ritualsStore.get(caller)) {
       case (null) { Runtime.trap("RitualNotFound: No rituals found for this user") };
       case (?ritualsList) {

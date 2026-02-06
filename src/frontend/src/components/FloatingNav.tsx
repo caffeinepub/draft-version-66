@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BookOpen, TrendingUp, Book } from 'lucide-react';
+import { BookOpen, TrendingUp, Book, Brain } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 
 interface NavItem {
@@ -27,6 +27,12 @@ const navItems: NavItem[] = [
     label: 'Books',
     icon: <Book className="w-5 h-5 sm:w-6 sm:h-6" />,
     path: '/books',
+  },
+  {
+    id: 'knowledge',
+    label: 'Knowledge',
+    icon: <Brain className="w-5 h-5 sm:w-6 sm:h-6" />,
+    path: '/knowledge',
   },
 ];
 

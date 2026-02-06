@@ -1,8 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { useInternetIdentity } from './useInternetIdentity';
-import type { ProgressStats, JournalEntry, MeditationType, MoodState, EnergyState, Book, ImportData, Ritual, AddJournalEntryRequest, UpdateJournalEntryRequest, JournalEntryActionRequest } from '../backend';
-import { Variant_delete_toggleFavorite } from '../backend';
+import type { ProgressStats, JournalEntry, MeditationType, MoodState, EnergyState, Book, ImportData, Ritual } from '../backend';
 import { BOOK_RECOMMENDATIONS } from '../lib/bookData';
 import { formatRankDisplay } from '../utils/progressRanks';
 import {
@@ -13,6 +12,9 @@ import {
   getGuestRituals,
   setGuestRituals,
 } from '../utils/meditationStorage';
+import { waitForCloudSyncReady, getCloudSyncErrorMessage, CloudSyncError, CLOUD_SYNC_ERRORS } from '../utils/cloudSync';
+import { toast } from 'sonner';
+import { useRef, useEffect } from 'react';
 
 // Stub types for methods not yet implemented in backend
 interface MeditationTypeInfo {
@@ -123,24 +125,50 @@ export function useDailyQuotes() {
 
 // Hook for recording meditation sessions - branches by auth state
 export function useRecordSession() {
-  const { actor } = useActor();
+  const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
   const queryClient = useQueryClient();
   const principalId = identity?.getPrincipal().toString();
   const isAuthenticated = identity && !identity.getPrincipal().isAnonymous();
 
+  // Use refs to provide live values to waitForCloudSyncReady
+  const actorRef = useRef(actor);
+  const isFetchingRef = useRef(isFetching);
+  const isAuthenticatedRef = useRef(isAuthenticated);
+
+  useEffect(() => {
+    actorRef.current = actor;
+  }, [actor]);
+
+  useEffect(() => {
+    isFetchingRef.current = isFetching;
+  }, [isFetching]);
+
+  useEffect(() => {
+    isAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated]);
+
   return useMutation({
     mutationFn: async (minutes: number) => {
-      if (isAuthenticated && actor) {
-        // Authenticated: fetch existing sessions and calculate stats
-        const existingSessions = await actor.getCallerSessionRecords();
+      if (isAuthenticated) {
+        // Authenticated: wait for cloud sync to be ready before proceeding
+        await waitForCloudSyncReady(
+          () => actorRef.current,
+          () => isAuthenticatedRef.current || false,
+          () => isFetchingRef.current,
+          8000,
+          150
+        );
+        
+        // Fetch backend sessions, calculate stats, and persist
+        const backendSessions = await actorRef.current!.getCallerSessionRecords();
         const now = new Date();
         const today = now.toISOString().split('T')[0];
 
-        // Calculate streak from existing sessions
+        // Calculate streak from backend sessions
         let currentStreak = 1;
-        if (existingSessions.length > 0) {
-          const sortedSessions = [...existingSessions].sort((a, b) => 
+        if (backendSessions.length > 0) {
+          const sortedSessions = [...backendSessions].sort((a, b) => 
             Number(b.timestamp) - Number(a.timestamp)
           );
           const lastSession = sortedSessions[0];
@@ -152,33 +180,32 @@ export function useRecordSession() {
 
           if (lastDateStr === today) {
             // Already meditated today, maintain streak
-            const existingStats = await actor.getCallerProgressStats();
-            currentStreak = Number(existingStats.currentStreak);
+            const backendStats = await actorRef.current!.getCallerProgressStats();
+            currentStreak = Number(backendStats.currentStreak);
           } else if (lastDateStr === yesterdayStr) {
             // Meditated yesterday, increment streak
-            const existingStats = await actor.getCallerProgressStats();
-            currentStreak = Number(existingStats.currentStreak) + 1;
+            const backendStats = await actorRef.current!.getCallerProgressStats();
+            currentStreak = Number(backendStats.currentStreak) + 1;
           }
         }
 
-        // Calculate total minutes (add to existing)
-        const existingStats = await actor.getCallerProgressStats();
-        const totalMinutes = Number(existingStats.totalMinutes) + minutes;
+        // Calculate total minutes from backend
+        const backendStats = await actorRef.current!.getCallerProgressStats();
+        const totalMinutes = Number(backendStats.totalMinutes) + minutes;
 
-        // Calculate monthly minutes from all sessions in last 30 days
+        // Calculate monthly minutes from backend sessions
         const thirtyDaysAgo = new Date(now);
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const allSessions = [...existingSessions, { minutes: BigInt(minutes), timestamp: BigInt(Date.now() * 1000000) }];
-        const monthlyMinutes = allSessions
+        const monthlyMinutes = [...backendSessions, { minutes: BigInt(minutes), timestamp: BigInt(Date.now() * 1000000) }]
           .filter((session) => new Date(Number(session.timestamp) / 1000000) >= thirtyDaysAgo)
           .reduce((sum, session) => sum + Number(session.minutes), 0);
 
-        await actor.recordMeditationSession(
+        await actorRef.current!.recordMeditationSession(
           {
             minutes: BigInt(minutes),
             timestamp: BigInt(Date.now() * 1000000),
           },
-          BigInt(totalMinutes),
+          BigInt(monthlyMinutes),
           BigInt(currentStreak)
         );
       } else {
@@ -187,10 +214,17 @@ export function useRecordSession() {
       }
     },
     onSuccess: () => {
-      // Invalidate progress stats and session records to trigger refresh
+      // Invalidate and refetch both progress and journal queries to refresh UI immediately
       queryClient.invalidateQueries({ queryKey: ['progressStats', principalId || 'guest'] });
-      queryClient.invalidateQueries({ queryKey: ['sessionRecords', principalId || 'guest'] });
-      queryClient.invalidateQueries({ queryKey: ['exportData', principalId || 'guest'] });
+      queryClient.invalidateQueries({ queryKey: ['journalEntries', principalId || 'guest'] });
+      queryClient.refetchQueries({ queryKey: ['progressStats', principalId || 'guest'] });
+      queryClient.refetchQueries({ queryKey: ['journalEntries', principalId || 'guest'] });
+    },
+    onError: (error: any) => {
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message, {
+        className: 'border-2 border-destructive/50 bg-destructive/10',
+      });
     },
   });
 }
@@ -205,34 +239,26 @@ export function useProgressStats() {
   return useQuery<LocalProgressData>({
     queryKey: ['progressStats', principalId || 'guest'],
     queryFn: async () => {
-      if (isAuthenticated && actor) {
+      if (isAuthenticated) {
         // Authenticated: fetch from backend
-        try {
-          const backendStats = await actor.getCallerProgressStats();
-          return {
-            totalMinutes: Number(backendStats.totalMinutes),
-            currentStreak: Number(backendStats.currentStreak),
-            monthlyMinutes: Number(backendStats.monthlyMinutes),
-            sessions: [],
-          };
-        } catch (error) {
-          console.error('Error fetching backend progress stats:', error);
-          return {
-            totalMinutes: 0,
-            currentStreak: 0,
-            monthlyMinutes: 0,
-            sessions: [],
-          };
-        }
+        if (!actor) throw new Error('Actor not available');
+        const backendStats = await actor.getCallerProgressStats();
+        return {
+          totalMinutes: Number(backendStats.totalMinutes),
+          currentStreak: Number(backendStats.currentStreak),
+          monthlyMinutes: Number(backendStats.monthlyMinutes),
+          sessions: [],
+        };
       } else {
         // Guest: read from localStorage
         return getGuestProgressData();
       }
     },
-    enabled: !!actor && !isFetching && !isInitializing,
+    enabled: isAuthenticated ? (!!actor && !isFetching && !isInitializing) : !isInitializing,
     staleTime: 30 * 1000, // 30 seconds
     refetchOnMount: true,
     refetchOnWindowFocus: false,
+    retry: false,
   });
 }
 
@@ -275,46 +301,99 @@ export function useJournalEntries() {
   return useQuery<JournalEntry[]>({
     queryKey: ['journalEntries', principalId || 'guest'],
     queryFn: async () => {
-      if (isAuthenticated && actor) {
+      if (isAuthenticated) {
         // Authenticated: fetch from backend
-        try {
-          return await actor.getCallerJournalEntries();
-        } catch (error) {
-          console.error('Error fetching backend journal entries:', error);
-          return [];
-        }
+        if (!actor) throw new Error('Actor not available');
+        return await actor.getCallerJournalEntries();
       } else {
         // Guest: read from localStorage
         const entries = getGuestJournalEntries();
         return entries.map(deserializeJournalEntryUnified);
       }
     },
-    enabled: !!actor && !isFetching && !isInitializing,
+    enabled: isAuthenticated ? (!!actor && !isFetching && !isInitializing) : !isInitializing,
     staleTime: 30 * 1000, // 30 seconds
     refetchOnMount: true,
     refetchOnWindowFocus: false,
+    retry: false,
   });
 }
 
 export function useSaveJournalEntry() {
-  const { actor } = useActor();
+  const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
   const queryClient = useQueryClient();
   const principalId = identity?.getPrincipal().toString();
   const isAuthenticated = identity && !identity.getPrincipal().isAnonymous();
 
+  // Use refs to provide live values to waitForCloudSyncReady
+  const actorRef = useRef(actor);
+  const isFetchingRef = useRef(isFetching);
+  const isAuthenticatedRef = useRef(isAuthenticated);
+
+  useEffect(() => {
+    actorRef.current = actor;
+  }, [actor]);
+
+  useEffect(() => {
+    isFetchingRef.current = isFetching;
+  }, [isFetching]);
+
+  useEffect(() => {
+    isAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated]);
+
   return useMutation({
     mutationFn: async (entry: Omit<JournalEntry, 'id' | 'user' | 'timestamp'>) => {
-      if (isAuthenticated && actor) {
-        // Authenticated: save to backend using addJournalEntry
-        const request: AddJournalEntryRequest = {
+      if (isAuthenticated) {
+        // Authenticated: wait for cloud sync to be ready before proceeding
+        await waitForCloudSyncReady(
+          () => actorRef.current,
+          () => isAuthenticatedRef.current || false,
+          () => isFetchingRef.current,
+          8000,
+          150
+        );
+        
+        // Fetch current entries, add new one with unique ID, and import back
+        const currentEntries = await actorRef.current!.getCallerJournalEntries();
+        
+        // Generate unique ID by finding max ID and adding 1
+        const maxId = currentEntries.length > 0 
+          ? Math.max(...currentEntries.map(e => Number(e.id)))
+          : -1;
+        
+        const newEntry: JournalEntry = {
+          id: BigInt(maxId + 1),
+          user: identity!.getPrincipal(),
           meditationType: entry.meditationType,
           duration: entry.duration,
           mood: entry.mood,
           energy: entry.energy,
           reflection: entry.reflection,
+          timestamp: BigInt(Date.now() * 1000000),
+          isFavorite: entry.isFavorite,
         };
-        await actor.addJournalEntry(request);
+        
+        const allEntries = [...currentEntries, newEntry];
+        const sessions = await actorRef.current!.getCallerSessionRecords();
+        const stats = await actorRef.current!.getCallerProgressStats();
+        
+        // Fetch current user profile to avoid overwriting it
+        const currentProfile = await actorRef.current!.getCallerUserProfile();
+        
+        const importPayload: ImportData = {
+          journalEntries: allEntries,
+          sessionRecords: sessions,
+          progressStats: stats,
+        };
+        
+        // Only include userProfile if it exists (Candid-compatible optional)
+        if (currentProfile) {
+          importPayload.userProfile = currentProfile;
+        }
+        
+        await actorRef.current!.importData(importPayload, true);
       } else {
         // Guest: save to localStorage
         const entries = getGuestJournalEntries();
@@ -334,33 +413,77 @@ export function useSaveJournalEntry() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries', principalId || 'guest'] });
+      queryClient.refetchQueries({ queryKey: ['journalEntries', principalId || 'guest'] });
     },
-    onError: (error) => {
-      console.error('Error saving journal entry:', error);
+    onError: (error: any) => {
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message, {
+        className: 'border-2 border-destructive/50 bg-destructive/10',
+      });
     },
   });
 }
 
 export function useUpdateJournalEntry() {
-  const { actor } = useActor();
+  const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
   const queryClient = useQueryClient();
   const principalId = identity?.getPrincipal().toString();
   const isAuthenticated = identity && !identity.getPrincipal().isAnonymous();
 
+  // Use refs to provide live values to waitForCloudSyncReady
+  const actorRef = useRef(actor);
+  const isFetchingRef = useRef(isFetching);
+  const isAuthenticatedRef = useRef(isAuthenticated);
+
+  useEffect(() => {
+    actorRef.current = actor;
+  }, [actor]);
+
+  useEffect(() => {
+    isFetchingRef.current = isFetching;
+  }, [isFetching]);
+
+  useEffect(() => {
+    isAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated]);
+
   return useMutation({
     mutationFn: async ({ id, entry }: { id: bigint; entry: JournalEntry }) => {
-      if (isAuthenticated && actor) {
-        // Authenticated: update in backend using updateJournalEntry
-        const request: UpdateJournalEntryRequest = {
-          id,
-          meditationType: entry.meditationType,
-          duration: entry.duration,
-          mood: entry.mood,
-          energy: entry.energy,
-          reflection: entry.reflection,
+      if (isAuthenticated) {
+        // Authenticated: wait for cloud sync to be ready before proceeding
+        await waitForCloudSyncReady(
+          () => actorRef.current,
+          () => isAuthenticatedRef.current || false,
+          () => isFetchingRef.current,
+          8000,
+          150
+        );
+        
+        // Fetch all entries, update the one, and import back
+        const currentEntries = await actorRef.current!.getCallerJournalEntries();
+        const updatedEntries = currentEntries.map(e => 
+          e.id === id ? entry : e
+        );
+        
+        const sessions = await actorRef.current!.getCallerSessionRecords();
+        const stats = await actorRef.current!.getCallerProgressStats();
+        
+        // Fetch current user profile to avoid overwriting it
+        const currentProfile = await actorRef.current!.getCallerUserProfile();
+        
+        const importPayload: ImportData = {
+          journalEntries: updatedEntries,
+          sessionRecords: sessions,
+          progressStats: stats,
         };
-        await actor.updateJournalEntry(request);
+        
+        // Only include userProfile if it exists (Candid-compatible optional)
+        if (currentProfile) {
+          importPayload.userProfile = currentProfile;
+        }
+        
+        await actorRef.current!.importData(importPayload, true);
       } else {
         // Guest: update in localStorage
         const entries = getGuestJournalEntries();
@@ -373,32 +496,75 @@ export function useUpdateJournalEntry() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries', principalId || 'guest'] });
+      queryClient.refetchQueries({ queryKey: ['journalEntries', principalId || 'guest'] });
     },
-    onError: (error) => {
-      console.error('Error updating journal entry:', error);
+    onError: (error: any) => {
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message, {
+        className: 'border-2 border-destructive/50 bg-destructive/10',
+      });
     },
   });
 }
 
 export function useDeleteJournalEntry() {
-  const { actor } = useActor();
+  const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
   const queryClient = useQueryClient();
   const principalId = identity?.getPrincipal().toString();
   const isAuthenticated = identity && !identity.getPrincipal().isAnonymous();
 
+  // Use refs to provide live values to waitForCloudSyncReady
+  const actorRef = useRef(actor);
+  const isFetchingRef = useRef(isFetching);
+  const isAuthenticatedRef = useRef(isAuthenticated);
+
+  useEffect(() => {
+    actorRef.current = actor;
+  }, [actor]);
+
+  useEffect(() => {
+    isFetchingRef.current = isFetching;
+  }, [isFetching]);
+
+  useEffect(() => {
+    isAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated]);
+
   return useMutation({
     mutationFn: async (id: bigint) => {
-      if (isAuthenticated && actor) {
-        // Authenticated: delete from backend using performJournalEntryAction
-        const request: JournalEntryActionRequest = {
-          entryIdentifier: {
-            user: identity!.getPrincipal(),
-            id,
-          },
-          action: Variant_delete_toggleFavorite.delete_,
+      if (isAuthenticated) {
+        // Authenticated: wait for cloud sync to be ready before proceeding
+        await waitForCloudSyncReady(
+          () => actorRef.current,
+          () => isAuthenticatedRef.current || false,
+          () => isFetchingRef.current,
+          8000,
+          150
+        );
+        
+        // Fetch all entries, filter out the one, and import back
+        const currentEntries = await actorRef.current!.getCallerJournalEntries();
+        const filteredEntries = currentEntries.filter(e => e.id !== id);
+        
+        const sessions = await actorRef.current!.getCallerSessionRecords();
+        const stats = await actorRef.current!.getCallerProgressStats();
+        
+        // Fetch current user profile to avoid overwriting it
+        const currentProfile = await actorRef.current!.getCallerUserProfile();
+        
+        const importPayload: ImportData = {
+          journalEntries: filteredEntries,
+          sessionRecords: sessions,
+          progressStats: stats,
         };
-        await actor.performJournalEntryAction(request);
+        
+        // Only include userProfile if it exists (Candid-compatible optional)
+        if (currentProfile) {
+          importPayload.userProfile = currentProfile;
+        }
+        
+        await actorRef.current!.importData(importPayload, true);
       } else {
         // Guest: delete from localStorage
         const entries = getGuestJournalEntries();
@@ -408,32 +574,77 @@ export function useDeleteJournalEntry() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries', principalId || 'guest'] });
+      queryClient.refetchQueries({ queryKey: ['journalEntries', principalId || 'guest'] });
     },
-    onError: (error) => {
-      console.error('Error deleting journal entry:', error);
+    onError: (error: any) => {
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message, {
+        className: 'border-2 border-destructive/50 bg-destructive/10',
+      });
     },
   });
 }
 
 export function useToggleFavoriteJournal() {
-  const { actor } = useActor();
+  const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
   const queryClient = useQueryClient();
   const principalId = identity?.getPrincipal().toString();
   const isAuthenticated = identity && !identity.getPrincipal().isAnonymous();
 
+  // Use refs to provide live values to waitForCloudSyncReady
+  const actorRef = useRef(actor);
+  const isFetchingRef = useRef(isFetching);
+  const isAuthenticatedRef = useRef(isAuthenticated);
+
+  useEffect(() => {
+    actorRef.current = actor;
+  }, [actor]);
+
+  useEffect(() => {
+    isFetchingRef.current = isFetching;
+  }, [isFetching]);
+
+  useEffect(() => {
+    isAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated]);
+
   return useMutation({
     mutationFn: async (id: bigint) => {
-      if (isAuthenticated && actor) {
-        // Authenticated: toggle in backend using performJournalEntryAction
-        const request: JournalEntryActionRequest = {
-          entryIdentifier: {
-            user: identity!.getPrincipal(),
-            id,
-          },
-          action: Variant_delete_toggleFavorite.toggleFavorite,
+      if (isAuthenticated) {
+        // Authenticated: wait for cloud sync to be ready before proceeding
+        await waitForCloudSyncReady(
+          () => actorRef.current,
+          () => isAuthenticatedRef.current || false,
+          () => isFetchingRef.current,
+          8000,
+          150
+        );
+        
+        // Fetch all entries, toggle favorite, and import back
+        const currentEntries = await actorRef.current!.getCallerJournalEntries();
+        const updatedEntries = currentEntries.map(e => 
+          e.id === id ? { ...e, isFavorite: !e.isFavorite } : e
+        );
+        
+        const sessions = await actorRef.current!.getCallerSessionRecords();
+        const stats = await actorRef.current!.getCallerProgressStats();
+        
+        // Fetch current user profile to avoid overwriting it
+        const currentProfile = await actorRef.current!.getCallerUserProfile();
+        
+        const importPayload: ImportData = {
+          journalEntries: updatedEntries,
+          sessionRecords: sessions,
+          progressStats: stats,
         };
-        await actor.performJournalEntryAction(request);
+        
+        // Only include userProfile if it exists (Candid-compatible optional)
+        if (currentProfile) {
+          importPayload.userProfile = currentProfile;
+        }
+        
+        await actorRef.current!.importData(importPayload, true);
       } else {
         // Guest: toggle in localStorage
         const entries = getGuestJournalEntries();
@@ -446,9 +657,13 @@ export function useToggleFavoriteJournal() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries', principalId || 'guest'] });
+      queryClient.refetchQueries({ queryKey: ['journalEntries', principalId || 'guest'] });
     },
-    onError: (error) => {
-      console.error('Error toggling favorite:', error);
+    onError: (error: any) => {
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message, {
+        className: 'border-2 border-destructive/50 bg-destructive/10',
+      });
     },
   });
 }
@@ -519,11 +734,28 @@ export function useExportMeditationData() {
 }
 
 export function useImportMeditationData() {
-  const { actor } = useActor();
+  const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
   const queryClient = useQueryClient();
   const principalId = identity?.getPrincipal().toString();
   const isAuthenticated = identity && !identity.getPrincipal().isAnonymous();
+
+  // Use refs to provide live values to waitForCloudSyncReady
+  const actorRef = useRef(actor);
+  const isFetchingRef = useRef(isFetching);
+  const isAuthenticatedRef = useRef(isAuthenticated);
+
+  useEffect(() => {
+    actorRef.current = actor;
+  }, [actor]);
+
+  useEffect(() => {
+    isFetchingRef.current = isFetching;
+  }, [isFetching]);
+
+  useEffect(() => {
+    isAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated]);
 
   return useMutation({
     mutationFn: async (file: File) => {
@@ -535,13 +767,25 @@ export function useImportMeditationData() {
         throw new Error('Invalid data format');
       }
 
-      if (isAuthenticated && actor) {
-        // Authenticated: import to backend ONLY (do NOT write to localStorage)
+      if (isAuthenticated) {
+        // Authenticated: wait for cloud sync to be ready before proceeding
+        await waitForCloudSyncReady(
+          () => actorRef.current,
+          () => isAuthenticatedRef.current || false,
+          () => isFetchingRef.current,
+          8000,
+          150
+        );
+        
+        // Import to backend ONLY (do NOT write to localStorage)
         try {
-          const importData: ImportData = {
-            journalEntries: data.journalEntries.map((entry) => ({
-              id: BigInt(entry.id || '0'),
-              user: identity.getPrincipal(),
+          // Fetch current user profile to avoid overwriting it
+          const currentProfile = await actorRef.current!.getCallerUserProfile();
+          
+          const importPayload: ImportData = {
+            journalEntries: data.journalEntries.map((entry, index) => ({
+              id: BigInt(index),
+              user: identity!.getPrincipal(),
               meditationType: entry.meditationType as MeditationType,
               duration: BigInt(entry.duration || '0'),
               mood: entry.mood as MoodState[],
@@ -560,11 +804,15 @@ export function useImportMeditationData() {
               monthlyMinutes: BigInt(data.progressStats.monthlyMinutes || 0),
               rank: formatRankDisplay(data.progressStats.totalMinutes || 0),
             },
-            userProfile: undefined,
           };
+          
+          // Only include userProfile if it exists (Candid-compatible optional)
+          if (currentProfile) {
+            importPayload.userProfile = currentProfile;
+          }
 
           // Call backend import with overwrite=true
-          await actor.importData(importData, true);
+          await actorRef.current!.importData(importPayload, true);
         } catch (error) {
           console.error('Backend import error:', error);
           throw new Error('Failed to import data to backend. Please try again.');
@@ -589,9 +837,20 @@ export function useImportMeditationData() {
       }
     },
     onSuccess: () => {
-      // Invalidate queries to refresh data immediately
+      // Invalidate and refetch queries to refresh data immediately, including rituals
       queryClient.invalidateQueries({ queryKey: ['journalEntries', principalId || 'guest'] });
       queryClient.invalidateQueries({ queryKey: ['progressStats', principalId || 'guest'] });
+      queryClient.invalidateQueries({ queryKey: ['rituals', principalId || 'guest'] });
+      
+      queryClient.refetchQueries({ queryKey: ['journalEntries', principalId || 'guest'] });
+      queryClient.refetchQueries({ queryKey: ['progressStats', principalId || 'guest'] });
+      queryClient.refetchQueries({ queryKey: ['rituals', principalId || 'guest'] });
+    },
+    onError: (error: any) => {
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message, {
+        className: 'border-2 border-destructive/50 bg-destructive/10',
+      });
     },
   });
 }
@@ -662,50 +921,82 @@ export function useRituals() {
   return useQuery<Array<LocalRitual & { displayName: string }>>({
     queryKey: ['rituals', principalId || 'guest'],
     queryFn: async () => {
-      if (isAuthenticated && actor) {
-        // Authenticated: fetch from backend ONLY (never read guest localStorage)
-        try {
-          const backendRituals = await actor.listCallerRituals();
-          return backendRituals.map((r) => ({
+      if (isAuthenticated) {
+        // Authenticated: fetch from backend
+        if (!actor) throw new Error('Actor not available');
+        const backendRituals = await actor.listCallerRituals();
+        return backendRituals.map((r) => {
+          const meditationName = getMeditationName(r.meditationType);
+          const duration = Number(r.duration);
+          const soundName = getAmbientSoundName(r.ambientSound);
+          return {
             meditationType: r.meditationType,
-            duration: Number(r.duration),
+            duration: duration,
             ambientSound: r.ambientSound,
             ambientSoundVolume: Number(r.ambientSoundVolume),
             timestamp: new Date(Number(r.timestamp) / 1000000).toISOString(),
-            displayName: `${getMeditationName(r.meditationType)} · ${Number(r.duration)} min · ${getAmbientSoundName(r.ambientSound)}`,
-          }));
-        } catch (error) {
-          console.error('Error fetching backend rituals:', error);
-          return [];
-        }
+            displayName: `${meditationName} · ${duration} min · ${soundName}`,
+          };
+        });
       } else {
-        // Guest: read from localStorage ONLY (never call backend)
+        // Guest: read from localStorage
         const guestRituals = getGuestRituals();
-        return guestRituals.map((r) => ({
-          ...r,
-          displayName: `${getMeditationName(r.meditationType)} · ${r.duration} min · ${getAmbientSoundName(r.ambientSound)}`,
-        }));
+        return guestRituals.map((r) => {
+          const meditationName = getMeditationName(r.meditationType);
+          const soundName = getAmbientSoundName(r.ambientSound);
+          return {
+            ...r,
+            displayName: `${meditationName} · ${r.duration} min · ${soundName}`,
+          };
+        });
       }
     },
-    enabled: !!actor && !isFetching && !isInitializing,
+    enabled: isAuthenticated ? (!!actor && !isFetching && !isInitializing) : !isInitializing,
     staleTime: 30 * 1000, // 30 seconds
     refetchOnMount: true,
     refetchOnWindowFocus: false,
+    retry: false,
   });
 }
 
 // Hook to save a ritual - branches by auth state with duplicate detection and 5-ritual limit
 export function useSaveRitual() {
-  const { actor } = useActor();
+  const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
   const queryClient = useQueryClient();
   const principalId = identity?.getPrincipal().toString();
   const isAuthenticated = identity && !identity.getPrincipal().isAnonymous();
 
+  // Use refs to provide live values to waitForCloudSyncReady
+  const actorRef = useRef(actor);
+  const isFetchingRef = useRef(isFetching);
+  const isAuthenticatedRef = useRef(isAuthenticated);
+
+  useEffect(() => {
+    actorRef.current = actor;
+  }, [actor]);
+
+  useEffect(() => {
+    isFetchingRef.current = isFetching;
+  }, [isFetching]);
+
+  useEffect(() => {
+    isAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated]);
+
   return useMutation({
     mutationFn: async (ritual: Omit<LocalRitual, 'timestamp'>) => {
-      if (isAuthenticated && actor) {
-        // Authenticated: save to backend (backend handles duplicate check and limit, throws trap)
+      if (isAuthenticated) {
+        // Authenticated: wait for cloud sync to be ready before proceeding with longer timeout
+        await waitForCloudSyncReady(
+          () => actorRef.current,
+          () => isAuthenticatedRef.current || false,
+          () => isFetchingRef.current,
+          10000,
+          200
+        );
+        
+        // Backend handles both duplicate check and limit enforcement
         const backendRitual: Ritual = {
           meditationType: ritual.meditationType as MeditationType,
           duration: BigInt(ritual.duration),
@@ -715,36 +1006,37 @@ export function useSaveRitual() {
         };
         
         try {
-          await actor.saveRitual(backendRitual);
+          await actorRef.current!.saveRitual(backendRitual);
         } catch (error: any) {
-          // Backend traps with "DuplicateSoundscape" or "RitualLimitExceeded" message
-          if (error.message && error.message.includes('DuplicateSoundscape')) {
+          // Map backend errors to frontend error identifiers
+          const errorMsg = error.message || String(error);
+          if (errorMsg.includes('DuplicateSoundscape')) {
             throw new Error('DUPLICATE_RITUAL');
+          } else if (errorMsg.includes('RitualLimitExceeded')) {
+            throw new Error('RITUAL_LIMIT_REACHED');
+          } else {
+            throw error;
           }
-          if (error.message && error.message.includes('RitualLimitExceeded')) {
-            throw new Error('RITUAL_LIMIT');
-          }
-          // Re-throw other errors for generic handling
-          throw error;
         }
       } else {
-        // Guest: check for duplicates and limit in localStorage before saving
+        // Guest: check for limit and duplicates in localStorage before saving
         const guestRituals = getGuestRituals();
+        
+        // Check limit first
+        if (guestRituals.length >= 5) {
+          throw new Error('RITUAL_LIMIT_REACHED');
+        }
+        
         const newRitual: LocalRitual = {
           ...ritual,
           timestamp: new Date().toISOString(),
         };
         
-        // Check for duplicates first (higher priority)
+        // Check for duplicates
         const isDuplicate = guestRituals.some((existing) => areRitualsEqual(existing, newRitual));
         
         if (isDuplicate) {
           throw new Error('DUPLICATE_RITUAL');
-        }
-        
-        // Check for limit (5 rituals max)
-        if (guestRituals.length >= 5) {
-          throw new Error('RITUAL_LIMIT');
         }
         
         guestRituals.push(newRitual);
@@ -753,22 +1045,58 @@ export function useSaveRitual() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rituals', principalId || 'guest'] });
+      queryClient.refetchQueries({ queryKey: ['rituals', principalId || 'guest'] });
+    },
+    onError: (error: any) => {
+      // Don't show toast for specific ritual errors (handled by component)
+      if (error.message !== 'DUPLICATE_RITUAL' && error.message !== 'RITUAL_LIMIT_REACHED') {
+        const message = getCloudSyncErrorMessage(error);
+        toast.error(message, {
+          className: 'border-2 border-destructive/50 bg-destructive/10',
+        });
+      }
     },
   });
 }
 
 // Hook to delete a ritual - branches by auth state
 export function useDeleteRitual() {
-  const { actor } = useActor();
+  const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
   const queryClient = useQueryClient();
   const principalId = identity?.getPrincipal().toString();
   const isAuthenticated = identity && !identity.getPrincipal().isAnonymous();
 
+  // Use refs to provide live values to waitForCloudSyncReady
+  const actorRef = useRef(actor);
+  const isFetchingRef = useRef(isFetching);
+  const isAuthenticatedRef = useRef(isAuthenticated);
+
+  useEffect(() => {
+    actorRef.current = actor;
+  }, [actor]);
+
+  useEffect(() => {
+    isFetchingRef.current = isFetching;
+  }, [isFetching]);
+
+  useEffect(() => {
+    isAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated]);
+
   return useMutation({
     mutationFn: async (ritual: LocalRitual) => {
-      if (isAuthenticated && actor) {
-        // Authenticated: delete from backend ONLY
+      if (isAuthenticated) {
+        // Authenticated: wait for cloud sync to be ready before proceeding
+        await waitForCloudSyncReady(
+          () => actorRef.current,
+          () => isAuthenticatedRef.current || false,
+          () => isFetchingRef.current,
+          8000,
+          150
+        );
+        
+        // Delete from backend
         const backendRitual: Ritual = {
           meditationType: ritual.meditationType as MeditationType,
           duration: BigInt(ritual.duration),
@@ -776,9 +1104,9 @@ export function useDeleteRitual() {
           ambientSoundVolume: BigInt(ritual.ambientSoundVolume),
           timestamp: BigInt(new Date(ritual.timestamp).getTime() * 1000000),
         };
-        await actor.deleteRitual(backendRitual);
+        await actorRef.current!.deleteRitual(backendRitual);
       } else {
-        // Guest: delete from localStorage ONLY
+        // Guest: delete from localStorage
         const guestRituals = getGuestRituals();
         const filteredRituals = guestRituals.filter((existing) => !areRitualsEqual(existing, ritual));
         setGuestRituals(filteredRituals);
@@ -786,6 +1114,13 @@ export function useDeleteRitual() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rituals', principalId || 'guest'] });
+      queryClient.refetchQueries({ queryKey: ['rituals', principalId || 'guest'] });
+    },
+    onError: (error: any) => {
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message, {
+        className: 'border-2 border-destructive/50 bg-destructive/10',
+      });
     },
   });
 }

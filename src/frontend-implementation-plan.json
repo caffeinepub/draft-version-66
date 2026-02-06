@@ -1,87 +1,40 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Revert theming to Draft 94 and remove token drift",
+  "title": "Deep-link Pre-Meditation “More details” to Knowledge category via route search params",
   "requirements": [
     {
-      "id": "REQ-14",
-      "summary": "Restore Draft 94 theme tokens so light/dark surfaces and text colors are consistent across the app.",
+      "id": "REQ-1",
+      "summary": "Update the Pre-Meditation “More details” button to navigate to Knowledge with the matching category selected for the current pre-meditation type.",
       "acceptanceCriteria": [
-        "In both light and dark mode, background, card, and popover surfaces visually match each other as intended (no unexpected shifts between sections of the same page).",
-        "Text colors (default, muted, and on-primary/on-accent) are consistent across Landing, Dashboard, Pre-meditation, Progress, Journal, and Books pages.",
-        "No UI element renders with unreadable contrast due to incorrect token values (e.g., light text on light background or dark text on dark background)."
+        "When the current pre-meditation type is `metta`, clicking “More details” navigates to `/knowledge` with the Metta category selected.",
+        "When the current pre-meditation type is `ifs`, clicking “More details” navigates to `/knowledge` with the IFS category selected.",
+        "When the current pre-meditation type is `visualization`, clicking “More details” navigates to `/knowledge` with the Visualization category selected.",
+        "When the current pre-meditation type is `mindfulness`, clicking “More details” navigates to `/knowledge` with the Mindfulness category selected.",
+        "The change is applied only to the selected “More details” button element in `frontend/src/pages/PreMeditationPage.tsx` (currently the button that calls `navigate({ to: '/knowledge', search: { scrollToContent: true } })`)."
       ],
       "file_operations": [
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Revert the light/dark theme variable values to match Draft 94 and ensure they represent Tailwind-ready OKLCH channel values (so background/foreground/card/popover/border/input/ring/primary/secondary/muted/accent/destructive and their foregrounds produce consistent surfaces and readable contrast). Also ensure any extra app-specific tokens used by the UI (e.g., primary-dark, accent-cyan, accent-cyan-tinted, description-gray) match Draft 94. Verify the component's usage instructions before implementing (shadcn-ui token conventions)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-15",
-      "summary": "Ensure a single authoritative theme token source is used by Tailwind and remove/neutralize duplicate token definitions to prevent drift.",
-      "acceptanceCriteria": [
-        "Only one global theme token definition is effectively applied at runtime (no conflicting :root/.dark variable sets).",
-        "Tailwind color utilities resolve to the expected CSS variables for background/foreground/card/popover/primary/secondary/muted/accent/destructive/border/input/ring.",
-        "Switching themes (dark/light) updates the same set of tokens consistently without leaving components in mixed theme states."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/index.css",
-          "operation": "delete",
-          "description": "Remove the duplicate global theme-token file so builds cannot accidentally pick up conflicting :root/.dark variable sets, ensuring the app relies on a single authoritative token source. Verify the component's usage instructions before implementing (shadcn-ui token conventions)."
-        },
-        {
-          "path": "frontend/src/main.tsx",
-          "operation": "modify",
-          "description": "Confirm the app imports only the intended global theme token file (frontend/src/index.css) and does not import any other theme-token CSS that could reintroduce conflicting variables. Verify the component's usage instructions before implementing (initial-app / build-template-react entry-point conventions)."
-        },
-        {
-          "path": "frontend/tailwind.config.js",
-          "operation": "modify",
-          "description": "Align Tailwind color mappings with the authoritative CSS variable naming and OKLCH token format used in frontend/src/index.css, removing/adjusting any mappings that reference missing or legacy token names and ensuring alpha-enabled utilities work consistently. Verify the component's usage instructions before implementing (shadcn-ui token conventions)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-16",
-      "summary": "Replace hardcoded colors on key UI surfaces with shared theme tokens so components render consistently across pages.",
-      "acceptanceCriteria": [
-        "No core page container or major card-like surface uses hardcoded colors that diverge from theme tokens.",
-        "After the fixes, the same component looks consistent when rendered on different pages (no different background/text coloring due to local overrides)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/LandingPage.tsx",
-          "operation": "modify",
-          "description": "Replace hardcoded gradient hex colors and any non-token background/text styling on the main page container and key surfaces with theme-token utilities (e.g., bg-background, text-foreground, bg-card, text-muted-foreground) so light/dark modes remain consistent with the restored Draft 94 theme. Verify the component's usage instructions before implementing (shadcn-ui theming patterns)."
-        },
-        {
-          "path": "frontend/src/pages/DashboardPage.tsx",
-          "operation": "modify",
-          "description": "Update the page container and major surfaces to remove hardcoded background overrides (including dark gradient hex) and rely exclusively on shared theme tokens; ensure toast styling uses theme tokens rather than hardcoded colors where applicable. Verify the component's usage instructions before implementing (shadcn-ui theming patterns)."
-        },
         {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Remove hardcoded OKLCH/hex values from major surfaces (page container gradients and the active-timer SVG strokes/fills) by switching to shared theme tokens via Tailwind utilities or CSS variables, ensuring consistent background/text contrast across modes and pages. Verify the component's usage instructions before implementing (shadcn-ui theming patterns)."
-        },
+          "description": "Modify only the existing “More details” button’s navigate() call to include a Knowledge route search param for the current meditation type (e.g., `category: meditationType`) while preserving existing `scrollToContent: true` behavior."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Make the Knowledge page initialize its selected category from an optional `category` search param while keeping existing `scrollToContent` deep-link scrolling and avoiding unintended category resets when clearing params.",
+      "acceptanceCriteria": [
+        "`/knowledge` supports an optional search parameter for the category (e.g., `category=metta`, `category=ifs`, etc.).",
+        "If the category search param matches a `TECHNIQUE_CONTENT` id, the Knowledge page opens with that category selected.",
+        "If the category search param is missing or invalid, the Knowledge page falls back to the current default behavior (first category in `TECHNIQUE_CONTENT`).",
+        "If `scrollToContent` is provided, the page still scrolls to the content section anchor after rendering, and clearing search params after scrolling does not reset the selected category unintentionally."
+      ],
+      "file_operations": [
         {
-          "path": "frontend/src/pages/ProgressPage.tsx",
+          "path": "frontend/src/pages/KnowledgePage.tsx",
           "operation": "modify",
-          "description": "Replace any hardcoded toast inline styles and any non-token background/text colors on core surfaces with shared theme tokens so the Progress page matches the restored Draft 94 theme in light/dark modes. Verify the component's usage instructions before implementing (shadcn-ui theming patterns)."
-        },
-        {
-          "path": "frontend/src/pages/JournalPage.tsx",
-          "operation": "modify",
-          "description": "Replace hardcoded toast inline styles and any non-token core surface styling (containers, overlays, prominent cards) with shared theme token utilities to prevent page-specific drift; ensure icon accent colors that affect readability are token-based where appropriate. Verify the component's usage instructions before implementing (shadcn-ui theming patterns)."
-        },
-        {
-          "path": "frontend/src/pages/BookRecommendationsPage.tsx",
-          "operation": "modify",
-          "description": "Remove hardcoded background overrides (including dark gradient hex) and ensure the page container and major card surfaces rely on shared theme tokens for consistent backgrounds and text colors across modes. Verify the component's usage instructions before implementing (shadcn-ui theming patterns)."
+          "description": "Extend route search typing to accept `category`; on initial render (and/or when `category` changes via navigation), validate it against `TECHNIQUE_CONTENT` ids and set initial `selectedCategory` accordingly. Update the deep-link scroll effect so it clears only `scrollToContent` (preserving `category` if present) and does not cause `selectedCategory` to reset."
         }
       ]
     }

@@ -223,7 +223,7 @@ export default function AmbientMusicCarousel({ selectedMusic, onSelectMusic, vol
       {/* Carousel Container with strong overflow hidden */}
       <div 
         ref={containerRef}
-        className="relative h-[260px] sm:h-[300px] overflow-hidden"
+        className="relative h-[260px] sm:h-[300px] overflow-hidden select-none"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}

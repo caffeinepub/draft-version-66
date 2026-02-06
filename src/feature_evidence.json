@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-eliminate-theme-token-drift-by-ensuring-there-is-a-single-authoritative-source-of-global-css-theme-variables-used-by-tailwind-oklch-tokens-and-prevent-unused-duplicate-token-files-from-inadvertently-affecting-builds-e-g-ensure-the-app-imports-and-relies-on-only-the-intended-theme-token-file-and-that-token-naming-matches-what-tailwind-expects",
-      "featureTitle": "Eliminate theme-token drift by ensuring there is a single authoritative source of global CSS theme variables used by Tailwind (OKLCH tokens), and prevent unused/duplicate token files from inadvertently affecting builds (e.g., ensure the app imports and relies on only the intended theme token file and that token naming matches what Tailwind expects).",
+      "featureId": "feature-update-the-pre-meditation-page-more-details-button-the-selected-element-so-it-navigates-to-the-knowledge-page-with-the-category-that-corresponds-to-the-current-pre-meditation-guide-meditation-type-e-g-metta-metta-category-ifs-ifs-category-instead-of-always-landing-on-mindfulness",
+      "featureTitle": "Update the Pre-Meditation page “More details” button (the selected element) so it navigates to the Knowledge page with the category that corresponds to the current pre-meditation guide/meditation type (e.g., metta -> Metta category, ifs -> IFS category) instead of always landing on Mindfulness.",
       "files": [
-        "frontend/index.css",
-        "frontend/tailwind.config.js"
+        "frontend/src/pages/PreMeditationPage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -18,16 +17,15 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-15"
+        "REQ-1"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-audit-key-ui-surfaces-to-ensure-they-exclusively-use-the-shared-theme-tokens-e-g-bg-background-text-foreground-bg-card-text-muted-foreground-rather-than-hardcoded-colors-that-could-cause-draft-95-style-inconsistencies-update-any-offending-styles-so-component-backgrounds-and-text-colors-remain-consistent-with-the-restored-draft-94-theme",
-      "featureTitle": "Audit key UI surfaces to ensure they exclusively use the shared theme tokens (e.g., bg-background, text-foreground, bg-card, text-muted-foreground) rather than hardcoded colors that could cause Draft 95-style inconsistencies; update any offending styles so component backgrounds and text colors remain consistent with the restored Draft 94 theme.",
+      "featureId": "feature-update-the-knowledge-page-to-accept-a-category-identifier-via-route-search-params-and-initialize-the-selected-category-from-it-if-present-and-valid-while-preserving-the-existing-deep-link-scroll-behavior-scrolltocontent",
+      "featureTitle": "Update the Knowledge page to accept a category identifier via route search params and initialize the selected category from it (if present and valid), while preserving the existing deep-link scroll behavior (`scrollToContent`).",
       "files": [
-        "frontend/src/pages/JournalPage.tsx",
-        "frontend/src/pages/ProgressPage.tsx"
+        "frontend/src/pages/KnowledgePage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -39,7 +37,7 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-16"
+        "REQ-2"
       ],
       "confidence": "high"
     }

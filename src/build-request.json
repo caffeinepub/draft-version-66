@@ -1,70 +1,56 @@
 {
   "kind": "build_request",
-  "title": "Revert UI theming to Draft 94 (fix mismatched colors and backgrounds)",
-  "priority": "high",
+  "title": "Fix Pre-Meditation “More details” to deep-link to matching Knowledge category",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-14",
-      "text": "Restore the application’s color system to match Draft 94 by reverting any Draft 95 changes that altered theme tokens (backgrounds, foreground/text colors, card/popover colors, border/input/ring, accent/secondary/muted, destructive) so that the UI no longer shows mismatched backgrounds and inconsistent text colors across pages and components.",
+      "id": "REQ-1",
+      "text": "Update the Pre-Meditation page “More details” button (the selected element) so it navigates to the Knowledge page with the category that corresponds to the current pre-meditation guide/meditation type (e.g., metta -> Metta category, ifs -> IFS category) instead of always landing on Mindfulness.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-6"
         ],
         "quotes": [
-          "Can you revert to draft 94, everything is bugged in terms of colors, backgrounds do not match, text colors are different.",
-          "Almost all colors are different and backgrounds changes"
+          "I noticed when I click on more details( I picked this element), it redirects me to the knowledge page, mindfulness category, always. It should correspond and reflec current pre-meditation guide. Meta > Meta Knowledge page category, IFS > IFS knowledge page category etc. Can you fix that?",
+          "/html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[1]/button[1]"
         ]
       },
       "acceptanceCriteria": [
-        "In both light and dark mode, background, card, and popover surfaces visually match each other as intended (no unexpected shifts between sections of the same page).",
-        "Text colors (default, muted, and on-primary/on-accent) are consistent across Landing, Dashboard, Pre-meditation, Progress, Journal, and Books pages.",
-        "No UI element renders with unreadable contrast due to incorrect token values (e.g., light text on light background or dark text on dark background)."
+        "When the current pre-meditation type is `metta`, clicking “More details” navigates to `/knowledge` with the Metta category selected.",
+        "When the current pre-meditation type is `ifs`, clicking “More details” navigates to `/knowledge` with the IFS category selected.",
+        "When the current pre-meditation type is `visualization`, clicking “More details” navigates to `/knowledge` with the Visualization category selected.",
+        "When the current pre-meditation type is `mindfulness`, clicking “More details” navigates to `/knowledge` with the Mindfulness category selected.",
+        "The change is applied only to the selected “More details” button element in `frontend/src/pages/PreMeditationPage.tsx` (currently the button that calls `navigate({ to: '/knowledge', search: { scrollToContent: true } })`)."
       ]
     },
     {
-      "id": "REQ-15",
-      "text": "Eliminate theme-token drift by ensuring there is a single authoritative source of global CSS theme variables used by Tailwind (OKLCH tokens), and prevent unused/duplicate token files from inadvertently affecting builds (e.g., ensure the app imports and relies on only the intended theme token file and that token naming matches what Tailwind expects).",
+      "id": "REQ-2",
+      "text": "Update the Knowledge page to accept a category identifier via route search params and initialize the selected category from it (if present and valid), while preserving the existing deep-link scroll behavior (`scrollToContent`).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-6"
         ],
         "quotes": [
-          "everything is bugged in terms of colors, backgrounds do not match, text colors are different"
+          "It should correspond and reflec current pre-meditation guide. Meta > Meta Knowledge page category, IFS > IFS knowledge page category etc."
         ]
       },
       "acceptanceCriteria": [
-        "Only one global theme token definition is effectively applied at runtime (no conflicting :root/.dark variable sets).",
-        "Tailwind color utilities resolve to the expected CSS variables for background/foreground/card/popover/primary/secondary/muted/accent/destructive/border/input/ring.",
-        "Switching themes (dark/light) updates the same set of tokens consistently without leaving components in mixed theme states."
-      ]
-    },
-    {
-      "id": "REQ-16",
-      "text": "Audit key UI surfaces to ensure they exclusively use the shared theme tokens (e.g., bg-background, text-foreground, bg-card, text-muted-foreground) rather than hardcoded colors that could cause Draft 95-style inconsistencies; update any offending styles so component backgrounds and text colors remain consistent with the restored Draft 94 theme.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "backgrounds do not match, text colors are different"
-        ]
-      },
-      "acceptanceCriteria": [
-        "No core page container or major card-like surface uses hardcoded colors that diverge from theme tokens.",
-        "After the fixes, the same component looks consistent when rendered on different pages (no different background/text coloring due to local overrides)."
+        "`/knowledge` supports an optional search parameter for the category (e.g., `category=metta`, `category=ifs`, etc.).",
+        "If the category search param matches a `TECHNIQUE_CONTENT` id, the Knowledge page opens with that category selected.",
+        "If the category search param is missing or invalid, the Knowledge page falls back to the current default behavior (first category in `TECHNIQUE_CONTENT`).",
+        "If `scrollToContent` is provided, the page still scrolls to the content section anchor after rendering, and clearing search params after scrolling does not reset the selected category unintentionally."
       ]
     }
   ],
   "constraints": [
-    "Do not edit any files under frontend/src/components/ui (compose with them as-is).",
-    "Do not edit immutable hook files listed in SYSTEM_CONTEXT."
+    "Do not modify files in `frontend/src/components/ui` or other paths listed under `frontend.immutablePaths` in SYSTEM_CONTEXT."
   ],
   "nonGoals": [
-    "Do not add new features (e.g., onboarding, weekly summary, ritual limit changes) as part of this request.",
-    "Do not change backend logic or data models; this is a theming regression fix only."
+    "Adding new knowledge categories or changing `TECHNIQUE_CONTENT` content.",
+    "Changing the Knowledge page layout or carousel behavior beyond selecting the correct initial category.",
+    "Backend changes or data migrations."
   ],
   "imageRequirements": {
     "required": [],

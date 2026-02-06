@@ -1,63 +1,23 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-04T13:56:56.913Z",
-  "summary": "Diff focuses on theming token updates (index.css + Tailwind color mappings) and some page-level class tweaks, but does not clearly demonstrate the full “Draft 94 revert” across all requested surfaces nor the “single authoritative token source” cleanup. It also appears to introduce extra styling/animation/font changes not requested in a theming regression fix.",
-  "missing_requirements": [
-    {
-      "id": "REQ-15",
-      "requirement": "Eliminate theme-token drift by ensuring there is a single authoritative source of global CSS theme variables used by Tailwind, and prevent unused/duplicate token files from affecting builds.",
-      "reason": "The diff shows updates to `frontend/index.css` and `frontend/tailwind.config.js`, but provides no evidence of removing/neutralizing duplicate theme token definitions, nor of auditing imports to ensure only one token file is applied at runtime (e.g., preventing multiple :root/.dark sets from competing).",
-      "evidence": [
-        "frontend/index.css",
-        "frontend/tailwind.config.js"
-      ]
-    },
-    {
-      "id": "REQ-16",
-      "requirement": "Audit key UI surfaces to ensure they exclusively use shared theme tokens rather than hardcoded colors; update offending styles so backgrounds/text remain consistent with Draft 94 tokens.",
-      "reason": "Only Journal and Progress pages are shown as modified, and at least one hardcoded color utility remains (`text-orange-500`), which conflicts with the requirement to avoid hardcoded colors that can cause theme drift/inconsistency. There is also no diff evidence of auditing/fixing other key pages (Landing, Dashboard, Pre-meditation, Books) for hardcoded overrides.",
-      "evidence": [
-        "frontend/src/pages/JournalPage.tsx",
-        "frontend/src/pages/ProgressPage.tsx"
-      ]
-    },
-    {
-      "id": "REQ-14",
-      "requirement": "Restore the application’s color system to match Draft 94 by reverting Draft 95 changes that altered theme tokens so UI no longer shows mismatched backgrounds/text colors across pages/components (light and dark).",
-      "reason": "`frontend/src/index.css` is described as restoring Draft 94 OKLCH tokens, but the diff evidence is insufficient to confirm all required surfaces/pages (Landing, Dashboard, Pre-meditation, Progress, Journal, Books) are now consistent in both light and dark mode, or that no unreadable contrast remains. Only two pages are directly shown as modified in code snippets.",
-      "evidence": [
-        "frontend/index.css",
-        "frontend/src/pages/JournalPage.tsx",
-        "frontend/src/pages/ProgressPage.tsx"
-      ]
-    }
-  ],
+  "generatedAt": "2026-02-06T14:06:09.724Z",
+  "summary": "The diff appears to implement deep-linking from PreMeditationPage to KnowledgePage using a category search param, and updates KnowledgePage to initialize/select category from that param while preserving the existing scrollToContent behavior and clearing only that flag after scrolling.",
+  "missing_requirements": [],
   "hallucinated_features": [
     {
-      "description": "Added/changed typography and font setup (Playfair Display import and Tailwind font family extension).",
-      "reason": "The BuildRequest is a theming regression fix limited to restoring Draft 94 theme tokens and eliminating token drift; adding a new/explicit font import and Tailwind font family configuration is not requested and could be considered a new styling feature.",
+      "description": "PreMeditationPage changes beyond the specified single “More details” button update (e.g., responsive slider width tweaks, light/dark background behavior changes, lotus intensity/variant changes, ritual instant-start via search params, additional cloud-sync error mapping).",
+      "reason": "BuildRequest explicitly limits REQ-1 to only updating the selected “More details” button element’s navigation behavior; these additional behaviors are not requested and are outside the stated scope/non-goals.",
       "evidence": [
-        "frontend/src/index.css",
-        "frontend/tailwind.config.js"
-      ]
-    },
-    {
-      "description": "Introduced/extended additional animations and visual effects (e.g., slide-in transitions, carousel slideIn keyframe, glow shadows, breathe/glow/float animations).",
-      "reason": "Non-goal states no new features; these animation/shadow additions go beyond restoring theme tokens and may alter UI behavior/feel outside a strict regression fix.",
-      "evidence": [
-        "frontend/src/index.css",
-        "frontend/tailwind.config.js"
+        "frontend-file-summaries.txt (PreMeditationPage summary mentions multiple unrelated UI/behavior changes)"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.72,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/index.css",
-    "frontend/src/pages/JournalPage.tsx",
-    "frontend/src/pages/ProgressPage.tsx",
-    "frontend/tailwind.config.js",
+    "frontend/src/pages/KnowledgePage.tsx",
+    "frontend/src/pages/PreMeditationPage.tsx",
     "project_state.json"
   ]
 }

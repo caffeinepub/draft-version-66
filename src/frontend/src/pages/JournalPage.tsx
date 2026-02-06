@@ -9,6 +9,7 @@ import LotusCanvas from '../components/LotusCanvas';
 import SessionIndicator from '../components/SessionIndicator';
 import HamburgerMenu from '../components/HamburgerMenu';
 import MobileBackButton from '../components/MobileBackButton';
+import CloudSyncErrorBanner from '../components/CloudSyncErrorBanner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -35,7 +36,7 @@ export default function JournalPage() {
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: journalEntries = [], isLoading } = useJournalEntries();
+  const { data: journalEntries = [], isLoading, isError, error, refetch } = useJournalEntries();
   const toggleFavorite = useToggleFavoriteJournal();
   const updateEntry = useUpdateJournalEntry();
   const deleteEntry = useDeleteJournalEntry();
@@ -107,21 +108,25 @@ export default function JournalPage() {
     return labels[type] || 'Unknown';
   };
 
-  const filteredEntries = journalEntries.filter((entry) => {
-    const matchesSearch = 
-      entry.reflection.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      getMeditationTypeLabel(entry.meditationType).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      entry.mood.some(m => getMoodLabel(m).toLowerCase().includes(searchQuery.toLowerCase())) ||
-      getEnergyLabel(entry.energy).toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesType = filterType === 'all' || entry.meditationType === filterType;
-    const matchesMood = filterMood === 'all' || entry.mood.some(m => m === filterMood);
-    const matchesEnergy = filterEnergy === 'all' || entry.energy === filterEnergy;
-    
-    return matchesSearch && matchesType && matchesMood && matchesEnergy;
-  });
+  const filteredEntries = journalEntries
+    .filter((entry) => {
+      const matchesSearch = 
+        entry.reflection.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        getMeditationTypeLabel(entry.meditationType).toLowerCase().includes(searchQuery.toLowerCase()) ||
+        entry.mood.some(m => getMoodLabel(m).toLowerCase().includes(searchQuery.toLowerCase())) ||
+        getEnergyLabel(entry.energy).toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesType = filterType === 'all' || entry.meditationType === filterType;
+      const matchesMood = filterMood === 'all' || entry.mood.some(m => m === filterMood);
+      const matchesEnergy = filterEnergy === 'all' || entry.energy === filterEnergy;
+      
+      return matchesSearch && matchesType && matchesMood && matchesEnergy;
+    })
+    .sort((a, b) => Number(b.timestamp) - Number(a.timestamp));
 
-  const favoriteEntries = journalEntries.filter((entry) => entry.isFavorite);
+  const favoriteEntries = journalEntries
+    .filter((entry) => entry.isFavorite)
+    .sort((a, b) => Number(b.timestamp) - Number(a.timestamp));
 
   const totalSessions = journalEntries.length;
   const avgDuration = totalSessions > 0 
@@ -179,11 +184,21 @@ export default function JournalPage() {
     try {
       await exportData.mutateAsync();
       toast.success('Meditation data exported successfully', {
-        className: 'bg-card border-2 border-accent-cyan/50 text-foreground',
+        className: 'border-2 border-accent-cyan/50 bg-accent-cyan/10',
+        style: {
+          background: 'oklch(0.65 0.12 195 / 0.1)',
+          borderColor: 'oklch(0.65 0.12 195 / 0.5)',
+          color: theme === 'dark' ? 'oklch(0.93 0.01 210)' : 'oklch(0.145 0.02 210)',
+        },
       });
     } catch (error) {
       toast.error('Failed to export meditation data', {
-        className: 'bg-card border-2 border-destructive/50 text-foreground',
+        className: 'border-2 border-destructive/50 bg-destructive/10',
+        style: {
+          background: 'oklch(var(--destructive) / 0.1)',
+          borderColor: 'oklch(var(--destructive) / 0.5)',
+          color: theme === 'dark' ? 'oklch(0.93 0.01 210)' : 'oklch(0.145 0.02 210)',
+        },
       });
       console.error('Export error:', error);
     }
@@ -207,17 +222,26 @@ export default function JournalPage() {
     try {
       await importData.mutateAsync(pendingFile);
       toast.success('Meditation data imported successfully', {
-        className: 'bg-card border-2 border-accent-cyan/50 text-foreground',
+        className: 'border-2 border-accent-cyan/50 bg-accent-cyan/10',
+        style: {
+          background: 'oklch(0.65 0.12 195 / 0.1)',
+          borderColor: 'oklch(0.65 0.12 195 / 0.5)',
+          color: theme === 'dark' ? 'oklch(0.93 0.01 210)' : 'oklch(0.145 0.02 210)',
+        },
       });
     } catch (error) {
       toast.error('Failed to import meditation data. Please check the file format.', {
-        className: 'bg-card border-2 border-destructive/50 text-foreground',
+        className: 'border-2 border-destructive/50 bg-destructive/10',
+        style: {
+          background: 'oklch(var(--destructive) / 0.1)',
+          borderColor: 'oklch(var(--destructive) / 0.5)',
+          color: theme === 'dark' ? 'oklch(0.93 0.01 210)' : 'oklch(0.145 0.02 210)',
+        },
       });
       console.error('Import error:', error);
     } finally {
       setShowImportConfirm(false);
       setPendingFile(null);
-      // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -227,7 +251,6 @@ export default function JournalPage() {
   const handleCancelImport = () => {
     setShowImportConfirm(false);
     setPendingFile(null);
-    // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -395,21 +418,14 @@ export default function JournalPage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background dark:bg-gradient-to-br dark:from-[#040f13] dark:to-background">
-      <div className="fixed top-0 left-0 w-96 h-96 opacity-15 dark:opacity-10 pointer-events-none">
-        <LotusCanvas variant="enhanced" />
-      </div>
-      <div className="fixed bottom-0 right-0 w-96 h-96 opacity-15 dark:opacity-10 pointer-events-none">
-        <LotusCanvas variant="enhanced" />
-      </div>
+      <LotusCanvas variant="enhanced" />
 
-      {/* Desktop Session Indicator */}
       {mounted && (
         <div className="hidden md:block">
           <SessionIndicator />
         </div>
       )}
 
-      {/* Desktop Theme Toggle */}
       {mounted && (
         <button
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -424,7 +440,6 @@ export default function JournalPage() {
         </button>
       )}
 
-      {/* Desktop Back Button */}
       <button
         onClick={() => navigate({ to: '/dashboard' })}
         className="hidden md:block fixed top-20 left-6 z-50 rounded-full bg-card/80 backdrop-blur-sm p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-border/50"
@@ -433,13 +448,9 @@ export default function JournalPage() {
         <ArrowLeft className="h-5 w-5 text-accent-cyan" />
       </button>
 
-      {/* Mobile Back Button */}
       {mounted && <MobileBackButton show={true} />}
-
-      {/* Mobile Hamburger Menu */}
       {mounted && <HamburgerMenu />}
 
-      {/* Export/Import buttons */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
         <Button
           onClick={handleExport}
@@ -477,7 +488,6 @@ export default function JournalPage() {
         />
       </div>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteConfirmId !== null} onOpenChange={() => setDeleteConfirmId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -500,7 +510,6 @@ export default function JournalPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Import Confirmation Dialog */}
       <AlertDialog open={showImportConfirm} onOpenChange={setShowImportConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -536,7 +545,14 @@ export default function JournalPage() {
             </p>
           </div>
 
-          {isLoading ? (
+          {isError ? (
+            <CloudSyncErrorBanner
+              onRetry={() => refetch()}
+              isRetrying={isLoading}
+              title="Failed to Load Journal"
+              description="We couldn't load your journal entries. Please check your connection and try again."
+            />
+          ) : isLoading ? (
             <div className="space-y-8">
               <Card className="bg-card/50 backdrop-blur-sm border-border/30">
                 <CardContent className="pt-6">

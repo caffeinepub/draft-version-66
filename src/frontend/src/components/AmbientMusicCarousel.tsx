@@ -277,8 +277,26 @@ export default function AmbientMusicCarousel({ selectedMusic, onSelectMusic, vol
         </div>
       </div>
 
+      {/* Volume Slider */}
+      <div className="mt-6 px-4 sm:px-8">
+        <div className="bg-card/40 backdrop-blur-sm rounded-xl p-4 border border-border/50 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Volume</span>
+            <span className="text-sm font-medium text-foreground">{volume}%</span>
+          </div>
+          <Slider
+            value={[volume]}
+            onValueChange={handleVolumeChange}
+            min={0}
+            max={100}
+            step={1}
+            className="w-full [&_[role=slider]]:bg-accent-cyan [&_[role=slider]]:border-accent-cyan"
+          />
+        </div>
+      </div>
+
       {/* Navigation Arrows */}
-      <div className="flex justify-center gap-6 sm:gap-8 mt-4">
+      <div className="flex justify-center gap-6 sm:gap-8 mt-6">
         <Button
           onClick={handlePrevious}
           variant="outline"

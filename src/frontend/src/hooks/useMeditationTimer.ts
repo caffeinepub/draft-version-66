@@ -25,6 +25,12 @@ export function useMeditationTimer({
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const hasCompletedRef = useRef(false);
 
+  // Reset timer when duration changes
+  useEffect(() => {
+    setTimeRemaining(totalSeconds);
+    hasCompletedRef.current = false;
+  }, [totalSeconds]);
+
   // Calculate progress (0 to 1)
   const progress = totalSeconds > 0 ? (totalSeconds - timeRemaining) / totalSeconds : 0;
 

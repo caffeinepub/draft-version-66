@@ -62,6 +62,15 @@ export interface ImportData {
     sessionRecords: Array<MeditationSession>;
     userProfile?: UserProfile;
 }
+export interface JournalEntryInput {
+    duration: bigint;
+    mood: Array<MoodState>;
+    isFavorite: boolean;
+    timestamp: bigint;
+    reflection: string;
+    meditationType: MeditationType;
+    energy: EnergyState;
+}
 export interface UserProfile {
     name: string;
     email?: string;
@@ -93,7 +102,10 @@ export enum UserRole {
 }
 export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    createJournalEntry(entry: JournalEntryInput): Promise<JournalEntry>;
+    deleteJournalEntry(entryId: bigint): Promise<void>;
     deleteRitual(ritualToDelete: Ritual): Promise<void>;
+    editJournalEntry(entry: JournalEntryInput): Promise<JournalEntry>;
     getBooks(): Promise<Array<Book>>;
     getCallerJournalEntries(): Promise<Array<JournalEntry>>;
     getCallerProgressStats(): Promise<ProgressStats>;
@@ -109,4 +121,6 @@ export interface backendInterface {
     recordMeditationSession(session: MeditationSession, _monthlyStats: bigint, _currentStreak: bigint): Promise<ProgressStats>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     saveRitual(ritual: Ritual): Promise<void>;
+    toggleFavoriteEntry(entryId: bigint): Promise<void>;
+    updateJournalEntry(entryId: bigint, entry: JournalEntryInput): Promise<JournalEntry>;
 }

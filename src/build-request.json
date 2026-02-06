@@ -1,32 +1,163 @@
 {
   "kind": "build_request",
-  "title": "Remove duplicate volume input in Pre‑Meditation setup container",
+  "title": "Fix toast notifications, enhance journal filtering/labels, stabilize guest journal, and align meditation navigation/timer UI",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "On the Pre‑Meditation page, remove the duplicate volume input element from the selected container (XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[3]) so that only a single volume control remains in that container and there are no two volume inputs that control the same audio volume.",
+      "text": "Update all toast/notification styling so success/error notifications are not transparent and have a clearly visible background color and border across the app (including export/import, post-meditation save, and journal note edit flows). Apply styling via app-level Toaster configuration (e.g., props in `frontend/src/App.tsx`) and/or global CSS, without modifying any files under `frontend/src/components/ui`.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-1"
         ],
         "quotes": [
-          "I selected volume element, it should be remove from that container in pre-med page. Because the are 2 volume input elements in the same container that does the same thing."
+          "Those notifications should have proper background color, and border. Not like right now, they are transparent."
         ]
       },
       "acceptanceCriteria": [
-        "In the Pre‑Meditation page UI, the selected container shows only one volume input/control (no duplicate/second volume input in the same container).",
-        "Changing the remaining volume control updates the ambient audio volume as before.",
-        "No other controls in that container (other than the duplicate volume element) are removed or functionally changed."
+        "Triggering export, import, saving after meditation, and saving an edited journal entry shows a toast with an opaque background (not transparent) and a visible border in both light and dark themes.",
+        "No changes are made inside `frontend/src/components/ui/*` (compose/configure instead)."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Change export/import notification copy to be generic and accurate: when exporting, the success toast must say \"Data has been exported successfully\" (or equivalent), and when importing, the success toast must say \"Data has been imported successfully\" (or equivalent). Do not mention \"journal\" in these toasts because exported/imported data includes journal and progress.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "when exporting data, in notification text, say something like \"data has been exported succesfully\", instead of right now, journal data has been exported. Because data is both journal and progress, so it shouldn't explicitly say journal."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Exporting data from the UI shows a success toast that does not mention \"journal\" and indicates data export success.",
+        "Importing data from the UI shows a success toast that does not mention \"journal\" and indicates data import success.",
+        "Existing error toasts still display an actionable error message (no regression)."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Enhance the Journal page filtering to include: (1) filter by Favorites (show only favorited entries), (2) filter by Date, and (3) filter by Time. These filters must work together with the existing search, mood, and energy filters and apply to the rendered list.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "allow proper filtering in journal page, meaning include filtering by favorites, by date, by time."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Journal page provides UI controls for Favorites, Date, and Time filtering in addition to the existing search/mood/energy filters.",
+        "Applying Favorites filter shows only entries with `isFavorite === true`.",
+        "Applying Date filter restricts entries to the selected day (or selected date range if implemented), based on `entry.timestamp`.",
+        "Applying Time filter restricts entries by time-of-day (e.g., within a chosen range) based on `entry.timestamp`.",
+        "Filters can be combined (e.g., Favorites + Mood + Date) and the list updates accordingly."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "In the Journal entries list, display mood tags with both the icon and a readable text label (e.g., sad-face icon plus the text \"Sad\"). Keep tooltips if present, but the meaning must be visible without hovering.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "the tags that represent moods, should have not only the icon in the journal, but also corresponding meaning. *sad face icon* sad."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Each mood tag displayed on a journal entry includes the icon and a visible text label (capitalized).",
+        "The UI remains readable and does not overflow badly on mobile (wraps appropriately)."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Prevent the guest-mode Journal page crash caused by legacy/invalid localStorage data (e.g., `TypeError: Cannot read properties of undefined (reading 'charAt')`). When this specific mismatch happens, automatically clear the app’s guest localStorage data used for journaling/progress and force a full page reload so the app can recreate data in the new format.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "TypeError: Cannot read properties of undefined (reading 'charAt')",
+          "It should delete local storage data, and refresh the page. Because it doesn't match with new updated data formats."
+        ]
+      },
+      "acceptanceCriteria": [
+        "In guest mode, if invalid/legacy stored journal data would cause the `charAt`-style runtime error on `/journal`, the app clears the relevant localStorage keys and refreshes the page automatically.",
+        "After refresh, the Journal page loads without throwing and shows an empty/valid state instead of crashing.",
+        "Authenticated users’ cloud/backed data is not deleted as part of this recovery behavior."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Make navigation UI consistent on the Pre-meditation page and the active Meditation session view: replace any \"Back to dashboard\" button variant with the same icon-style back control used on other navigation pages, and ensure the burger (hamburger) menu is available in the header the same way it is on Books/Journal/Progress/Knowledge pages (including consistent guest vs signed-in appearance).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "There are incosistencies in how pre-meditation page, has a \"back to dashboard\" button and the burger menu not appearing.",
+          "Basically copy the appearance of viewing as guest or user and burger menu on navigation pages like(books, journal, progress, knowledge), same way in pre-meditation page and meditation page."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Pre-meditation page header matches the standard header pattern used on Books/Journal/Progress/Knowledge (back icon + hamburger menu + session indicator behavior).",
+        "Active meditation session view (the screen with the timer) also uses the same header pattern (or an intentionally minimal variant that still includes the burger menu and icon back button as requested).",
+        "No duplicate/conflicting navigation controls are shown."
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "On the Meditation page timer UI, make the timer container circular while preserving the existing wavy fill effect behavior: the wave fill must still rise from bottom to top as time decreases, and the visual effects (wave pattern and progression) should remain the same aside from the container shape.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "just make the timer container circular, but leave effects the same, like the wavy pattern that fills up based on total time left from bottom to top(no time left at the top)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The timer is visually contained within a circular container (mask/clip or equivalent).",
+        "Wave fill effect remains: as time elapses, fill progresses upward; when no time remains, the fill is at the top.",
+        "No regressions to timer accuracy, pause/resume, or readability of time text."
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "On the Pre-meditation page, move the \"More details\" content into the step guide container (so it appears inside the same container as the step-by-step guide content rather than outside/separate).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "in pre-med page, put \"more details inside the step guide container\""
+        ]
+      },
+      "acceptanceCriteria": [
+        "The \"More details\" section renders inside the step guide container on the Pre-meditation page.",
+        "Layout remains responsive and consistent with surrounding UI styling."
       ]
     }
   ],
   "constraints": [
-    "Apply changes only to the selected element/container identified by XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[3."
+    "Do not modify any files under `frontend/src/components/ui/*` (compose or configure them instead).",
+    "Backend must remain single-actor (all Motoko logic in `backend/main.mo`); only introduce state migration if a backend schema change is required (not expected for this request).",
+    "Use English for all user-facing text."
   ],
   "nonGoals": [
-    "Do not implement the other requested changes in this build (dashboard quote persistence, button size reductions, dashboard Begin/Quiz behavior changes, Save as ritual visibility changes, or circular meditation timer)."
+    "Adding new backend data models or changing persistent schemas for journal/progress.",
+    "Adding new authentication methods beyond Internet Identity.",
+    "Implementing real-time notifications or push notifications."
   ],
   "imageRequirements": {
     "required": [],

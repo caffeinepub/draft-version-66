@@ -1,21 +1,157 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Remove duplicate volume control in Pre‑Meditation setup container",
+  "title": "Toast styling fixes, Journal filter/label enhancements, guest crash recovery, and consistent meditation navigation/timer UI",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Remove the duplicate volume input from the specified Pre‑Meditation setup container so only one ambient-volume control remains and continues to drive the same volume state/audio behavior.",
+      "summary": "Make toast notifications opaque with clearly visible background and border across the app via Toaster configuration and/or global CSS (without changing shadcn/ui source files).",
       "acceptanceCriteria": [
-        "In the Pre‑Meditation page UI, the selected container shows only one volume input/control (no duplicate/second volume input in the same container).",
-        "Changing the remaining volume control updates the ambient audio volume as before.",
-        "No other controls in that container (other than the duplicate volume element) are removed or functionally changed."
+        "Triggering export, import, saving after meditation, and saving an edited journal entry shows a toast with an opaque background (not transparent) and a visible border in both light and dark themes.",
+        "No changes are made inside `frontend/src/components/ui/*` (compose/configure instead)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Configure the app-level Toaster (from `@/components/ui/sonner`) with app-wide toast styling options (e.g., classNames/toastOptions) so success/error toasts have opaque backgrounds and visible borders in light/dark themes, without modifying any files under `frontend/src/components/ui/*`. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add global CSS overrides targeting Sonner toast elements (success/error/default) to enforce opaque background and a visible border that matches the theme tokens, ensuring the toast is not transparent across the app."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Update export/import success toast copy to be generic (data-level) and accurate across all UI locations.",
+      "acceptanceCriteria": [
+        "Exporting data from the UI shows a success toast that does not mention \"journal\" and indicates data export success.",
+        "Importing data from the UI shows a success toast that does not mention \"journal\" and indicates data import success.",
+        "Existing error toasts still display an actionable error message (no regression)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/JournalPage.tsx",
+          "operation": "modify",
+          "description": "Update export/import success toast messages to be generic and accurate (e.g., export: \"Data has been exported successfully\", import: \"Data has been imported successfully\"), without mentioning \"journal\"; keep existing error toast behavior intact."
+        },
+        {
+          "path": "frontend/src/pages/ProgressPage.tsx",
+          "operation": "modify",
+          "description": "Align import (and any export success messaging if present/added) to use the same generic data-level copy that does not mention \"journal\" or only \"progress\", while preserving existing error toasts."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Add Journal list filtering by Favorites, Date, and Time, combinable with existing search/mood/energy filters.",
+      "acceptanceCriteria": [
+        "Journal page provides UI controls for Favorites, Date, and Time filtering in addition to the existing search/mood/energy filters.",
+        "Applying Favorites filter shows only entries with `isFavorite === true`.",
+        "Applying Date filter restricts entries to the selected day (or selected date range if implemented), based on `entry.timestamp`.",
+        "Applying Time filter restricts entries by time-of-day (e.g., within a chosen range) based on `entry.timestamp`.",
+        "Filters can be combined (e.g., Favorites + Mood + Date) and the list updates accordingly."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/JournalPage.tsx",
+          "operation": "modify",
+          "description": "Add UI controls and state for Favorites, Date, and Time filters; implement combined filtering logic applied to the rendered list alongside existing search/mood/energy filters, using `entry.timestamp` for date/time derivation."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Show mood tags in Journal entries list with both icon and visible text label (not tooltip-only) with responsive wrapping.",
+      "acceptanceCriteria": [
+        "Each mood tag displayed on a journal entry includes the icon and a visible text label (capitalized).",
+        "The UI remains readable and does not overflow badly on mobile (wraps appropriately)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/JournalPage.tsx",
+          "operation": "modify",
+          "description": "Update the journal entry mood tag rendering to include both the mood icon and a readable capitalized text label (while retaining any existing tooltip behavior), ensuring tags wrap appropriately on smaller screens."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Recover from guest-mode Journal crashes caused by legacy/invalid localStorage data by clearing guest keys and forcing a full reload (without affecting authenticated data).",
+      "acceptanceCriteria": [
+        "In guest mode, if invalid/legacy stored journal data would cause the `charAt`-style runtime error on `/journal`, the app clears the relevant localStorage keys and refreshes the page automatically.",
+        "After refresh, the Journal page loads without throwing and shows an empty/valid state instead of crashing.",
+        "Authenticated users’ cloud/backed data is not deleted as part of this recovery behavior."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/JournalPage.tsx",
+          "operation": "modify",
+          "description": "Add guest-only defensive recovery on the Journal page: detect the specific legacy-data mismatch failure pattern (e.g., a `charAt`-style runtime error originating from bad stored values) and trigger a guest-storage reset + full page reload, with a loop-prevention guard to avoid repeated reloads."
+        },
+        {
+          "path": "frontend/src/utils/meditationStorage.ts",
+          "operation": "modify",
+          "description": "Harden guest localStorage parsing/normalization for journal/progress-related data by validating expected fields (notably mood/strings) and exposing/triggering a safe reset routine that clears only guest-mode keys used by journaling/progress when legacy formats are detected."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Standardize navigation UI on Pre-meditation and active meditation timer views to match the app’s standard header pattern (icon back + hamburger menu, consistent guest/signed-in behavior).",
+      "acceptanceCriteria": [
+        "Pre-meditation page header matches the standard header pattern used on Books/Journal/Progress/Knowledge (back icon + hamburger menu + session indicator behavior).",
+        "Active meditation session view (the screen with the timer) also uses the same header pattern (or an intentionally minimal variant that still includes the burger menu and icon back button as requested).",
+        "No duplicate/conflicting navigation controls are shown."
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Within the Pre‑Meditation setup view JSX, locate the UI block that corresponds to the selected container (XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[3]) and remove the duplicate volume input/Slider so only a single volume control remains in that container. Ensure the remaining control continues to update the existing `volume` state and still drives ambient audio volume changes (including the setup preview audio via AmbientMusicCarousel and the in-session audio via `audioRef`). Keep all other controls in that container intact and functionally unchanged."
+          "description": "Replace any bespoke/duplicative navigation controls (e.g., separate back button variant, missing burger) with the shared `StandardPageNav` header pattern, ensuring the header remains present/consistent in both setup and active timer states and avoids duplicate controls. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/StandardPageNav.tsx",
+          "operation": "modify",
+          "description": "If needed to meet consistency requirements, refine `StandardPageNav` to support the pre-meditation/active-timer context (e.g., optional minimal mode) while retaining: icon-style back control + hamburger menu + guest vs signed-in session indicator behavior. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Make the meditation timer UI container circular while preserving the existing wavy fill effect and timer behavior.",
+      "acceptanceCriteria": [
+        "The timer is visually contained within a circular container (mask/clip or equivalent).",
+        "Wave fill effect remains: as time elapses, fill progresses upward; when no time remains, the fill is at the top.",
+        "No regressions to timer accuracy, pause/resume, or readability of time text."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/MeditationTimerWaveFill.tsx",
+          "operation": "modify",
+          "description": "Update the timer rendering so the wave fill canvas is visually masked/clipped into a circle (e.g., circular wrapper with overflow hidden), while keeping the same wave animation logic and time text rendering."
+        },
+        {
+          "path": "frontend/src/pages/PreMeditationPage.tsx",
+          "operation": "modify",
+          "description": "Adjust the active meditation timer layout to provide a square bounding box for the wave fill component and apply circular container styling (without altering timer logic), ensuring readability and consistent sizing across breakpoints."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Move the Pre-meditation “More details” section so it renders inside the step guide container.",
+      "acceptanceCriteria": [
+        "The \"More details\" section renders inside the step guide container on the Pre-meditation page.",
+        "Layout remains responsive and consistent with surrounding UI styling."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/PreMeditationPage.tsx",
+          "operation": "modify",
+          "description": "Restructure the Pre-meditation layout so the \"More details\" content/button is rendered inside the same container as the step-by-step guide (MeditationGuideStepper section), maintaining responsive spacing and existing visual styling. Verify the component's usage instructions before implementing."
         }
       ]
     }

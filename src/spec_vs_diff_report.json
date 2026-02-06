@@ -1,87 +1,151 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T16:07:53.007Z",
-  "summary": "REQ-1 (remove duplicate volume input on Pre‑Meditation page) appears to be implemented via changes to the AmbientMusicCarousel/PreMeditation UI, but the diff also includes multiple unrelated UI/behavior changes that were explicitly listed as non-goals (dashboard quote persistence, button size reductions, Begin/Quiz behavior changes, Save-as-ritual visibility changes, circular timer, and other navigation/features).",
-  "missing_requirements": [],
-  "hallucinated_features": [
+  "generatedAt": "2026-02-06T18:03:17.440Z",
+  "summary": "Diff implements app-level Sonner Toaster classNames and updates export/import success copy in ProgressPage. JournalPage adds new filter state variables and a guest-mode crash recovery effect that clears some localStorage keys and reloads. StandardPageNav introduces an icon-style back button and a mobile hamburger menu. However, several requirements cannot be fully verified from the truncated diffs (journal filter UI/logic, mood tag text labels, circular timer container, and “More details” placement). There are also indications of unrequested feature work (quiz, landing redirect, floating nav, lotus canvas variants, etc.).",
+  "missing_requirements": [
     {
-      "description": "Dashboard quote persistence/memoization so the quote does not change on carousel navigation",
-      "reason": "Explicitly called out as a non-goal for this build, but implemented in DashboardPage via memoization of quote selection.",
+      "id": "REQ-2",
+      "requirement": "Update export/import success toast copy everywhere to be generic (no 'journal') for export and import flows.",
+      "reason": "Only ProgressPage clearly shows the updated success strings. Export/import is also referenced via ExportImportControls and hooks, but the diff does not show those components being updated, so it’s not verifiable that all export/import toasts across the app use the required generic copy.",
       "evidence": [
-        "frontend/src/pages/DashboardPage.tsx",
-        "frontend-file-summaries.txt (DashboardPage.tsx: \"Memoize the quote selection so it doesn't change on carousel navigation\")"
+        "frontend/src/pages/ProgressPage.tsx",
+        "frontend/src/pages/JournalPage.tsx (imports ExportImportControls)",
+        "frontend/src/hooks/useQueries.ts (imports export/import utils, toast)"
       ]
     },
     {
-      "description": "Dashboard Begin/Quiz behavior changes (Begin button text/behavior and quiz auto-navigation)",
-      "reason": "Explicitly listed as a non-goal, but DashboardPage contains updated Begin handler logic and quiz completion auto-navigation to pre-meditation.",
+      "id": "REQ-3",
+      "requirement": "Add Favorites, Date, and Time filters to Journal page UI and ensure they combine with existing search/mood/energy filters and apply to rendered list.",
+      "reason": "JournalPage adds state for favorites/date/time, but the truncated diff does not show UI controls being rendered nor the combined filtering logic applied to the displayed entries list.",
       "evidence": [
-        "frontend/src/pages/DashboardPage.tsx"
+        "frontend/src/pages/JournalPage.tsx"
       ]
     },
     {
-      "description": "Reduced button sizes on Dashboard and/or Pre‑Meditation pages",
-      "reason": "Explicitly listed as a non-goal, but the summary notes reduced button sizes (e.g., px-6 py-4 instead of px-8 py-6) and \"reduced button sizes throughout\".",
+      "id": "REQ-4",
+      "requirement": "Show mood tags with icon AND visible readable text label in the Journal entries list.",
+      "reason": "JournalPage imports moodIconMap and Badge/Tooltip, but the truncated portion does not show the mood tag rendering. Cannot confirm visible text labels are added next to icons.",
       "evidence": [
-        "frontend-file-summaries.txt (DashboardPage.tsx: \"reduced button sizes\")",
-        "frontend-file-summaries.txt (PreMeditationPage.tsx: \"reduced button sizes throughout\")"
+        "frontend/src/pages/JournalPage.tsx"
       ]
     },
     {
-      "description": "Change 'Save as Ritual' visibility (moved to reflection view only / hidden until after meditation)",
-      "reason": "Explicitly listed as a non-goal, but PreMeditationPage summary states this was changed.",
+      "id": "REQ-5",
+      "requirement": "On guest-mode /journal crash due to legacy/invalid localStorage data, clear the relevant guest localStorage keys used for journaling/progress and force a full page reload.",
+      "reason": "JournalPage crash recovery clears `guestJournalEntries`, `guestProgressStats`, and `guestSessionRecords`, but the guest progress key defined in storage utils is `guest-meditationProgress` (and rituals use `guestRituals`). Because the cleared keys don’t match the keys used in `meditationStorage.ts`, the recovery may not actually clear the relevant data as required.",
       "evidence": [
-        "frontend-file-summaries.txt (PreMeditationPage.tsx: \"moved \\\"Save as Ritual\\\" button to reflection view only\")"
+        "frontend/src/pages/JournalPage.tsx",
+        "frontend/src/utils/meditationStorage.ts"
       ]
     },
     {
-      "description": "Circular meditation timer with progress fill/glow behavior",
-      "reason": "Explicitly listed as a non-goal (\"circular meditation timer\"), but PreMeditationPage/ActiveMeditationPage summaries mention an active circular timer with progress fill and glow.",
+      "id": "REQ-6",
+      "requirement": "Ensure pre-meditation and active meditation session views use consistent header navigation (icon back + hamburger menu; consistent guest vs signed-in appearance).",
+      "reason": "StandardPageNav provides a hamburger menu only on mobile (`sm:hidden`) and does not show a hamburger menu on desktop, which may violate the requirement that the burger menu is available in the header the same way as other pages. Also, the diff does not show the active meditation session view adopting StandardPageNav (only inferred by external summary, not evidenced in the provided file diffs).",
       "evidence": [
-        "frontend-file-summaries.txt (PreMeditationPage.tsx: \"active circular timer with progress-based fill and subtle glow\")",
-        "frontend-file-summaries.txt (ActiveMeditationPage.tsx: \"large circular timer with synchronized breathing anima...\")"
+        "frontend/src/components/StandardPageNav.tsx",
+        "frontend/src/pages/PreMeditationPage.tsx (imports StandardPageNav)"
       ]
     },
     {
-      "description": "Added a new /knowledge route and floating navigation changes (Knowledge/Brain icon)",
-      "reason": "Not requested in the BuildRequest and outside the stated single-change constraint; summaries mention a new /knowledge route and FloatingNav updates.",
+      "id": "REQ-7",
+      "requirement": "Make the meditation timer container circular while preserving the wavy fill behavior (wave rises bottom-to-top as time decreases).",
+      "reason": "MeditationTimerWaveFill draws a full-rect canvas with no circular clipping/mask in the component. The diff does not show any wrapper applying `rounded-full`/`overflow-hidden` (or equivalent) to make the container circular, so the circular container requirement is not verifiable from the provided changes.",
       "evidence": [
-        "frontend-file-summaries.txt (frontend/src/App.tsx: \"including the new /knowledge route\")",
-        "frontend-file-summaries.txt (frontend/src/components/FloatingNav.tsx: \"Knowledge with Brain icon\")"
+        "frontend/src/components/MeditationTimerWaveFill.tsx",
+        "frontend/src/pages/PreMeditationPage.tsx (uses MeditationTimerWaveFill, but truncated)"
       ]
     },
     {
-      "description": "Landing page theme/background changes and authenticated auto-redirect behavior",
-      "reason": "Not requested in the BuildRequest; LandingPage summary describes new background behavior and auth redirect logic.",
+      "id": "REQ-8",
+      "requirement": "Move 'More details' content into the step guide container on the Pre-meditation page.",
+      "reason": "PreMeditationPage is truncated before any 'More details' section or step guide container layout is shown, so it cannot be verified that the 'More details' content was moved inside the step guide container.",
       "evidence": [
-        "frontend-file-summaries.txt (frontend/src/pages/LandingPage.tsx)"
-      ]
-    },
-    {
-      "description": "Global CSS, Tailwind config, and multiple other UI component upgrades (LotusCanvas variants/intensity, FeatureCard icon filter, scrollbar styling, etc.)",
-      "reason": "Not requested in the BuildRequest and violates the constraint to apply changes only to the selected container/element.",
-      "evidence": [
-        "frontend-file-summaries.txt (frontend/src/index.css)",
-        "frontend-file-summaries.txt (frontend/tailwind.config.js)",
-        "frontend-file-summaries.txt (frontend/src/components/LotusCanvas.tsx)",
-        "frontend-file-summaries.txt (frontend/src/components/FeatureCard.tsx)"
-      ]
-    },
-    {
-      "description": "Broad changes to React Query hooks (useQueries) including import/export, authenticated query behavior, rituals reconciliation, etc.",
-      "reason": "Not requested in the BuildRequest and unrelated to removing a duplicate volume input.",
-      "evidence": [
-        "frontend-file-summaries.txt (frontend/src/hooks/useQueries.ts)"
+        "frontend/src/pages/PreMeditationPage.tsx",
+        "frontend/src/components/MeditationGuideStepper.tsx (layout shown, but no evidence of 'More details')"
       ]
     }
   ],
-  "confidence": 0.72,
+  "hallucinated_features": [
+    {
+      "description": "Landing page auto-redirect for authenticated users; light theme background change.",
+      "reason": "Not requested in any REQ; appears as additional UX behavior unrelated to toast/journal/nav/timer requirements.",
+      "evidence": [
+        "frontend-file-summaries.txt (LandingPage summary)"
+      ]
+    },
+    {
+      "description": "LotusCanvas redesigned with multiple variants and intensity prop.",
+      "reason": "Not requested; unrelated to specified requirements.",
+      "evidence": [
+        "frontend-file-summaries.txt (LotusCanvas summary)"
+      ]
+    },
+    {
+      "description": "FeatureCard icon color normalization via CSS filter and other hover/animation tweaks.",
+      "reason": "Not requested; unrelated to specified requirements.",
+      "evidence": [
+        "frontend-file-summaries.txt (FeatureCard summary)"
+      ]
+    },
+    {
+      "description": "Dashboard 'Begin' opens QuizDialog for 'quiz' type and quiz flow changes.",
+      "reason": "Not requested; scope creep beyond stated meditation navigation/timer UI alignment.",
+      "evidence": [
+        "frontend-file-summaries.txt (DashboardPage summary)",
+        "frontend-file-summaries.txt (QuizDialog summary)"
+      ]
+    },
+    {
+      "description": "FloatingNav component with drifting semi-transparent icons and hover labels.",
+      "reason": "Not requested; new navigation feature beyond REQ-6’s header consistency.",
+      "evidence": [
+        "frontend-file-summaries.txt (FloatingNav summary)"
+      ]
+    },
+    {
+      "description": "MeditationCarousel made circular with exactly 3 visible items and 'recommended' badge behavior.",
+      "reason": "Not requested in the BuildRequest.",
+      "evidence": [
+        "frontend-file-summaries.txt (MeditationCarousel summary)"
+      ]
+    },
+    {
+      "description": "Ambient music carousel adds audio preview, volume slider placement changes, cleanup on unmount.",
+      "reason": "Not requested.",
+      "evidence": [
+        "frontend-file-summaries.txt (AmbientMusicCarousel summary)"
+      ]
+    },
+    {
+      "description": "New/expanded ActiveMeditationPage with seek slider, breathing animation sync, audio fade-out, and automatic transition to reflection page.",
+      "reason": "Not requested; REQ-6/REQ-7 focus on header consistency and circular timer container, not adding seek controls or new session flow features.",
+      "evidence": [
+        "frontend-file-summaries.txt (ActiveMeditationPage summary)"
+      ]
+    },
+    {
+      "description": "Tailwind config extended with additional shadows/animations (e.g., glow-strong, glow-pulse-strong).",
+      "reason": "Not explicitly requested; beyond toast styling requirement and may be unrelated.",
+      "evidence": [
+        "frontend-file-summaries.txt (tailwind.config.js summary)"
+      ]
+    }
+  ],
+  "confidence": 0.66,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/AmbientMusicCarousel.tsx",
-    "frontend/src/pages/DashboardPage.tsx",
+    "frontend/src/App.tsx",
+    "frontend/src/components/MeditationGuideStepper.tsx",
+    "frontend/src/components/MeditationTimerWaveFill.tsx",
+    "frontend/src/components/StandardPageNav.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/index.css",
+    "frontend/src/pages/JournalPage.tsx",
     "frontend/src/pages/PreMeditationPage.tsx",
+    "frontend/src/pages/ProgressPage.tsx",
+    "frontend/src/utils/meditationStorage.ts",
     "project_state.json"
   ]
 }

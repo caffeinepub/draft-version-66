@@ -1,31 +1,32 @@
-import { useState, useEffect } from 'react';
-import { Trophy, TrendingUp, Calendar, Flame, Download, Upload, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { TrendingUp, Calendar, Award, Flame } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useTheme } from 'next-themes';
-import CloudSyncErrorBanner from '../components/CloudSyncErrorBanner';
 import PageBackgroundShell from '../components/PageBackgroundShell';
 import StandardPageNav from '../components/StandardPageNav';
+import ExportImportControls from '../components/ExportImportControls';
+import CloudSyncErrorBanner from '../components/CloudSyncErrorBanner';
 import ProgressBowl from '../components/ProgressBowl';
-import { useProgressStats, useImportData, useExportData } from '../hooks/useQueries';
-import { getCurrentRank, getNextRank, getMinutesUntilNextRank } from '../utils/progressRanks';
+import { useProgressStats, useSessionRecords, useImportData, useExportData } from '../hooks/useQueries';
 import { toast } from 'sonner';
 import { getCloudSyncErrorMessage } from '../utils/cloudSync';
+import { getCurrentRank, getNextRank, getMinutesUntilNextRank } from '../utils/progressRanks';
+import { format } from 'date-fns';
 
 export default function ProgressPage() {
   const { theme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  const { data: progressStats, isLoading, isError, error, refetch } = useProgressStats();
+  const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useProgressStats();
+  const { data: sessions, isLoading: sessionsLoading, isError: sessionsError, refetch: refetchSessions } = useSessionRecords();
   const importData = useImportData();
   const exportData = useExportData();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const [filterFavorites, setFilterFavorites] = useState(false);
 
   const handleExport = async () => {
     try {
       await exportData.mutateAsync();
+      toast.success('Data has been exported successfully');
     } catch (error: any) {
       const message = getCloudSyncErrorMessage(error);
       toast.error(message);
@@ -38,7 +39,7 @@ export default function ProgressPage() {
 
     try {
       await importData.mutateAsync({ file, overwrite: false });
-      toast.success('Progress data imported successfully');
+      toast.success('Data has been imported successfully');
     } catch (error: any) {
       const message = getCloudSyncErrorMessage(error);
       toast.error(message);
@@ -47,19 +48,24 @@ export default function ProgressPage() {
     event.target.value = '';
   };
 
-  const totalMinutes = progressStats ? Number(progressStats.totalMinutes) : 0;
-  const currentStreak = progressStats ? Number(progressStats.currentStreak) : 0;
-  const monthlyMinutes = progressStats ? Number(progressStats.monthlyMinutes) : 0;
-  
+  const totalMinutes = stats ? Number(stats.totalMinutes) : 0;
+  const currentStreak = stats ? Number(stats.currentStreak) : 0;
   const currentRank = getCurrentRank(totalMinutes);
   const nextRank = getNextRank(totalMinutes);
   const minutesUntilNext = getMinutesUntilNextRank(totalMinutes);
+
+  const sortedSessions = sessions
+    ? [...sessions].sort((a, b) => Number(b.timestamp - a.timestamp))
+    : [];
+
+  const isLoading = statsLoading || sessionsLoading;
+  const isError = statsError || sessionsError;
 
   return (
     <PageBackgroundShell>
       <StandardPageNav />
 
-      <main className="relative z-10 min-h-screen px-3 sm:px-4 py-8 sm:py-12">
+      <main className="relative z-10 min-h-screen px-3 sm:px-4 py-8 sm:py-12 pb-24">
         <div className="max-w-5xl mx-auto w-full space-y-6 sm:space-y-8 animate-fade-in mt-16">
           <div className="text-center space-y-4">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-accent-cyan-tinted animate-breathe-gentle">
@@ -73,87 +79,123 @@ export default function ProgressPage() {
 
           {isError && (
             <CloudSyncErrorBanner 
-              onRetry={refetch} 
+              onRetry={() => {
+                refetchStats();
+                refetchSessions();
+              }} 
               isRetrying={isLoading}
               title="Failed to Load Progress"
               description="We couldn't load your progress data. Please check your connection and try again."
             />
           )}
 
-          <div className="flex justify-center gap-4">
-            <Button
-              onClick={handleExport}
-              variant="outline"
-              size="sm"
-              disabled={exportData.isPending}
-              className="border-accent-cyan/50 hover:bg-accent-cyan/10"
-            >
-              {exportData.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
-              Export
-            </Button>
-            <label>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={importData.isPending}
-                className="border-accent-cyan/50 hover:bg-accent-cyan/10 cursor-pointer"
-                asChild
-              >
-                <span>
-                  {importData.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
-                  Import
-                </span>
-              </Button>
-              <input type="file" accept=".json" onChange={handleImport} className="hidden" />
-            </label>
+          {/* Bowl Visualization */}
+          <div className="flex justify-center">
+            <ProgressBowl totalMinutes={totalMinutes} theme={theme || 'dark'} />
           </div>
 
-          {/* Bowl Visualization - Fixed Layout */}
-          <div className="relative w-full max-w-md mx-auto" style={{ height: '300px' }}>
-            {mounted && <ProgressBowl totalMinutes={totalMinutes} theme={theme || 'light'} />}
-          </div>
+          {/* Stats Card - Single Column */}
+          <Card className="bg-card/70 backdrop-blur-sm border-accent-cyan/20">
+            <CardHeader>
+              <CardTitle className="text-2xl text-accent-cyan flex items-center gap-2">
+                <TrendingUp className="w-6 h-6" />
+                Your Journey
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 gap-6">
+                <div className="flex items-center justify-between p-4 bg-accent-cyan/5 rounded-lg border border-accent-cyan/20">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-accent-cyan/10 rounded-lg">
+                      <Flame className="w-6 h-6 text-accent-cyan" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Current Streak</p>
+                      <p className="text-2xl font-bold text-foreground">{currentStreak} days</p>
+                    </div>
+                  </div>
+                </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <div className="bg-card/70 backdrop-blur-md border-2 border-accent-cyan/30 rounded-3xl p-6 space-y-3 hover:border-accent-cyan/50 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <Trophy className="w-8 h-8 text-accent-cyan" />
-                <span className="text-3xl font-bold text-accent-cyan">{currentRank.name}</span>
+                <div className="flex items-center justify-between p-4 bg-accent-cyan/5 rounded-lg border border-accent-cyan/20">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-accent-cyan/10 rounded-lg">
+                      <Calendar className="w-6 h-6 text-accent-cyan" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Minutes</p>
+                      <p className="text-2xl font-bold text-foreground">{totalMinutes} min</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-accent-cyan/5 rounded-lg border border-accent-cyan/20">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-accent-cyan/10 rounded-lg">
+                      <Award className="w-6 h-6 text-accent-cyan" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Current Rank</p>
+                      <p className="text-2xl font-bold text-foreground">{currentRank.name}</p>
+                      {nextRank && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {minutesUntilNext} min until {nextRank.name}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground">Current Rank</p>
-              {nextRank && minutesUntilNext !== null && (
-                <p className="text-xs text-muted-foreground">
-                  {minutesUntilNext} min to {nextRank.name}
+            </CardContent>
+          </Card>
+
+          {/* Session History */}
+          <Card className="bg-card/70 backdrop-blur-sm border-accent-cyan/20">
+            <CardHeader>
+              <CardTitle className="text-xl text-accent-cyan">Session History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <p className="text-center text-muted-foreground py-8">Loading sessions...</p>
+              ) : sortedSessions.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">
+                  No meditation sessions yet. Start your first session to begin tracking your progress!
                 </p>
+              ) : (
+                <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                  {sortedSessions.map((session, index) => {
+                    const sessionDate = new Date(Number(session.timestamp) / 1_000_000);
+                    return (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-3 bg-accent-cyan/5 rounded-lg border border-accent-cyan/20 hover:border-accent-cyan/40 transition-all"
+                      >
+                        <div>
+                          <p className="font-medium text-foreground">
+                            {session.minutes.toString()} minutes
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {format(sessionDate, 'MMMM d, yyyy • h:mm a')}
+                          </p>
+                        </div>
+                        <Badge variant="outline" className="border-accent-cyan/50 text-accent-cyan">
+                          Completed
+                        </Badge>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
-            </div>
-
-            <div className="bg-card/70 backdrop-blur-md border-2 border-accent-cyan/30 rounded-3xl p-6 space-y-3 hover:border-accent-cyan/50 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <TrendingUp className="w-8 h-8 text-accent-cyan" />
-                <span className="text-3xl font-bold text-accent-cyan">{totalMinutes}</span>
-              </div>
-              <p className="text-sm text-muted-foreground">Total Minutes</p>
-            </div>
-
-            <div className="bg-card/70 backdrop-blur-md border-2 border-accent-cyan/30 rounded-3xl p-6 space-y-3 hover:border-accent-cyan/50 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <Flame className="w-8 h-8 text-accent-cyan" />
-                <span className="text-3xl font-bold text-accent-cyan">{currentStreak}</span>
-              </div>
-              <p className="text-sm text-muted-foreground">Day Streak</p>
-            </div>
-
-            <div className="bg-card/70 backdrop-blur-md border-2 border-accent-cyan/30 rounded-3xl p-6 space-y-3 hover:border-accent-cyan/50 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <Calendar className="w-8 h-8 text-accent-cyan" />
-                <span className="text-3xl font-bold text-accent-cyan">{monthlyMinutes}</span>
-              </div>
-              <p className="text-sm text-muted-foreground">This Month</p>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </main>
+
+      <ExportImportControls
+        onExport={handleExport}
+        onImport={handleImport}
+        isExporting={exportData.isPending}
+        isImporting={importData.isPending}
+      />
     </PageBackgroundShell>
   );
 }

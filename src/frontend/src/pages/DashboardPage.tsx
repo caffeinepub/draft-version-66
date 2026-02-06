@@ -33,16 +33,22 @@ export default function DashboardPage() {
   // Memoize the quote selection so it doesn't change on carousel navigation
   const displayQuote = useMemo(() => {
     if (quotes && quotes.length > 0) {
-      return quotes[Math.floor(Math.random() * quotes.length)];
+      // Filter out empty quotes
+      const validQuotes = quotes.filter(q => q && q.trim().length > 0);
+      if (validQuotes.length > 0) {
+        return validQuotes[Math.floor(Math.random() * validQuotes.length)];
+      }
     }
     return 'Welcome to your meditation journey.';
   }, [quotes]);
 
   const handleBegin = () => {
-    if (quizOpen) {
-      // If quiz is selected, don't navigate - let quiz complete first
+    // If "Take Quiz" is selected, open quiz dialog instead of navigating
+    if (selectedType === 'quiz') {
+      setQuizOpen(true);
       return;
     }
+    
     navigate({
       to: '/pre-meditation',
       search: { type: selectedType },
@@ -50,12 +56,11 @@ export default function DashboardPage() {
   };
 
   const handleQuizComplete = (recommendedType: string) => {
-    setSelectedType(recommendedType);
     setQuizOpen(false);
-    // Auto-navigate to pre-meditation after quiz
+    // Auto-navigate to pre-meditation after quiz with fromQuiz flag
     navigate({
       to: '/pre-meditation',
-      search: { type: recommendedType },
+      search: { type: recommendedType, fromQuiz: true },
     });
   };
 
@@ -152,7 +157,7 @@ export default function DashboardPage() {
             <Button
               onClick={handleBegin}
               size="lg"
-              className="w-full sm:w-auto px-6 sm:px-8 py-4 sm:py-5 text-base sm:text-lg font-bold rounded-full bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark shadow-glow hover:shadow-glow-strong transition-all duration-300 hover:scale-105"
+              className="w-full sm:w-auto px-6 sm:px-8 py-4 sm:py-5 text-base sm:text-lg font-bold rounded-full bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
             >
               Begin
             </Button>
@@ -166,17 +171,6 @@ export default function DashboardPage() {
               >
                 <Sparkles className="w-4 h-4 mr-2" />
                 Your Rituals
-              </Button>
-            )}
-
-            {!quizOpen && (
-              <Button
-                onClick={() => setQuizOpen(true)}
-                size="lg"
-                variant="outline"
-                className="w-full sm:w-auto px-6 sm:px-8 py-4 sm:py-5 text-base sm:text-lg font-bold rounded-full border-2 border-accent-cyan/60 text-accent-cyan hover:bg-accent-cyan hover:text-primary-dark transition-all duration-300 hover:scale-105"
-              >
-                Take Quiz
               </Button>
             )}
           </div>

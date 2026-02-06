@@ -46,6 +46,15 @@ export interface JournalEntry {
   'meditationType' : MeditationType,
   'energy' : EnergyState,
 }
+export interface JournalEntryInput {
+  'duration' : bigint,
+  'mood' : Array<MoodState>,
+  'isFavorite' : boolean,
+  'timestamp' : bigint,
+  'reflection' : string,
+  'meditationType' : MeditationType,
+  'energy' : EnergyState,
+}
 export interface MeditationSession { 'minutes' : bigint, 'timestamp' : bigint }
 export type MeditationType = { 'ifs' : null } |
   { 'metta' : null } |
@@ -106,7 +115,10 @@ export interface _SERVICE {
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'createJournalEntry' : ActorMethod<[JournalEntryInput], JournalEntry>,
+  'deleteJournalEntry' : ActorMethod<[bigint], undefined>,
   'deleteRitual' : ActorMethod<[Ritual], undefined>,
+  'editJournalEntry' : ActorMethod<[JournalEntryInput], JournalEntry>,
   'getBooks' : ActorMethod<[], Array<Book>>,
   'getCallerJournalEntries' : ActorMethod<[], Array<JournalEntry>>,
   'getCallerProgressStats' : ActorMethod<[], ProgressStats>,
@@ -125,6 +137,8 @@ export interface _SERVICE {
   >,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'saveRitual' : ActorMethod<[Ritual], undefined>,
+  'toggleFavoriteEntry' : ActorMethod<[bigint], undefined>,
+  'updateJournalEntry' : ActorMethod<[bigint, JournalEntryInput], JournalEntry>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

@@ -1,58 +1,74 @@
-import { ArrowLeft, Moon, Sun } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
+import { Button } from '@/components/ui/button';
 import { useTheme } from 'next-themes';
-import { useState, useEffect } from 'react';
+import { Moon, Sun } from 'lucide-react';
 import SessionIndicator from './SessionIndicator';
 import HamburgerMenu from './HamburgerMenu';
-import MobileBackButton from './MobileBackButton';
 
-export default function StandardPageNav() {
+interface StandardPageNavProps {
+  showBackButton?: boolean;
+}
+
+export default function StandardPageNav({ showBackButton = true }: StandardPageNavProps) {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   return (
     <>
-      {/* Desktop Session Indicator */}
-      {mounted && (
-        <div className="hidden md:block">
-          <SessionIndicator />
+      {/* Desktop back button - top left */}
+      {showBackButton && (
+        <div className="hidden sm:block fixed top-6 left-6 z-50">
+          <Button
+            onClick={() => navigate({ to: '/dashboard' })}
+            variant="ghost"
+            size="icon"
+            className="bg-card/70 backdrop-blur-sm hover:bg-card border border-accent-cyan/20 hover:border-accent-cyan/40 transition-all"
+          >
+            <ArrowLeft className="w-5 h-5 text-accent-cyan" />
+          </Button>
         </div>
       )}
 
-      {/* Desktop Theme Toggle */}
-      {mounted && (
-        <button
+      {/* Theme toggle - top right */}
+      <div className="fixed top-6 right-6 z-50 flex items-center gap-3">
+        <Button
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="hidden md:block fixed top-6 right-6 z-50 rounded-full bg-card/80 backdrop-blur-sm p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-border/50"
-          aria-label="Toggle theme"
+          variant="ghost"
+          size="icon"
+          className="bg-card/70 backdrop-blur-sm hover:bg-card border border-accent-cyan/20 hover:border-accent-cyan/40 transition-all"
         >
           {theme === 'dark' ? (
-            <Sun className="h-5 w-5 text-accent-cyan" />
+            <Sun className="w-5 h-5 text-accent-cyan" />
           ) : (
-            <Moon className="h-5 w-5 text-primary-dark" />
+            <Moon className="w-5 h-5 text-accent-cyan" />
           )}
-        </button>
+        </Button>
+
+        {/* Session indicator - desktop only */}
+        <div className="hidden sm:block">
+          <SessionIndicator />
+        </div>
+      </div>
+
+      {/* Mobile back button - top left */}
+      {showBackButton && (
+        <div className="sm:hidden fixed top-4 left-4 z-50">
+          <Button
+            onClick={() => navigate({ to: '/dashboard' })}
+            variant="ghost"
+            size="icon"
+            className="bg-card/70 backdrop-blur-sm hover:bg-card border border-accent-cyan/20 hover:border-accent-cyan/40 transition-all"
+          >
+            <ArrowLeft className="w-5 h-5 text-accent-cyan" />
+          </Button>
+        </div>
       )}
 
-      {/* Desktop Back Button */}
-      <button
-        onClick={() => navigate({ to: '/dashboard' })}
-        className="hidden md:block fixed top-20 left-6 z-50 rounded-full bg-card/80 backdrop-blur-sm p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-border/50"
-        aria-label="Back to dashboard"
-      >
-        <ArrowLeft className="h-5 w-5 text-accent-cyan" />
-      </button>
-
-      {/* Mobile Back Button */}
-      {mounted && <MobileBackButton show={true} />}
-
-      {/* Mobile Hamburger Menu */}
-      {mounted && <HamburgerMenu />}
+      {/* Mobile hamburger menu - top right */}
+      <div className="sm:hidden fixed top-4 right-4 z-50">
+        <HamburgerMenu />
+      </div>
     </>
   );
 }

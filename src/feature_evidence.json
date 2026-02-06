@@ -2,8 +2,153 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-on-the-pre-meditation-page-remove-the-duplicate-volume-input-element-from-the-selected-container-xpath-html-1-body-1-div-1-div-1-main-1-div-1-div-2-div-3-so-that-only-a-single-volume-control-remains-in-that-container-and-there-are-no-two-volume-inputs-that-control-the-same-audio-volume",
-      "featureTitle": "On the Pre‑Meditation page, remove the duplicate volume input element from the selected container (XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[3]) so that only a single volume control remains in that container and there are no two volume inputs that control the same audio volume.",
+      "featureId": "feature-update-all-toast-notification-styling-so-success-error-notifications-are-not-transparent-and-have-a-clearly-visible-background-color-and-border-across-the-app-including-export-import-post-meditation-save-and-journal-note-edit-flows-apply-styling-via-app-level-toaster-configuration-e-g-props-in-frontend-src-app-tsx-and-or-global-css-without-modifying-any-files-under-frontend-src-components-ui",
+      "featureTitle": "Update all toast/notification styling so success/error notifications are not transparent and have a clearly visible background color and border across the app (including export/import, post-meditation save, and journal note edit flows). Apply styling via app-level Toaster configuration (e.g., props in `frontend/src/App.tsx`) and/or global CSS, without modifying any files under `frontend/src/components/ui`.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/index.css"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-change-export-import-notification-copy-to-be-generic-and-accurate-when-exporting-the-success-toast-must-say-data-has-been-exported-successfully-or-equivalent-and-when-importing-the-success-toast-must-say-data-has-been-imported-successfully-or-equivalent-do-not-mention-journal-in-these-toasts-because-exported-imported-data-includes-journal-and-progress",
+      "featureTitle": "Change export/import notification copy to be generic and accurate: when exporting, the success toast must say \"Data has been exported successfully\" (or equivalent), and when importing, the success toast must say \"Data has been imported successfully\" (or equivalent). Do not mention \"journal\" in these toasts because exported/imported data includes journal and progress.",
+      "files": [
+        "frontend/src/pages/JournalPage.tsx",
+        "frontend/src/pages/ProgressPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-enhance-the-journal-page-filtering-to-include-1-filter-by-favorites-show-only-favorited-entries-2-filter-by-date-and-3-filter-by-time-these-filters-must-work-together-with-the-existing-search-mood-and-energy-filters-and-apply-to-the-rendered-list",
+      "featureTitle": "Enhance the Journal page filtering to include: (1) filter by Favorites (show only favorited entries), (2) filter by Date, and (3) filter by Time. These filters must work together with the existing search, mood, and energy filters and apply to the rendered list.",
+      "files": [
+        "frontend/src/pages/JournalPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-in-the-journal-entries-list-display-mood-tags-with-both-the-icon-and-a-readable-text-label-e-g-sad-face-icon-plus-the-text-sad-keep-tooltips-if-present-but-the-meaning-must-be-visible-without-hovering",
+      "featureTitle": "In the Journal entries list, display mood tags with both the icon and a readable text label (e.g., sad-face icon plus the text \"Sad\"). Keep tooltips if present, but the meaning must be visible without hovering.",
+      "files": [
+        "frontend/src/pages/JournalPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-prevent-the-guest-mode-journal-page-crash-caused-by-legacy-invalid-localstorage-data-e-g-typeerror-cannot-read-properties-of-undefined-reading-charat-when-this-specific-mismatch-happens-automatically-clear-the-app-s-guest-localstorage-data-used-for-journaling-progress-and-force-a-full-page-reload-so-the-app-can-recreate-data-in-the-new-format",
+      "featureTitle": "Prevent the guest-mode Journal page crash caused by legacy/invalid localStorage data (e.g., `TypeError: Cannot read properties of undefined (reading 'charAt')`). When this specific mismatch happens, automatically clear the app’s guest localStorage data used for journaling/progress and force a full page reload so the app can recreate data in the new format.",
+      "files": [
+        "frontend/src/pages/JournalPage.tsx",
+        "frontend/src/utils/meditationStorage.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-make-navigation-ui-consistent-on-the-pre-meditation-page-and-the-active-meditation-session-view-replace-any-back-to-dashboard-button-variant-with-the-same-icon-style-back-control-used-on-other-navigation-pages-and-ensure-the-burger-hamburger-menu-is-available-in-the-header-the-same-way-it-is-on-books-journal-progress-knowledge-pages-including-consistent-guest-vs-signed-in-appearance",
+      "featureTitle": "Make navigation UI consistent on the Pre-meditation page and the active Meditation session view: replace any \"Back to dashboard\" button variant with the same icon-style back control used on other navigation pages, and ensure the burger (hamburger) menu is available in the header the same way it is on Books/Journal/Progress/Knowledge pages (including consistent guest vs signed-in appearance).",
+      "files": [
+        "frontend/src/components/StandardPageNav.tsx",
+        "frontend/src/pages/PreMeditationPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-on-the-meditation-page-timer-ui-make-the-timer-container-circular-while-preserving-the-existing-wavy-fill-effect-behavior-the-wave-fill-must-still-rise-from-bottom-to-top-as-time-decreases-and-the-visual-effects-wave-pattern-and-progression-should-remain-the-same-aside-from-the-container-shape",
+      "featureTitle": "On the Meditation page timer UI, make the timer container circular while preserving the existing wavy fill effect behavior: the wave fill must still rise from bottom to top as time decreases, and the visual effects (wave pattern and progression) should remain the same aside from the container shape.",
+      "files": [
+        "frontend/src/components/MeditationTimerWaveFill.tsx",
+        "frontend/src/pages/PreMeditationPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-on-the-pre-meditation-page-move-the-more-details-content-into-the-step-guide-container-so-it-appears-inside-the-same-container-as-the-step-by-step-guide-content-rather-than-outside-separate",
+      "featureTitle": "On the Pre-meditation page, move the \"More details\" content into the step guide container (so it appears inside the same container as the step-by-step guide content rather than outside/separate).",
       "files": [
         "frontend/src/pages/PreMeditationPage.tsx"
       ],
@@ -17,7 +162,7 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-1"
+        "REQ-8"
       ],
       "confidence": "high"
     }

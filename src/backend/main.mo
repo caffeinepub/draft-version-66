@@ -57,6 +57,16 @@ actor {
     isFavorite : Bool;
   };
 
+  type JournalEntryInput = {
+    meditationType : MeditationType;
+    duration : Nat;
+    mood : [MoodState];
+    energy : EnergyState;
+    reflection : Text;
+    timestamp : Int;
+    isFavorite : Bool;
+  };
+
   type UserProfile = {
     name : Text;
     email : ?Text;
@@ -88,6 +98,13 @@ actor {
     userProfile : ?UserProfile;
   };
 
+  type ExportData = {
+    journalEntries : [JournalEntry];
+    sessionRecords : [MeditationSession];
+    progressStats : ProgressStats;
+    userProfile : ?UserProfile;
+  };
+
   type Ritual = {
     meditationType : MeditationType;
     duration : Nat;
@@ -96,7 +113,7 @@ actor {
     timestamp : Int;
   };
 
-  // Updated book list (no buddhism/spirituality)
+  // Books and quotes data for persistent storage
   let books = List.fromArray<Book>([
     {
       title = "Ten Percent Happier";
@@ -199,11 +216,10 @@ actor {
 
   let accessControlState = AccessControl.initState();
   let defaultAvatar : ?Storage.ExternalBlob = null;
+  var ritualsStore = Map.empty<Principal, List.List<Ritual>>();
 
   include MixinAuthorization(accessControlState);
   include MixinStorage();
-
-  var ritualsStore = Map.empty<Principal, List.List<Ritual>>();
 
   // Utility function to ensure caller is initialized as a user
   func ensureUserInitialized(caller : Principal) {
@@ -215,20 +231,18 @@ actor {
     ignore AccessControl.hasPermission(accessControlState, caller, #user);
   };
 
-  // Public endpoints accessible to all users (including guests)
+  // Public endpoints - no authentication required
   public query ({ caller }) func getBooks() : async [Book] {
     books.toArray();
   };
 
   public query ({ caller }) func getDailyQuotes() : async [Text] {
-    quotes.toArray();
+    let quotesArray = quotes.toArray();
+    quotesArray;
   };
 
-  // User profile endpoints - require authenticated user
+  // User profile endpoints - authenticated users only
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
-    if (caller.isAnonymous()) {
-      Runtime.trap("Unauthorized: Authentication required");
-    };
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: User role required");
     };
@@ -239,10 +253,6 @@ actor {
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
-    if (caller.isAnonymous()) {
-      Runtime.trap("Unauthorized: Authentication required");
-    };
-    // Users can only view their own profile, admins can view any profile
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
     };
@@ -250,13 +260,17 @@ actor {
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    ensureUserInitialized(caller);
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
     userProfiles.add(caller, if (profile.name == "" and profile.avatar == null) { { name = "Anonymous"; email = null; avatar = null } } else { profile });
   };
 
-  // Import/Export endpoints - require authenticated user
+  // Import/Export endpoints - authenticated users only
   public shared ({ caller }) func importData(importData : ImportData, overwrite : Bool) : async () {
-    ensureUserInitialized(caller);
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
 
     // Security: Ensure all imported journal entries are assigned to the caller
     let sanitizedEntries = importData.journalEntries.map(func(entry : JournalEntry) : JournalEntry {
@@ -326,49 +340,11 @@ actor {
     };
   };
 
-  type ExportData = {
-    journalEntries : [JournalEntry];
-    sessionRecords : [MeditationSession];
-    progressStats : ProgressStats;
-    userProfile : ?UserProfile;
-  };
-
-  // Fetch current user's journal entries (for export or persistent storage)
-  public query ({ caller }) func getCallerJournalEntries() : async [JournalEntry] {
-    ensureUserInitialized(caller);
-    switch (journalEntries.get(caller)) {
-      case (null) { [] };
-      case (?list) { list.toArray() };
-    };
-  };
-
-  // Fetch current user's progress data (for persistent profile)
-  public query ({ caller }) func getCallerProgressStats() : async ProgressStats {
-    ensureUserInitialized(caller);
-    switch (progressCache.get(caller)) {
-      case (null) {
-        {
-          totalMinutes = 0;
-          currentStreak = 0;
-          monthlyMinutes = 0;
-          rank = "Beginner";
-        };
-      };
-      case (?cache) { cache };
-    };
-  };
-
-  // Fetch current user's session records (for export or persistent storage)
-  public query ({ caller }) func getCallerSessionRecords() : async [MeditationSession] {
-    ensureUserInitialized(caller);
-    switch (sessionRecords.get(caller)) {
-      case (null) { [] };
-      case (?list) { list.toArray() };
-    };
-  };
-
   public query ({ caller }) func getCurrentUserExportData() : async ExportData {
-    ensureUserInitialized(caller);
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
+
     let entries = switch (journalEntries.get(caller)) {
       case (null) { [] };
       case (?list) { list.toArray() };
@@ -401,7 +377,203 @@ actor {
     };
   };
 
-  // Helper function to calculate rank based on total minutes
+  // Journal entry endpoints - authenticated users only with ownership checks
+  public query ({ caller }) func getCallerJournalEntries() : async [JournalEntry] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
+    switch (journalEntries.get(caller)) {
+      case (null) { [] };
+      case (?list) { list.toArray() };
+    };
+  };
+
+  public shared ({ caller }) func createJournalEntry(entry : JournalEntryInput) : async JournalEntry {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
+
+    let newId = nextEntryId;
+    nextEntryId += 1;
+
+    let newEntry : JournalEntry = {
+      id = newId;
+      user = caller;
+      meditationType = entry.meditationType;
+      duration = entry.duration;
+      mood = entry.mood;
+      energy = entry.energy;
+      reflection = entry.reflection;
+      timestamp = entry.timestamp;
+      isFavorite = entry.isFavorite;
+    };
+
+    switch (journalEntries.get(caller)) {
+      case (?existing) {
+        existing.add(newEntry);
+        journalEntries.add(caller, existing);
+      };
+      case (null) {
+        let newList = List.empty<JournalEntry>();
+        newList.add(newEntry);
+        journalEntries.add(caller, newList);
+      };
+    };
+
+    newEntry;
+  };
+
+  public shared ({ caller }) func updateJournalEntry(entryId : Nat, entry : JournalEntryInput) : async JournalEntry {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
+
+    switch (journalEntries.get(caller)) {
+      case (null) { Runtime.trap("Unauthorized: Journal entry not found or access denied") };
+      case (?entries) {
+        let existingEntry = entries.find(func(e) { e.id == entryId });
+        switch (existingEntry) {
+          case (null) { Runtime.trap("Unauthorized: Journal entry not found or access denied") };
+          case (?existing) {
+            if (existing.user != caller) {
+              Runtime.trap("Unauthorized: Cannot update another user's journal entry");
+            };
+
+            let updatedEntry : JournalEntry = {
+              id = entryId;
+              user = caller;
+              meditationType = entry.meditationType;
+              duration = entry.duration;
+              mood = entry.mood;
+              energy = entry.energy;
+              reflection = entry.reflection;
+              timestamp = entry.timestamp;
+              isFavorite = entry.isFavorite;
+            };
+
+            let filtered = entries.filter(func(e) { e.id != entryId });
+            filtered.add(updatedEntry);
+            journalEntries.add(caller, filtered);
+            updatedEntry;
+          };
+        };
+      };
+    };
+  };
+
+  public shared ({ caller }) func editJournalEntry(entry : JournalEntryInput) : async JournalEntry {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
+
+    let newId = nextEntryId;
+    nextEntryId += 1;
+
+    let newEntry : JournalEntry = {
+      id = newId;
+      user = caller;
+      meditationType = entry.meditationType;
+      duration = entry.duration;
+      mood = entry.mood;
+      energy = entry.energy;
+      reflection = entry.reflection;
+      timestamp = entry.timestamp;
+      isFavorite = entry.isFavorite;
+    };
+
+    switch (journalEntries.get(caller)) {
+      case (?existing) {
+        existing.add(newEntry);
+        journalEntries.add(caller, existing);
+      };
+      case (null) {
+        let newList = List.empty<JournalEntry>();
+        newList.add(newEntry);
+        journalEntries.add(caller, newList);
+      };
+    };
+
+    newEntry;
+  };
+
+  public shared ({ caller }) func toggleFavoriteEntry(entryId : Nat) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
+
+    switch (journalEntries.get(caller)) {
+      case (null) { Runtime.trap("Unauthorized: Journal entry not found or access denied") };
+      case (?entries) {
+        let existingEntry = entries.find(func(e) { e.id == entryId });
+        switch (existingEntry) {
+          case (null) { Runtime.trap("Unauthorized: Journal entry not found or access denied") };
+          case (?entry) {
+            if (entry.user != caller) {
+              Runtime.trap("Unauthorized: Cannot modify another user's journal entry");
+            };
+
+            let updatedEntry = { entry with isFavorite = not entry.isFavorite };
+            let filteredEntries = entries.filter(func(e) { e.id != entryId });
+            filteredEntries.add(updatedEntry);
+            journalEntries.add(caller, filteredEntries);
+          };
+        };
+      };
+    };
+  };
+
+  public shared ({ caller }) func deleteJournalEntry(entryId : Nat) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
+
+    switch (journalEntries.get(caller)) {
+      case (null) { Runtime.trap("Unauthorized: Journal entry not found or access denied") };
+      case (?entries) {
+        let existingEntry = entries.find(func(e) { e.id == entryId });
+        switch (existingEntry) {
+          case (null) { Runtime.trap("Unauthorized: Journal entry not found or access denied") };
+          case (?entry) {
+            if (entry.user != caller) {
+              Runtime.trap("Unauthorized: Cannot delete another user's journal entry");
+            };
+
+            let filtered = entries.filter(func(e) { e.id != entryId });
+            journalEntries.add(caller, filtered);
+          };
+        };
+      };
+    };
+  };
+
+  // Progress and session endpoints - authenticated users only
+  public query ({ caller }) func getCallerProgressStats() : async ProgressStats {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
+    switch (progressCache.get(caller)) {
+      case (null) {
+        {
+          totalMinutes = 0;
+          currentStreak = 0;
+          monthlyMinutes = 0;
+          rank = "Beginner";
+        };
+      };
+      case (?cache) { cache };
+    };
+  };
+
+  public query ({ caller }) func getCallerSessionRecords() : async [MeditationSession] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
+    switch (sessionRecords.get(caller)) {
+      case (null) { [] };
+      case (?list) { list.toArray() };
+    };
+  };
+
   private func calculateRank(totalMinutes : Nat) : Text {
     if (totalMinutes >= 1000) { "Master" }
     else if (totalMinutes >= 500) { "Expert" }
@@ -410,9 +582,11 @@ actor {
     else { "Beginner" };
   };
 
-  // Endpoint to persist client-calculated session progress
   public shared ({ caller }) func recordMeditationSession(session : MeditationSession, _monthlyStats : Nat, _currentStreak : Nat) : async ProgressStats {
-    ensureUserInitialized(caller);
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
+
     let sessions : List.List<MeditationSession> = switch (sessionRecords.get(caller)) {
       case (null) {
         let newSessions = List.empty<MeditationSession>();
@@ -426,7 +600,6 @@ actor {
     };
     sessionRecords.add(caller, sessions);
 
-    // Calculate total minutes from all sessions
     var totalMinutes = 0;
     for (s in sessions.values()) {
       totalMinutes += s.minutes;
@@ -452,9 +625,11 @@ actor {
     newStats;
   };
 
-  // RITUALS FEATURE - require authenticated user
+  // Rituals endpoints - authenticated users only
   public shared ({ caller }) func saveRitual(ritual : Ritual) : async () {
-    ensureUserInitialized(caller);
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
 
     let newRitual = { ritual with timestamp = Time.now() };
 
@@ -486,7 +661,9 @@ actor {
   };
 
   public query ({ caller }) func listCallerRituals() : async [Ritual] {
-    ensureUserInitialized(caller);
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
     switch (ritualsStore.get(caller)) {
       case (null) { [] };
       case (?list) {
@@ -501,7 +678,10 @@ actor {
   };
 
   public shared ({ caller }) func deleteRitual(ritualToDelete : Ritual) : async () {
-    ensureUserInitialized(caller);
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: User role required");
+    };
+
     switch (ritualsStore.get(caller)) {
       case (null) { Runtime.trap("RitualNotFound: No rituals found for this user") };
       case (?ritualsList) {

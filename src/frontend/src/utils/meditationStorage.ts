@@ -40,13 +40,20 @@ export function getGuestJournalEntries(): GuestJournalEntry[] {
     if (!stored) return [];
     const entries = JSON.parse(stored);
     
-    // Validate entries have required fields
-    return entries.filter((entry: any) => {
-      return entry.id !== undefined && 
-             entry.mood && 
-             Array.isArray(entry.mood) &&
-             entry.mood.every((m: any) => typeof m === 'string');
-    });
+    // Validate and sanitize entries
+    return entries
+      .filter((entry: any) => {
+        return entry.id !== undefined && 
+               entry.mood && 
+               Array.isArray(entry.mood);
+      })
+      .map((entry: any) => ({
+        ...entry,
+        // Ensure mood is an array of valid strings
+        mood: Array.isArray(entry.mood) 
+          ? entry.mood.filter((m: any) => typeof m === 'string' && m.length > 0)
+          : []
+      }));
   } catch (error) {
     console.error('Error loading guest journal entries:', error);
     return [];
@@ -55,7 +62,14 @@ export function getGuestJournalEntries(): GuestJournalEntry[] {
 
 export function saveGuestJournalEntries(entries: GuestJournalEntry[]): void {
   try {
-    localStorage.setItem(GUEST_JOURNAL_KEY, JSON.stringify(entries));
+    // Sanitize entries before saving
+    const sanitized = entries.map(entry => ({
+      ...entry,
+      mood: Array.isArray(entry.mood) 
+        ? entry.mood.filter((m: any) => typeof m === 'string' && m.length > 0)
+        : []
+    }));
+    localStorage.setItem(GUEST_JOURNAL_KEY, JSON.stringify(sanitized));
   } catch (error) {
     console.error('Error saving guest journal entries:', error);
   }
@@ -83,7 +97,7 @@ export function updateGuestJournalEntry(entryId: string, updates: Partial<GuestJ
 export function deleteGuestJournalEntry(entryId: string): void {
   const entries = getGuestJournalEntries();
   const filtered = entries.filter((e) => e.id !== entryId);
-  saveGuestJournalEntries(entries);
+  saveGuestJournalEntries(filtered);
 }
 
 export function getGuestProgressData(): GuestProgressData {

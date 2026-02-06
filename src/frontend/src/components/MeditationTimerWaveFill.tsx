@@ -8,6 +8,13 @@ interface MeditationTimerWaveFillProps {
 export default function MeditationTimerWaveFill({ progress, timeText }: MeditationTimerWaveFillProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number | undefined>(undefined);
+  const waveOffsetRef = useRef(0);
+  const progressRef = useRef(progress);
+
+  // Update progress ref without triggering re-render
+  useEffect(() => {
+    progressRef.current = progress;
+  }, [progress]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -26,8 +33,6 @@ export default function MeditationTimerWaveFill({ progress, timeText }: Meditati
     const width = rect.width;
     const height = rect.height;
 
-    let waveOffset = 0;
-
     const animate = () => {
       ctx.clearRect(0, 0, width, height);
 
@@ -36,8 +41,9 @@ export default function MeditationTimerWaveFill({ progress, timeText }: Meditati
       const fillColor = isDark ? 'rgba(112, 224, 229, 0.3)' : 'rgba(0, 173, 181, 0.3)';
       const waveColor = isDark ? 'rgba(112, 224, 229, 0.6)' : 'rgba(0, 173, 181, 0.6)';
 
-      // Calculate fill height (bottom to top)
-      const fillHeight = height * progress;
+      // Calculate fill height (bottom to top) using ref
+      const currentProgress = progressRef.current;
+      const fillHeight = height * currentProgress;
       const fillY = height - fillHeight;
 
       // Draw filled area
@@ -45,15 +51,15 @@ export default function MeditationTimerWaveFill({ progress, timeText }: Meditati
       ctx.fillRect(0, fillY, width, fillHeight);
 
       // Draw wave at the top edge of the fill
-      if (progress > 0 && progress < 1) {
+      if (currentProgress > 0 && currentProgress < 1) {
         ctx.beginPath();
         ctx.moveTo(0, fillY);
 
         const waveAmplitude = 8;
-        const waveFrequency = 0.02;
+        const waveFrequency = 0.015; // Slower wave frequency
 
         for (let x = 0; x <= width; x++) {
-          const y = fillY + Math.sin((x + waveOffset) * waveFrequency) * waveAmplitude;
+          const y = fillY + Math.sin((x + waveOffsetRef.current) * waveFrequency) * waveAmplitude;
           ctx.lineTo(x, y);
         }
 
@@ -64,7 +70,8 @@ export default function MeditationTimerWaveFill({ progress, timeText }: Meditati
         ctx.fillStyle = waveColor;
         ctx.fill();
 
-        waveOffset += 2;
+        // Slower wave animation
+        waveOffsetRef.current += 0.8;
       }
 
       animationFrameRef.current = requestAnimationFrame(animate);
@@ -77,7 +84,7 @@ export default function MeditationTimerWaveFill({ progress, timeText }: Meditati
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [progress]);
+  }, []); // Only initialize once
 
   return (
     <div className="relative w-full h-full flex items-center justify-center">

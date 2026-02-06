@@ -3,6 +3,7 @@ import { Search, Heart, Trash2, Edit2, X, Check, Star, Calendar, Clock } from 'l
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -38,34 +39,6 @@ export default function JournalPage() {
   const toggleFavorite = useToggleFavorite();
   const importData = useImportData();
   const exportData = useExportData();
-
-  // Guest mode crash recovery
-  useEffect(() => {
-    const hasReloaded = sessionStorage.getItem('journal-crash-recovery');
-    
-    if (!hasReloaded && entries && entries.length > 0) {
-      try {
-        // Test if entries have valid mood data
-        entries.forEach(entry => {
-          if (entry.mood && entry.mood.length > 0) {
-            entry.mood.forEach(mood => {
-              if (typeof mood === 'string') {
-                mood.charAt(0); // This will throw if mood is undefined/invalid
-              }
-            });
-          }
-        });
-      } catch (err) {
-        console.error('Detected legacy data format, clearing guest storage:', err);
-        // Clear guest storage
-        localStorage.removeItem('guestJournalEntries');
-        localStorage.removeItem('guestProgressStats');
-        localStorage.removeItem('guestSessionRecords');
-        sessionStorage.setItem('journal-crash-recovery', 'true');
-        window.location.reload();
-      }
-    }
-  }, [entries]);
 
   const handleToggleFavorite = async (entry: JournalEntry) => {
     try {
@@ -198,6 +171,7 @@ export default function JournalPage() {
   const sortedEntries = [...filteredEntries].sort((a, b) => Number(b.timestamp - a.timestamp));
 
   const getMoodLabel = (mood: MoodState): string => {
+    if (!mood || typeof mood !== 'string') return 'Unknown';
     return mood.charAt(0).toUpperCase() + mood.slice(1);
   };
 
@@ -343,7 +317,7 @@ export default function JournalPage() {
                               <Icon className={`w-5 h-5 ${isSelected ? 'text-accent-cyan' : 'text-muted-foreground'}`} />
                             </button>
                           </TooltipTrigger>
-                          <TooltipContent>{mood.charAt(0).toUpperCase() + mood.slice(1)}</TooltipContent>
+                          <TooltipContent>{getMoodLabel(mood)}</TooltipContent>
                         </Tooltip>
                       );
                     })}
@@ -408,9 +382,9 @@ export default function JournalPage() {
             ) : sortedEntries.length === 0 ? (
               <div className="text-center py-12 bg-card/50 backdrop-blur-sm rounded-xl border border-accent-cyan/20">
                 <p className="text-muted-foreground">
-                  {entries && entries.length > 0 
-                    ? 'No entries match your filters. Try adjusting your search criteria.'
-                    : 'No journal entries yet. Start your meditation journey to create your first entry!'}
+                  {entries && entries.length > 0
+                    ? 'No entries match your current filters'
+                    : 'No journal entries yet. Complete a meditation session to create your first entry.'}
                 </p>
               </div>
             ) : (
@@ -419,128 +393,127 @@ export default function JournalPage() {
                 const entryDate = new Date(Number(entry.timestamp) / 1_000_000);
 
                 return (
-                  <div
-                    key={entry.id.toString()}
-                    className="bg-card/70 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-accent-cyan/20 hover:border-accent-cyan/40 transition-all"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="outline" className="border-accent-cyan/50 text-accent-cyan">
-                            {entry.meditationType}
-                          </Badge>
-                          <span className="text-sm text-muted-foreground">
-                            {entry.duration.toString()} min
-                          </span>
+                  <Card key={entry.id.toString()} className="bg-card/70 backdrop-blur-sm border-accent-cyan/30 hover:border-accent-cyan/50 transition-all">
+                    <CardContent className="p-6 space-y-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-3">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant="outline" className="border-accent-cyan/50 text-accent-cyan">
+                              {entry.meditationType}
+                            </Badge>
+                            <Badge variant="outline" className="border-accent-cyan/50">
+                              {Number(entry.duration)} min
+                            </Badge>
+                            <span className="text-sm text-muted-foreground">
+                              {format(entryDate, 'MMM d, yyyy • h:mm a')}
+                            </span>
+                          </div>
+
+                          <div className="flex flex-wrap gap-2">
+                            {entry.mood.map((mood) => {
+                              const Icon = moodIconMap[mood];
+                              return (
+                                <TooltipProvider key={mood}>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-accent-cyan/10 border border-accent-cyan/30">
+                                        <Icon className="w-4 h-4 text-accent-cyan" />
+                                        <span className="text-xs text-accent-cyan">{getMoodLabel(mood)}</span>
+                                      </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>{getMoodLabel(mood)}</TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              );
+                            })}
+                            {entry.energy && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-accent-cyan/10 border border-accent-cyan/30">
+                                      {(() => {
+                                        const Icon = energyIconMap[entry.energy];
+                                        return <Icon className="w-4 h-4 text-accent-cyan" />;
+                                      })()}
+                                      <span className="text-xs text-accent-cyan">
+                                        {entry.energy.charAt(0).toUpperCase() + entry.energy.slice(1)}
+                                      </span>
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent>{entry.energy.charAt(0).toUpperCase() + entry.energy.slice(1)}</TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                          </div>
+
+                          {isEditing ? (
+                            <Textarea
+                              value={editedReflection}
+                              onChange={(e) => setEditedReflection(e.target.value)}
+                              rows={4}
+                              className="bg-background/50 border-accent-cyan/30 focus:border-accent-cyan"
+                            />
+                          ) : (
+                            <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+                              {entry.reflection || <span className="text-muted-foreground italic">No reflection added</span>}
+                            </p>
+                          )}
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          {format(entryDate, 'MMMM d, yyyy • h:mm a')}
-                        </p>
-                      </div>
 
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleToggleFavorite(entry)}
-                          disabled={toggleFavorite.isPending}
-                          className="hover:bg-accent-cyan/10"
-                        >
-                          <Heart
-                            className={`w-5 h-5 ${
-                              entry.isFavorite
-                                ? 'fill-accent-cyan text-accent-cyan'
-                                : 'text-muted-foreground'
-                            }`}
-                          />
-                        </Button>
-                        {!isEditing && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleStartEdit(entry)}
-                              className="hover:bg-accent-cyan/10"
-                            >
-                              <Edit2 className="w-5 h-5 text-muted-foreground" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDeleteClick(entry.id)}
-                              className="hover:bg-destructive/10"
-                            >
-                              <Trash2 className="w-5 h-5 text-destructive" />
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {entry.mood.map((mood) => {
-                        const Icon = moodIconMap[mood];
-                        return (
-                          <Badge
-                            key={mood}
-                            variant="secondary"
-                            className="flex items-center gap-1.5 bg-accent-cyan/10 text-accent-cyan border-accent-cyan/30"
-                          >
-                            <Icon className="w-3.5 h-3.5" />
-                            <span>{getMoodLabel(mood)}</span>
-                          </Badge>
-                        );
-                      })}
-                      {(() => {
-                        const Icon = energyIconMap[entry.energy];
-                        return (
-                          <Badge
-                            variant="secondary"
-                            className="flex items-center gap-1.5 bg-accent-lavender/10 text-accent-lavender border-accent-lavender/30"
-                          >
-                            <Icon className="w-3.5 h-3.5" />
-                            <span>{entry.energy.charAt(0).toUpperCase() + entry.energy.slice(1)}</span>
-                          </Badge>
-                        );
-                      })()}
-                    </div>
-
-                    {isEditing ? (
-                      <div className="space-y-3">
-                        <Textarea
-                          value={editedReflection}
-                          onChange={(e) => setEditedReflection(e.target.value)}
-                          className="min-h-[120px] bg-background/50 border-accent-cyan/30 focus:border-accent-cyan"
-                          placeholder="Edit your reflection..."
-                        />
-                        <div className="flex gap-2">
+                        <div className="flex flex-col gap-2">
                           <Button
-                            onClick={() => handleSaveEdit(entry)}
-                            disabled={updateEntry.isPending}
-                            size="sm"
-                            className="bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark"
+                            onClick={() => handleToggleFavorite(entry)}
+                            variant="ghost"
+                            size="icon"
+                            className={`${entry.isFavorite ? 'text-red-500' : 'text-muted-foreground'}`}
                           >
-                            <Check className="w-4 h-4 mr-1" />
-                            Save
+                            <Heart className={`w-5 h-5 ${entry.isFavorite ? 'fill-current' : ''}`} />
                           </Button>
-                          <Button
-                            onClick={handleCancelEdit}
-                            disabled={updateEntry.isPending}
-                            variant="outline"
-                            size="sm"
-                            className="border-accent-cyan/50 hover:border-accent-cyan"
-                          >
-                            <X className="w-4 h-4 mr-1" />
-                            Cancel
-                          </Button>
+
+                          {isEditing ? (
+                            <>
+                              <Button
+                                onClick={() => handleSaveEdit(entry)}
+                                variant="ghost"
+                                size="icon"
+                                className="text-green-500"
+                                disabled={updateEntry.isPending}
+                              >
+                                <Check className="w-5 h-5" />
+                              </Button>
+                              <Button
+                                onClick={handleCancelEdit}
+                                variant="ghost"
+                                size="icon"
+                                className="text-muted-foreground"
+                              >
+                                <X className="w-5 h-5" />
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button
+                                onClick={() => handleStartEdit(entry)}
+                                variant="ghost"
+                                size="icon"
+                                className="text-muted-foreground hover:text-accent-cyan"
+                              >
+                                <Edit2 className="w-5 h-5" />
+                              </Button>
+                              <Button
+                                onClick={() => handleDeleteClick(entry.id)}
+                                variant="ghost"
+                                size="icon"
+                                className="text-muted-foreground hover:text-destructive"
+                              >
+                                <Trash2 className="w-5 h-5" />
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </div>
-                    ) : (
-                      <p className="text-foreground leading-relaxed whitespace-pre-wrap">
-                        {entry.reflection}
-                      </p>
-                    )}
-                  </div>
+                    </CardContent>
+                  </Card>
                 );
               })
             )}

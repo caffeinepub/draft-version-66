@@ -1,163 +1,110 @@
 {
   "kind": "build_request",
-  "title": "Fix toast notifications, enhance journal filtering/labels, stabilize guest journal, and align meditation navigation/timer UI",
+  "title": "Update meditation setup/active/reflection UX and standardize nav controls",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Update all toast/notification styling so success/error notifications are not transparent and have a clearly visible background color and border across the app (including export/import, post-meditation save, and journal note edit flows). Apply styling via app-level Toaster configuration (e.g., props in `frontend/src/App.tsx`) and/or global CSS, without modifying any files under `frontend/src/components/ui`.",
+      "text": "On the Pre-Meditation page, remove the meditation type carousel UI from the setup flow so users are not presented with the carousel-based meditation-type selector.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "Those notifications should have proper background color, and border. Not like right now, they are transparent."
+          "Remove meditation carousel type from pre-meditation page."
         ]
       },
       "acceptanceCriteria": [
-        "Triggering export, import, saving after meditation, and saving an edited journal entry shows a toast with an opaque background (not transparent) and a visible border in both light and dark themes.",
-        "No changes are made inside `frontend/src/components/ui/*` (compose/configure instead)."
+        "PreMeditationPage no longer renders the MeditationCarousel component in the setup UI.",
+        "Meditation setup remains usable (user can still proceed into a meditation session without the type carousel being shown)."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Change export/import notification copy to be generic and accurate: when exporting, the success toast must say \"Data has been exported successfully\" (or equivalent), and when importing, the success toast must say \"Data has been imported successfully\" (or equivalent). Do not mention \"journal\" in these toasts because exported/imported data includes journal and progress.",
+      "text": "Re-introduce the step-by-step meditation guide UI in the Pre-Meditation setup flow, and add a clearly placed \"More details\" control that reveals additional guide content in an appropriate way (e.g., opening an in-page expanded view/dialog/drawer) without re-adding the meditation type carousel.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "when exporting data, in notification text, say something like \"data has been exported succesfully\", instead of right now, journal data has been exported. Because data is both journal and progress, so it shouldn't explicitly say journal."
+          "And re-add in the step guides, more details btn in appropriate way."
         ]
       },
       "acceptanceCriteria": [
-        "Exporting data from the UI shows a success toast that does not mention \"journal\" and indicates data export success.",
-        "Importing data from the UI shows a success toast that does not mention \"journal\" and indicates data import success.",
-        "Existing error toasts still display an actionable error message (no regression)."
+        "PreMeditationPage setup includes a step guide UI (using the existing MeditationGuideStepper) for the currently selected meditation type.",
+        "A \"More details\" button is present near the step guide and, when activated, shows expanded guide information (not just a tooltip) and is dismissible.",
+        "The step guide and \"More details\" feature work on both mobile and desktop layouts."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Enhance the Journal page filtering to include: (1) filter by Favorites (show only favorited entries), (2) filter by Date, and (3) filter by Time. These filters must work together with the existing search, mood, and energy filters and apply to the rendered list.",
+      "text": "Standardize the Back button and Light/Dark theme toggle on the following pages by removing any page-specific back/theme controls (including DashboardBackButton and inline Moon/Sun buttons) and replacing them with the same navigation UI used on the Book and Knowledge pages (StandardPageNav): PreMeditationPage (setup/active/reflection views), Journal page (\"journey\"), and Progress page.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "allow proper filtering in journal page, meaning include filtering by favorites, by date, by time."
+          "Also remove those light/dark theme and back buttons from pre-med, med, journey, progress pages. They should be replaced with the light and dark theme btn like they are in the book and knowledge pages, as well as back btn too!"
         ]
       },
       "acceptanceCriteria": [
-        "Journal page provides UI controls for Favorites, Date, and Time filtering in addition to the existing search/mood/energy filters.",
-        "Applying Favorites filter shows only entries with `isFavorite === true`.",
-        "Applying Date filter restricts entries to the selected day (or selected date range if implemented), based on `entry.timestamp`.",
-        "Applying Time filter restricts entries by time-of-day (e.g., within a chosen range) based on `entry.timestamp`.",
-        "Filters can be combined (e.g., Favorites + Mood + Date) and the list updates accordingly."
+        "PreMeditationPage uses StandardPageNav and does not render DashboardBackButton or its own theme toggle button.",
+        "JournalPage uses StandardPageNav and does not render DashboardBackButton or its own theme toggle button.",
+        "ProgressPage uses StandardPageNav and does not render DashboardBackButton or its own theme toggle button.",
+        "Back navigation goes to /dashboard (matching StandardPageNav behavior) and theme toggle behavior matches StandardPageNav.",
+        "No duplicate back/theme controls appear on any of the affected pages in either mobile or desktop breakpoints."
       ]
     },
     {
       "id": "REQ-4",
-      "text": "In the Journal entries list, display mood tags with both the icon and a readable text label (e.g., sad-face icon plus the text \"Sad\"). Keep tooltips if present, but the meaning must be visible without hovering.",
+      "text": "Update the active meditation experience so the meditation timer is circular rather than square by replacing the current square timer UI with the existing circular timer component (MeditationTimerRing) during the active meditation view.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "the tags that represent moods, should have not only the icon in the journal, but also corresponding meaning. *sad face icon* sad."
+          "And meditation page, should have circular timer, instead of currently square."
         ]
       },
       "acceptanceCriteria": [
-        "Each mood tag displayed on a journal entry includes the icon and a visible text label (capitalized).",
-        "The UI remains readable and does not overflow badly on mobile (wraps appropriately)."
+        "During active meditation, the timer display is circular (ring) rather than square/wave-fill.",
+        "The timer continues to reflect the countdown correctly (time remaining and progress) and responds to pause/resume as before."
       ]
     },
     {
       "id": "REQ-5",
-      "text": "Prevent the guest-mode Journal page crash caused by legacy/invalid localStorage data (e.g., `TypeError: Cannot read properties of undefined (reading 'charAt')`). When this specific mismatch happens, automatically clear the app’s guest localStorage data used for journaling/progress and force a full page reload so the app can recreate data in the new format.",
+      "text": "Change the post-meditation reflection flow so prompts are incremental and sequential: (1) prompt the user to select mood/icon state, then (2) prompt the user to select energy state icon, then (3) prompt the user to optionally write a note, optionally mark the session as favorite, and then save. Ensure validation only blocks progression where required (mood and energy required; note optional).",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "TypeError: Cannot read properties of undefined (reading 'charAt')",
-          "It should delete local storage data, and refresh the page. Because it doesn't match with new updated data formats."
+          "Also after meditation is done, user should be prompted incrementely, first with selecting icon state, then energy state icon, and then only write note(optionally), mark it as favorite and save."
         ]
       },
       "acceptanceCriteria": [
-        "In guest mode, if invalid/legacy stored journal data would cause the `charAt`-style runtime error on `/journal`, the app clears the relevant localStorage keys and refreshes the page automatically.",
-        "After refresh, the Journal page loads without throwing and shows an empty/valid state instead of crashing.",
-        "Authenticated users’ cloud/backed data is not deleted as part of this recovery behavior."
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Make navigation UI consistent on the Pre-meditation page and the active Meditation session view: replace any \"Back to dashboard\" button variant with the same icon-style back control used on other navigation pages, and ensure the burger (hamburger) menu is available in the header the same way it is on Books/Journal/Progress/Knowledge pages (including consistent guest vs signed-in appearance).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "There are incosistencies in how pre-meditation page, has a \"back to dashboard\" button and the burger menu not appearing.",
-          "Basically copy the appearance of viewing as guest or user and burger menu on navigation pages like(books, journal, progress, knowledge), same way in pre-meditation page and meditation page."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Pre-meditation page header matches the standard header pattern used on Books/Journal/Progress/Knowledge (back icon + hamburger menu + session indicator behavior).",
-        "Active meditation session view (the screen with the timer) also uses the same header pattern (or an intentionally minimal variant that still includes the burger menu and icon back button as requested).",
-        "No duplicate/conflicting navigation controls are shown."
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "On the Meditation page timer UI, make the timer container circular while preserving the existing wavy fill effect behavior: the wave fill must still rise from bottom to top as time decreases, and the visual effects (wave pattern and progression) should remain the same aside from the container shape.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "just make the timer container circular, but leave effects the same, like the wavy pattern that fills up based on total time left from bottom to top(no time left at the top)"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The timer is visually contained within a circular container (mask/clip or equivalent).",
-        "Wave fill effect remains: as time elapses, fill progresses upward; when no time remains, the fill is at the top.",
-        "No regressions to timer accuracy, pause/resume, or readability of time text."
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "text": "On the Pre-meditation page, move the \"More details\" content into the step guide container (so it appears inside the same container as the step-by-step guide content rather than outside/separate).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "in pre-med page, put \"more details inside the step guide container\""
-        ]
-      },
-      "acceptanceCriteria": [
-        "The \"More details\" section renders inside the step guide container on the Pre-meditation page.",
-        "Layout remains responsive and consistent with surrounding UI styling."
+        "After the meditation completes, the UI shows a step-based reflection flow where mood selection is shown first, energy selection second, and note/favorite/save last.",
+        "User cannot advance past mood selection without selecting at least one mood.",
+        "User cannot advance past energy selection without selecting an energy level.",
+        "The note field is optional and can be left empty while still allowing save.",
+        "Favorite can be toggled during the final step before saving.",
+        "Saving creates the journal entry using the existing create flow and navigates to /dashboard on success (maintaining existing behavior), with errors surfaced via existing toast/error handling."
       ]
     }
   ],
   "constraints": [
-    "Do not modify any files under `frontend/src/components/ui/*` (compose or configure them instead).",
-    "Backend must remain single-actor (all Motoko logic in `backend/main.mo`); only introduce state migration if a backend schema change is required (not expected for this request).",
-    "Use English for all user-facing text."
+    "Frontend paths listed as immutable in SYSTEM_CONTEXT must not be edited (compose existing UI components instead).",
+    "Backend must remain single-actor; only introduce a migration if a persisted state/schema change is required."
   ],
   "nonGoals": [
-    "Adding new backend data models or changing persistent schemas for journal/progress.",
     "Adding new authentication methods beyond Internet Identity.",
-    "Implementing real-time notifications or push notifications."
+    "Introducing new backend services or external databases.",
+    "Changing the backend journal entry schema unless strictly required for the new reflection step UI (the change requested can be implemented as a frontend flow)."
   ],
   "imageRequirements": {
     "required": [],

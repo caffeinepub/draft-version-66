@@ -1,105 +1,66 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T18:03:17.445Z",
+  "generatedAt": "2026-02-06T19:01:33.873Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 8,
-    "implemented": 8,
+    "total": 5,
+    "implemented": 5,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Update all toast/notification styling so success/error notifications are not transparent and have a clearly visible background color and border across the app (including export/import, post-meditation save, and journal note edit flows). Apply styling via app-level Toaster configuration (e.g., props in `frontend/src/App.tsx`) and/or global CSS, without modifying any files under `frontend/src/components/ui`.",
+        "summary": "On the Pre-Meditation page, remove the meditation type carousel UI from the setup flow so users are not presented with the carousel-based meditation-type selector.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/index.css"
+          "frontend/src/pages/PreMeditationPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/index.css"
+          "frontend/src/pages/PreMeditationPage.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Change export/import notification copy to be generic and accurate: when exporting, the success toast must say \"Data has been exported successfully\" (or equivalent), and when importing, the success toast must say \"Data has been imported successfully\" (or equivalent). Do not mention \"journal\" in these toasts because exported/imported data includes journal and progress.",
+        "summary": "Re-introduce the step-by-step meditation guide UI in the Pre-Meditation setup flow, and add a clearly placed \"More details\" control that reveals additional guide content in an appropriate way (e.g., opening an in-page expanded view/dialog/drawer) without re-adding the meditation type carousel.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/JournalPage.tsx",
-          "frontend/src/pages/ProgressPage.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/JournalPage.tsx",
-          "frontend/src/pages/ProgressPage.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Enhance the Journal page filtering to include: (1) filter by Favorites (show only favorited entries), (2) filter by Date, and (3) filter by Time. These filters must work together with the existing search, mood, and energy filters and apply to the rendered list.",
+        "summary": "Standardize the Back button and Light/Dark theme toggle on the following pages by removing any page-specific back/theme controls (including DashboardBackButton and inline Moon/Sun buttons) and replacing them with the same navigation UI used on the Book and Knowledge pages (StandardPageNav): PreMeditationPage (setup/active/reflection views), Journal page (\"journey\"), and Progress page.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/JournalPage.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx",
+          "frontend/src/pages/JournalPage.tsx",
+          "frontend/src/pages/ProgressPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/JournalPage.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx",
+          "frontend/src/pages/JournalPage.tsx",
+          "frontend/src/pages/ProgressPage.tsx"
         ]
       },
       {
         "id": "REQ-4",
-        "summary": "In the Journal entries list, display mood tags with both the icon and a readable text label (e.g., sad-face icon plus the text \"Sad\"). Keep tooltips if present, but the meaning must be visible without hovering.",
+        "summary": "Update the active meditation experience so the meditation timer is circular rather than square by replacing the current square timer UI with the existing circular timer component (MeditationTimerRing) during the active meditation view.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/JournalPage.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/JournalPage.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx"
         ]
       },
       {
         "id": "REQ-5",
-        "summary": "Prevent the guest-mode Journal page crash caused by legacy/invalid localStorage data (e.g., `TypeError: Cannot read properties of undefined (reading 'charAt')`). When this specific mismatch happens, automatically clear the app’s guest localStorage data used for journaling/progress and force a full page reload so the app can recreate data in the new format.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/JournalPage.tsx",
-          "frontend/src/utils/meditationStorage.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/JournalPage.tsx",
-          "frontend/src/utils/meditationStorage.ts"
-        ]
-      },
-      {
-        "id": "REQ-6",
-        "summary": "Make navigation UI consistent on the Pre-meditation page and the active Meditation session view: replace any \"Back to dashboard\" button variant with the same icon-style back control used on other navigation pages, and ensure the burger (hamburger) menu is available in the header the same way it is on Books/Journal/Progress/Knowledge pages (including consistent guest vs signed-in appearance).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx",
-          "frontend/src/components/StandardPageNav.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx",
-          "frontend/src/components/StandardPageNav.tsx"
-        ]
-      },
-      {
-        "id": "REQ-7",
-        "summary": "On the Meditation page timer UI, make the timer container circular while preserving the existing wavy fill effect behavior: the wave fill must still rise from bottom to top as time decreases, and the visual effects (wave pattern and progression) should remain the same aside from the container shape.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/MeditationTimerWaveFill.tsx",
-          "frontend/src/pages/PreMeditationPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/MeditationTimerWaveFill.tsx",
-          "frontend/src/pages/PreMeditationPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-8",
-        "summary": "On the Pre-meditation page, move the \"More details\" content into the step guide container (so it appears inside the same container as the step-by-step guide content rather than outside/separate).",
+        "summary": "Change the post-meditation reflection flow so prompts are incremental and sequential: (1) prompt the user to select mood/icon state, then (2) prompt the user to select energy state icon, then (3) prompt the user to optionally write a note, optionally mark the session as favorite, and then save. Ensure validation only blocks progression where required (mood and energy required; note optional).",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/pages/PreMeditationPage.tsx"
@@ -115,16 +76,9 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/components/MeditationGuideStepper.tsx",
-    "frontend/src/components/MeditationTimerWaveFill.tsx",
-    "frontend/src/components/StandardPageNav.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/index.css",
     "frontend/src/pages/JournalPage.tsx",
     "frontend/src/pages/PreMeditationPage.tsx",
     "frontend/src/pages/ProgressPage.tsx",
-    "frontend/src/utils/meditationStorage.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

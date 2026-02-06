@@ -1,27 +1,22 @@
 import { useState } from 'react';
 import { TrendingUp, Calendar, Award, Flame } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useTheme } from 'next-themes';
 import PageBackgroundShell from '../components/PageBackgroundShell';
 import StandardPageNav from '../components/StandardPageNav';
+import ProgressBowl from '../components/ProgressBowl';
 import ExportImportControls from '../components/ExportImportControls';
 import CloudSyncErrorBanner from '../components/CloudSyncErrorBanner';
-import ProgressBowl from '../components/ProgressBowl';
-import { useProgressStats, useSessionRecords, useImportData, useExportData } from '../hooks/useQueries';
+import { useProgressStats, useImportData, useExportData } from '../hooks/useQueries';
 import { toast } from 'sonner';
 import { getCloudSyncErrorMessage } from '../utils/cloudSync';
-import { getCurrentRank, getNextRank, getMinutesUntilNextRank } from '../utils/progressRanks';
-import { format } from 'date-fns';
+import { useTheme } from 'next-themes';
 
 export default function ProgressPage() {
-  const { theme } = useTheme();
-  const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useProgressStats();
-  const { data: sessions, isLoading: sessionsLoading, isError: sessionsError, refetch: refetchSessions } = useSessionRecords();
+  const { data: stats, isLoading, isError, refetch } = useProgressStats();
   const importData = useImportData();
   const exportData = useExportData();
-
-  const [filterFavorites, setFilterFavorites] = useState(false);
+  const { theme } = useTheme();
 
   const handleExport = async () => {
     try {
@@ -50,16 +45,8 @@ export default function ProgressPage() {
 
   const totalMinutes = stats ? Number(stats.totalMinutes) : 0;
   const currentStreak = stats ? Number(stats.currentStreak) : 0;
-  const currentRank = getCurrentRank(totalMinutes);
-  const nextRank = getNextRank(totalMinutes);
-  const minutesUntilNext = getMinutesUntilNextRank(totalMinutes);
-
-  const sortedSessions = sessions
-    ? [...sessions].sort((a, b) => Number(b.timestamp - a.timestamp))
-    : [];
-
-  const isLoading = statsLoading || sessionsLoading;
-  const isError = statsError || sessionsError;
+  const monthlyMinutes = stats ? Number(stats.monthlyMinutes) : 0;
+  const rank = stats?.rank || 'Beginner';
 
   return (
     <PageBackgroundShell>
@@ -79,10 +66,7 @@ export default function ProgressPage() {
 
           {isError && (
             <CloudSyncErrorBanner 
-              onRetry={() => {
-                refetchStats();
-                refetchSessions();
-              }} 
+              onRetry={refetch} 
               isRetrying={isLoading}
               title="Failed to Load Progress"
               description="We couldn't load your progress data. Please check your connection and try again."
@@ -94,97 +78,71 @@ export default function ProgressPage() {
             <ProgressBowl totalMinutes={totalMinutes} theme={theme || 'dark'} />
           </div>
 
-          {/* Stats Card - Single Column */}
-          <Card className="bg-card/70 backdrop-blur-sm border-accent-cyan/20">
-            <CardHeader>
-              <CardTitle className="text-2xl text-accent-cyan flex items-center gap-2">
-                <TrendingUp className="w-6 h-6" />
-                Your Journey
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 gap-6">
-                <div className="flex items-center justify-between p-4 bg-accent-cyan/5 rounded-lg border border-accent-cyan/20">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-accent-cyan/10 rounded-lg">
-                      <Flame className="w-6 h-6 text-accent-cyan" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Current Streak</p>
-                      <p className="text-2xl font-bold text-foreground">{currentStreak} days</p>
-                    </div>
+          {/* Stats Card */}
+          <Card className="bg-card/70 backdrop-blur-sm border-accent-cyan/30">
+            <CardContent className="p-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+                <div className="text-center space-y-2">
+                  <div className="flex justify-center">
+                    <TrendingUp className="w-8 h-8 text-accent-cyan" />
                   </div>
+                  <div className="text-3xl font-bold text-accent-cyan-tinted">{totalMinutes}</div>
+                  <div className="text-sm text-muted-foreground">Total Minutes</div>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-accent-cyan/5 rounded-lg border border-accent-cyan/20">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-accent-cyan/10 rounded-lg">
-                      <Calendar className="w-6 h-6 text-accent-cyan" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Total Minutes</p>
-                      <p className="text-2xl font-bold text-foreground">{totalMinutes} min</p>
-                    </div>
+                <div className="text-center space-y-2">
+                  <div className="flex justify-center">
+                    <Flame className="w-8 h-8 text-accent-cyan" />
                   </div>
+                  <div className="text-3xl font-bold text-accent-cyan-tinted">{currentStreak}</div>
+                  <div className="text-sm text-muted-foreground">Day Streak</div>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-accent-cyan/5 rounded-lg border border-accent-cyan/20">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-accent-cyan/10 rounded-lg">
-                      <Award className="w-6 h-6 text-accent-cyan" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Current Rank</p>
-                      <p className="text-2xl font-bold text-foreground">{currentRank.name}</p>
-                      {nextRank && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {minutesUntilNext} min until {nextRank.name}
-                        </p>
-                      )}
-                    </div>
+                <div className="text-center space-y-2">
+                  <div className="flex justify-center">
+                    <Calendar className="w-8 h-8 text-accent-cyan" />
                   </div>
+                  <div className="text-3xl font-bold text-accent-cyan-tinted">{monthlyMinutes}</div>
+                  <div className="text-sm text-muted-foreground">This Month</div>
+                </div>
+
+                <div className="text-center space-y-2">
+                  <div className="flex justify-center">
+                    <Award className="w-8 h-8 text-accent-cyan" />
+                  </div>
+                  <div className="text-3xl font-bold text-accent-cyan-tinted">{rank}</div>
+                  <div className="text-sm text-muted-foreground">Current Rank</div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Session History */}
-          <Card className="bg-card/70 backdrop-blur-sm border-accent-cyan/20">
-            <CardHeader>
-              <CardTitle className="text-xl text-accent-cyan">Session History</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <p className="text-center text-muted-foreground py-8">Loading sessions...</p>
-              ) : sortedSessions.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">
-                  No meditation sessions yet. Start your first session to begin tracking your progress!
-                </p>
-              ) : (
-                <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                  {sortedSessions.map((session, index) => {
-                    const sessionDate = new Date(Number(session.timestamp) / 1_000_000);
-                    return (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-3 bg-accent-cyan/5 rounded-lg border border-accent-cyan/20 hover:border-accent-cyan/40 transition-all"
-                      >
-                        <div>
-                          <p className="font-medium text-foreground">
-                            {session.minutes.toString()} minutes
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {format(sessionDate, 'MMMM d, yyyy • h:mm a')}
-                          </p>
-                        </div>
-                        <Badge variant="outline" className="border-accent-cyan/50 text-accent-cyan">
-                          Completed
-                        </Badge>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+          {/* Rank Progress */}
+          <Card className="bg-card/70 backdrop-blur-sm border-accent-cyan/30">
+            <CardContent className="p-6 space-y-4">
+              <h3 className="text-xl font-semibold text-foreground">Rank Progression</h3>
+              <div className="flex flex-wrap gap-2">
+                {['Beginner', 'Intermediate', 'Advanced', 'Expert', 'Master'].map((rankName) => (
+                  <Badge
+                    key={rankName}
+                    variant={rank === rankName ? 'default' : 'outline'}
+                    className={
+                      rank === rankName
+                        ? 'bg-accent-cyan text-primary-dark'
+                        : 'border-accent-cyan/30 text-muted-foreground'
+                    }
+                  >
+                    {rankName}
+                  </Badge>
+                ))}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                <p>• Beginner: 0-49 minutes</p>
+                <p>• Intermediate: 50-199 minutes</p>
+                <p>• Advanced: 200-499 minutes</p>
+                <p>• Expert: 500-999 minutes</p>
+                <p>• Master: 1000+ minutes</p>
+              </div>
             </CardContent>
           </Card>
         </div>

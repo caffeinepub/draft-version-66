@@ -102,7 +102,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Desktop Theme Toggle */}
+      {/* Desktop Theme Toggle - no back button on dashboard */}
       {mounted && (
         <button
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -117,7 +117,7 @@ export default function DashboardPage() {
         </button>
       )}
 
-      {/* Mobile Hamburger Menu */}
+      {/* Mobile Hamburger Menu - no back button on dashboard */}
       {mounted && <HamburgerMenu />}
 
       <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-3 sm:px-4 py-8 sm:py-12">

@@ -1,11 +1,10 @@
 # Specification
 
 ## Summary
-**Goal:** Make the Pre-Meditation “More details” button deep-link to the Knowledge page with the matching category selected for the current pre-meditation type.
+**Goal:** Remove the duplicate volume input on the Pre‑Meditation setup so only one volume control remains in the specified container.
 
 **Planned changes:**
-- Update the selected “More details” button in `frontend/src/pages/PreMeditationPage.tsx` to navigate to `/knowledge` with a `category` search param that corresponds to the current pre-meditation type (while preserving `scrollToContent`).
-- Update the Knowledge page to read an optional `category` search param, initialize the selected category from it when valid (matching a `TECHNIQUE_CONTENT` id), and fall back to existing default behavior when missing/invalid.
-- Preserve existing Knowledge deep-link scrolling behavior (`scrollToContent`) and ensure clearing search params after scrolling does not unintentionally reset the selected category.
+- In the Pre‑Meditation page, remove the extra/duplicate volume input element within the container identified by XPath `/html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[3]`.
+- Ensure the remaining volume control continues to update the ambient audio volume as it did previously, without altering other controls in that container.
 
-**User-visible outcome:** Clicking “More details” from a given pre-meditation guide opens the Knowledge page on the corresponding category (e.g., Metta, IFS, Visualization, Mindfulness) and still scrolls to the content section when requested.
+**User-visible outcome:** The Pre‑Meditation setup container shows a single volume control (no duplicate), and adjusting it changes the ambient audio volume normally.

@@ -1,22 +1,86 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T14:06:09.724Z",
-  "summary": "The diff appears to implement deep-linking from PreMeditationPage to KnowledgePage using a category search param, and updates KnowledgePage to initialize/select category from that param while preserving the existing scrollToContent behavior and clearing only that flag after scrolling.",
+  "generatedAt": "2026-02-06T16:07:53.007Z",
+  "summary": "REQ-1 (remove duplicate volume input on Pre‑Meditation page) appears to be implemented via changes to the AmbientMusicCarousel/PreMeditation UI, but the diff also includes multiple unrelated UI/behavior changes that were explicitly listed as non-goals (dashboard quote persistence, button size reductions, Begin/Quiz behavior changes, Save-as-ritual visibility changes, circular timer, and other navigation/features).",
   "missing_requirements": [],
   "hallucinated_features": [
     {
-      "description": "PreMeditationPage changes beyond the specified single “More details” button update (e.g., responsive slider width tweaks, light/dark background behavior changes, lotus intensity/variant changes, ritual instant-start via search params, additional cloud-sync error mapping).",
-      "reason": "BuildRequest explicitly limits REQ-1 to only updating the selected “More details” button element’s navigation behavior; these additional behaviors are not requested and are outside the stated scope/non-goals.",
+      "description": "Dashboard quote persistence/memoization so the quote does not change on carousel navigation",
+      "reason": "Explicitly called out as a non-goal for this build, but implemented in DashboardPage via memoization of quote selection.",
       "evidence": [
-        "frontend-file-summaries.txt (PreMeditationPage summary mentions multiple unrelated UI/behavior changes)"
+        "frontend/src/pages/DashboardPage.tsx",
+        "frontend-file-summaries.txt (DashboardPage.tsx: \"Memoize the quote selection so it doesn't change on carousel navigation\")"
+      ]
+    },
+    {
+      "description": "Dashboard Begin/Quiz behavior changes (Begin button text/behavior and quiz auto-navigation)",
+      "reason": "Explicitly listed as a non-goal, but DashboardPage contains updated Begin handler logic and quiz completion auto-navigation to pre-meditation.",
+      "evidence": [
+        "frontend/src/pages/DashboardPage.tsx"
+      ]
+    },
+    {
+      "description": "Reduced button sizes on Dashboard and/or Pre‑Meditation pages",
+      "reason": "Explicitly listed as a non-goal, but the summary notes reduced button sizes (e.g., px-6 py-4 instead of px-8 py-6) and \"reduced button sizes throughout\".",
+      "evidence": [
+        "frontend-file-summaries.txt (DashboardPage.tsx: \"reduced button sizes\")",
+        "frontend-file-summaries.txt (PreMeditationPage.tsx: \"reduced button sizes throughout\")"
+      ]
+    },
+    {
+      "description": "Change 'Save as Ritual' visibility (moved to reflection view only / hidden until after meditation)",
+      "reason": "Explicitly listed as a non-goal, but PreMeditationPage summary states this was changed.",
+      "evidence": [
+        "frontend-file-summaries.txt (PreMeditationPage.tsx: \"moved \\\"Save as Ritual\\\" button to reflection view only\")"
+      ]
+    },
+    {
+      "description": "Circular meditation timer with progress fill/glow behavior",
+      "reason": "Explicitly listed as a non-goal (\"circular meditation timer\"), but PreMeditationPage/ActiveMeditationPage summaries mention an active circular timer with progress fill and glow.",
+      "evidence": [
+        "frontend-file-summaries.txt (PreMeditationPage.tsx: \"active circular timer with progress-based fill and subtle glow\")",
+        "frontend-file-summaries.txt (ActiveMeditationPage.tsx: \"large circular timer with synchronized breathing anima...\")"
+      ]
+    },
+    {
+      "description": "Added a new /knowledge route and floating navigation changes (Knowledge/Brain icon)",
+      "reason": "Not requested in the BuildRequest and outside the stated single-change constraint; summaries mention a new /knowledge route and FloatingNav updates.",
+      "evidence": [
+        "frontend-file-summaries.txt (frontend/src/App.tsx: \"including the new /knowledge route\")",
+        "frontend-file-summaries.txt (frontend/src/components/FloatingNav.tsx: \"Knowledge with Brain icon\")"
+      ]
+    },
+    {
+      "description": "Landing page theme/background changes and authenticated auto-redirect behavior",
+      "reason": "Not requested in the BuildRequest; LandingPage summary describes new background behavior and auth redirect logic.",
+      "evidence": [
+        "frontend-file-summaries.txt (frontend/src/pages/LandingPage.tsx)"
+      ]
+    },
+    {
+      "description": "Global CSS, Tailwind config, and multiple other UI component upgrades (LotusCanvas variants/intensity, FeatureCard icon filter, scrollbar styling, etc.)",
+      "reason": "Not requested in the BuildRequest and violates the constraint to apply changes only to the selected container/element.",
+      "evidence": [
+        "frontend-file-summaries.txt (frontend/src/index.css)",
+        "frontend-file-summaries.txt (frontend/tailwind.config.js)",
+        "frontend-file-summaries.txt (frontend/src/components/LotusCanvas.tsx)",
+        "frontend-file-summaries.txt (frontend/src/components/FeatureCard.tsx)"
+      ]
+    },
+    {
+      "description": "Broad changes to React Query hooks (useQueries) including import/export, authenticated query behavior, rituals reconciliation, etc.",
+      "reason": "Not requested in the BuildRequest and unrelated to removing a duplicate volume input.",
+      "evidence": [
+        "frontend-file-summaries.txt (frontend/src/hooks/useQueries.ts)"
       ]
     }
   ],
   "confidence": 0.72,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/pages/KnowledgePage.tsx",
+    "frontend/src/components/AmbientMusicCarousel.tsx",
+    "frontend/src/pages/DashboardPage.tsx",
     "frontend/src/pages/PreMeditationPage.tsx",
     "project_state.json"
   ]

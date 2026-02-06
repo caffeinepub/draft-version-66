@@ -277,20 +277,6 @@ export default function AmbientMusicCarousel({ selectedMusic, onSelectMusic, vol
         </div>
       </div>
 
-      {/* Volume Slider - No top margin */}
-      <div className="flex items-center justify-center gap-4 px-8 sm:px-16">
-        <VolumeX className="w-4 h-4 text-accent-cyan/60" />
-        <Slider
-          value={[volume]}
-          onValueChange={handleVolumeChange}
-          min={0}
-          max={100}
-          step={5}
-          className="w-full max-w-xs"
-        />
-        <Volume2 className="w-5 h-5 text-accent-cyan" />
-      </div>
-
       {/* Navigation Arrows */}
       <div className="flex justify-center gap-6 sm:gap-8 mt-4">
         <Button

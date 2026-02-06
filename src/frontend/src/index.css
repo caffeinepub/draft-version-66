@@ -183,4 +183,30 @@
   .animate-slide-in-left {
     animation: slide-in-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
+
+  /* Custom scrollbar for quiz container */
+  #wwm4eh::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  #wwm4eh::-webkit-scrollbar-track {
+    background: oklch(var(--muted));
+    border-radius: 5px;
+  }
+
+  #wwm4eh::-webkit-scrollbar-thumb {
+    background: oklch(var(--accent-cyan));
+    border-radius: 5px;
+    border: 2px solid oklch(var(--muted));
+  }
+
+  #wwm4eh::-webkit-scrollbar-thumb:hover {
+    background: oklch(var(--accent-cyan-tinted));
+  }
+
+  /* Firefox scrollbar */
+  #wwm4eh {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(var(--accent-cyan)) oklch(var(--muted));
+  }
 }

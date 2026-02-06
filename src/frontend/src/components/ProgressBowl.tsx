@@ -200,11 +200,9 @@ export default function ProgressBowl({ totalMinutes, theme }: ProgressBowlProps)
   }, [totalMinutes, theme]);
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center">
-      <canvas
-        ref={canvasRef}
-        className="max-w-full max-h-full"
-      />
-    </div>
+    <canvas
+      ref={canvasRef}
+      className="max-w-full max-h-full"
+    />
   );
 }

@@ -1,19 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { Moon, Sun, ArrowLeft, Play, Pause, Heart, Smile, Meh, Frown, Zap, Battery, BatteryCharging, Sparkles, Loader2, ExternalLink } from 'lucide-react';
-import { useTheme } from 'next-themes';
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { Play, Pause, Heart, Smile, Meh, Frown, Zap, Battery, BatteryCharging, Sparkles, Loader2, ExternalLink } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import LotusCanvas from '../components/LotusCanvas';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import AmbientMusicCarousel from '../components/AmbientMusicCarousel';
-import SessionIndicator from '../components/SessionIndicator';
-import HamburgerMenu from '../components/HamburgerMenu';
-import MobileBackButton from '../components/MobileBackButton';
 import MeditationGuideStepper from '../components/MeditationGuideStepper';
+import PageBackgroundShell from '../components/PageBackgroundShell';
+import StandardPageNav from '../components/StandardPageNav';
+import { useMeditationTimer } from '../hooks/useMeditationTimer';
 import { useMeditationTypes, useRecordSession, useSaveJournalEntry, useSaveRitual } from '../hooks/useQueries';
+import { useProgressStats } from '../hooks/useQueries';
 import type { MeditationType, MoodState, EnergyState } from '../backend';
 import { toast } from 'sonner';
 import { getCloudSyncErrorMessage } from '../utils/cloudSync';
@@ -113,7 +112,6 @@ interface PreMeditationSearch {
 }
 
 export default function PreMeditationPage() {
-  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const search = useSearch({ from: '/pre-meditation' }) as PreMeditationSearch;
   const [mounted, setMounted] = useState(false);
@@ -122,12 +120,8 @@ export default function PreMeditationPage() {
   const [volume, setVolume] = useState(search.ritualVolume || 50);
   const [viewState, setViewState] = useState<ViewState>(search.instantStart ? 'active' : 'setup');
   
-  // Active meditation state
-  const [isPaused, setIsPaused] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(0);
-  const [totalTime, setTotalTime] = useState(0);
+  // Audio management
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Reflection state
@@ -142,9 +136,16 @@ export default function PreMeditationPage() {
   const meditationType = search.type || 'mindfulness';
   const fromQuiz = search.fromQuiz || false;
   const { data: meditationTypes } = useMeditationTypes();
+  const { data: progressStats } = useProgressStats();
   const recordSession = useRecordSession();
   const saveJournalEntry = useSaveJournalEntry();
   const saveRitual = useSaveRitual();
+
+  // Timer hook
+  const timer = useMeditationTimer({
+    durationMinutes: duration,
+    onComplete: handleMeditationComplete,
+  });
 
   useEffect(() => {
     setMounted(true);
@@ -152,7 +153,7 @@ export default function PreMeditationPage() {
 
   // Handle instant start from ritual
   useEffect(() => {
-    if (search.instantStart && mounted) {
+    if (search.instantStart && mounted && viewState === 'active') {
       handleStartMeditation();
     }
   }, [search.instantStart, mounted]);
@@ -161,9 +162,6 @@ export default function PreMeditationPage() {
   useEffect(() => {
     return () => {
       stopAllAudio();
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
       if (fadeIntervalRef.current) {
         clearInterval(fadeIntervalRef.current);
       }
@@ -251,9 +249,6 @@ export default function PreMeditationPage() {
   };
 
   const handleStartMeditation = () => {
-    const sessionDuration = duration * 60;
-    setTotalTime(sessionDuration);
-    setTimeRemaining(sessionDuration);
     setViewState('active');
 
     // Start audio
@@ -264,36 +259,21 @@ export default function PreMeditationPage() {
       console.log('Audio autoplay prevented:', error);
     });
     audioRef.current = audio;
-
-    // Start timer
-    startTimer();
   };
 
-  const startTimer = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-    intervalRef.current = setInterval(() => {
-      setTimeRemaining((prev) => {
-        if (prev <= 1) {
-          handleMeditationComplete();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  const handleMeditationComplete = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-
+  function handleMeditationComplete() {
     // Fade out ambient music smoothly and stop completely
     fadeOutAndStop();
 
-    // Record the session immediately
-    recordSession.mutate(duration);
+    // Record the session immediately with proper parameters
+    const monthlyMinutes = progressStats ? Number(progressStats.monthlyMinutes) : 0;
+    const currentStreak = progressStats ? Number(progressStats.currentStreak) : 0;
+    
+    recordSession.mutate({
+      minutes: duration,
+      monthlyMinutes,
+      currentStreak,
+    });
 
     // Transition to reflection after a short delay
     setTimeout(() => {
@@ -307,30 +287,27 @@ export default function PreMeditationPage() {
       setShowEnergyQuestion(false);
       setShowNotesSection(false);
     }, 1500);
-  };
+  }
 
-  const togglePause = () => {
-    if (isPaused) {
-      startTimer();
+  const handleTogglePause = () => {
+    timer.togglePause();
+    if (timer.isPaused) {
+      // Resuming
       if (audioRef.current) {
         audioRef.current.play().catch((error) => {
           console.log('Audio play prevented:', error);
         });
       }
     } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      // Pausing
       if (audioRef.current) {
         audioRef.current.pause();
       }
     }
-    setIsPaused(!isPaused);
   };
 
   const handleTimeSeek = (value: number[]) => {
-    const newTime = value[0];
-    setTimeRemaining(newTime);
+    timer.seekTime(value[0]);
   };
 
   const handleVolumeChange = (value: number[]) => {
@@ -341,248 +318,252 @@ export default function PreMeditationPage() {
     }
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
   const handleBackToDashboard = () => {
     stopAllAudio();
     navigate({ to: '/dashboard' });
   };
 
-  const handleChangeMeditationType = () => {
-    stopAllAudio();
-    navigate({ to: '/dashboard' });
-  };
-
-  // Reflection handlers
-  const moodQuestions = [
-    {
-      question: 'How are you feeling right now? (Select up to 2)',
-      options: [
-        { value: 'calm' as MoodState, label: 'Calm', icon: Smile },
-        { value: 'happy' as MoodState, label: 'Happy', icon: Smile },
-        { value: 'neutral' as MoodState, label: 'Neutral', icon: Meh },
-        { value: 'anxious' as MoodState, label: 'Anxious', icon: Frown },
-        { value: 'sad' as MoodState, label: 'Sad', icon: Frown },
-      ],
-    },
-  ];
-
-  const energyQuestion = {
-    question: 'How is your energy level?',
-    options: [
-      { value: 'tired' as EnergyState, label: 'Tired', icon: Battery },
-      { value: 'balanced' as EnergyState, label: 'Balanced', icon: Zap },
-      { value: 'energized' as EnergyState, label: 'Energized', icon: BatteryCharging },
-      { value: 'restless' as EnergyState, label: 'Restless', icon: Zap },
-    ],
-  };
-
-  const handleMoodToggle = (mood: MoodState) => {
-    setSelectedMoods((prev) => {
-      if (prev.includes(mood)) {
-        // Allow deselection
-        return prev.filter((m) => m !== mood);
-      } else {
-        // Limit to 2 moods maximum
-        if (prev.length >= 2) {
-          return prev; // Don't add if already at limit
-        }
-        return [...prev, mood];
-      }
+  const handleMoreDetails = () => {
+    navigate({
+      to: '/knowledge',
+      search: { category: meditationType, scrollToContent: true },
     });
   };
 
-  const handleMoodNext = () => {
-    if (selectedMoods.length === 0) return;
-    setShowEnergyQuestion(true);
-  };
-
-  const handleEnergyNext = () => {
-    if (!selectedEnergy) return;
-    setShowNotesSection(true);
-  };
-
-  const handleSaveAsRitual = async () => {
+  const handleSaveRitual = async () => {
     try {
       await saveRitual.mutateAsync({
-        meditationType,
-        duration,
+        meditationType: meditationType as MeditationType,
+        duration: BigInt(duration),
         ambientSound: selectedMusic,
-        ambientSoundVolume: volume,
+        ambientSoundVolume: BigInt(volume),
+        timestamp: BigInt(Date.now() * 1000000),
       });
-      toast.success('Ritual saved successfully!', {
-        className: 'bg-card border-2 border-accent-cyan/50 text-foreground',
-      });
+      toast.success('Ritual saved successfully!');
     } catch (error: any) {
-      console.error('Error saving ritual:', error);
-      
-      // Check for specific error types first
-      if (error.message === 'DUPLICATE_RITUAL') {
-        toast.error('This ritual already exists in your collection.', {
-          className: 'bg-card border-2 border-destructive/50 text-foreground',
-        });
-      } else if (error.message === 'RITUAL_LIMIT_REACHED') {
-        toast.error('You can only save up to 5 rituals.', {
-          className: 'bg-card border-2 border-destructive/50 text-foreground',
-        });
-      } else {
-        // Use cloud sync error mapping for auth/readiness errors
-        const message = getCloudSyncErrorMessage(error);
-        toast.error(message, {
-          className: 'bg-card border-2 border-destructive/50 text-foreground',
-        });
-      }
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message);
     }
   };
 
-  const handleSaveAndContinue = async () => {
-    // Defensively cap moods to 2 at save time
-    const moodsToSave = selectedMoods.slice(0, 2);
-    
+  const handleMoodToggle = (mood: MoodState) => {
+    setSelectedMoods((prev) =>
+      prev.includes(mood) ? prev.filter((m) => m !== mood) : [...prev, mood]
+    );
+  };
+
+  const handleNextQuestion = () => {
+    if (currentQuestion === 0 && selectedMoods.length > 0) {
+      setShowEnergyQuestion(true);
+      setCurrentQuestion(1);
+    } else if (currentQuestion === 1 && selectedEnergy) {
+      setShowNotesSection(true);
+      setCurrentQuestion(2);
+    }
+  };
+
+  const handleSaveReflection = async () => {
+    if (selectedMoods.length === 0 || !selectedEnergy) {
+      toast.error('Please answer all required questions');
+      return;
+    }
+
     try {
-      // Wait for journal save to complete before navigating
       await saveJournalEntry.mutateAsync({
         meditationType: meditationType as MeditationType,
-        duration: BigInt(duration),
-        mood: moodsToSave.length > 0 ? moodsToSave : ['neutral' as MoodState],
-        energy: selectedEnergy || ('balanced' as EnergyState),
+        duration,
+        mood: selectedMoods,
+        energy: selectedEnergy,
         reflection: personalNotes,
         isFavorite,
       });
 
-      // Only navigate after successful save
-      navigate({ to: '/dashboard' });
+      toast.success('Reflection saved successfully!');
+      
+      // Navigate back to dashboard after a short delay
+      setTimeout(() => {
+        navigate({ to: '/dashboard' });
+      }, 1000);
     } catch (error: any) {
-      console.error('Error saving journal entry:', error);
-      // Use cloud sync error mapping for consistent error messages
       const message = getCloudSyncErrorMessage(error);
-      toast.error(message, {
-        className: 'bg-card border-2 border-destructive/50 text-foreground',
-      });
-      // Stay on reflection view on error
+      toast.error(message);
     }
   };
 
-  // Render based on view state
+  // SETUP VIEW
+  if (viewState === 'setup') {
+    return (
+      <PageBackgroundShell>
+        <StandardPageNav />
+        <main className="relative z-10 min-h-screen px-3 sm:px-4 py-16 sm:py-20">
+          <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
+            {/* Header */}
+            <div className="text-center space-y-3">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-accent-cyan-tinted">
+                {getMeditationName()} Meditation
+              </h1>
+              <p className="text-base sm:text-lg text-description-gray">
+                Prepare your practice
+              </p>
+            </div>
+
+            {/* Guide Stepper */}
+            <div className="bg-card/40 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-border/30">
+              <MeditationGuideStepper steps={getGuideSteps()} />
+              <div className="mt-4 text-center">
+                <Button
+                  onClick={handleMoreDetails}
+                  variant="ghost"
+                  size="sm"
+                  className="text-accent-cyan hover:text-accent-cyan/80 hover:bg-accent-cyan/10"
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  More details
+                </Button>
+              </div>
+            </div>
+
+            {/* Duration Selection */}
+            <div className="bg-card/40 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-border/30 space-y-4">
+              <div className="flex items-center justify-between">
+                <Label className="text-base sm:text-lg font-semibold text-foreground">Duration</Label>
+                <span className="text-xl sm:text-2xl font-bold text-accent-cyan">{duration} min</span>
+              </div>
+              <Slider
+                value={[duration]}
+                onValueChange={(value) => setDuration(value[0])}
+                min={5}
+                max={60}
+                step={5}
+                className="w-full"
+              />
+              <p className="text-xs sm:text-sm text-description-gray text-center">{getDurationText()}</p>
+            </div>
+
+            {/* Ambient Music Selection */}
+            <div className="bg-card/40 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-border/30 space-y-4">
+              <Label className="text-base sm:text-lg font-semibold text-foreground block text-center">
+                Ambient Sound
+              </Label>
+              <AmbientMusicCarousel
+                selectedMusic={selectedMusic}
+                onSelectMusic={setSelectedMusic}
+                volume={volume}
+                onVolumeChange={setVolume}
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-4">
+              <Button
+                onClick={handleStartMeditation}
+                size="lg"
+                className="w-full sm:w-auto px-6 sm:px-10 py-5 sm:py-6 text-base sm:text-lg font-bold rounded-full bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark shadow-glow hover:shadow-glow-strong transition-all duration-300 hover:scale-105"
+              >
+                <Play className="w-5 h-5 mr-2" />
+                Begin Meditation
+              </Button>
+              <Button
+                onClick={handleBackToDashboard}
+                variant="outline"
+                size="lg"
+                className="w-full sm:w-auto px-6 sm:px-10 py-5 sm:py-6 text-base sm:text-lg font-bold rounded-full border-2 border-accent-cyan/60 text-accent-cyan hover:bg-accent-cyan hover:text-primary-dark transition-all duration-300"
+              >
+                Back to Dashboard
+              </Button>
+            </div>
+          </div>
+        </main>
+      </PageBackgroundShell>
+    );
+  }
+
+  // ACTIVE MEDITATION VIEW
   if (viewState === 'active') {
-    const progress = ((totalTime - timeRemaining) / totalTime) * 100;
-    const breatheScale = 1 + Math.sin(Date.now() / 2000) * 0.05;
+    const glowIntensity = Math.min(timer.progress * 1.5, 1);
+    const circumference = 2 * Math.PI * 140;
+    const strokeDashoffset = circumference * (1 - timer.progress);
 
     return (
-      <div className="relative min-h-screen overflow-x-hidden bg-background dark:bg-gradient-to-br dark:from-[#040f13] dark:to-background">
-        <LotusCanvas variant="premed" intensity={0.7} />
+      <PageBackgroundShell>
+        <StandardPageNav />
+        <main className="relative z-10 min-h-screen flex flex-col items-center justify-center px-3 sm:px-4 py-8">
+          <div className="max-w-2xl mx-auto w-full space-y-8 sm:space-y-12">
+            {/* Session Info */}
+            <div className="text-center space-y-2">
+              <h2 className="text-xl sm:text-2xl font-semibold text-accent-cyan-tinted">
+                {getMeditationName()} Session
+              </h2>
+              <p className="text-sm sm:text-base text-description-gray">
+                {getAmbientSoundName(selectedMusic)} • {duration} minutes
+              </p>
+            </div>
 
-        {/* Desktop Session Indicator */}
-        {mounted && (
-          <div className="hidden md:block">
-            <SessionIndicator />
-          </div>
-        )}
+            {/* Circular Timer */}
+            <div className="flex items-center justify-center">
+              <div className="relative w-72 h-72 sm:w-80 sm:h-80">
+                {/* Background circle */}
+                <svg className="absolute inset-0 w-full h-full -rotate-90">
+                  <circle
+                    cx="50%"
+                    cy="50%"
+                    r="140"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="8"
+                    className="text-border/30"
+                  />
+                  {/* Progress circle with glow */}
+                  <circle
+                    cx="50%"
+                    cy="50%"
+                    r="140"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="8"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={strokeDashoffset}
+                    strokeLinecap="round"
+                    className="text-accent-cyan transition-all duration-1000 ease-linear"
+                    style={{
+                      filter: `drop-shadow(0 0 ${4 + glowIntensity * 8}px oklch(0.75 0.15 195))`,
+                    }}
+                  />
+                </svg>
 
-        {/* Desktop Theme Toggle */}
-        {mounted && (
-          <button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="hidden md:block fixed top-6 right-6 z-50 rounded-full bg-card/80 backdrop-blur-sm p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-border/50"
-            aria-label="Toggle theme"
-          >
-            {theme === 'dark' ? (
-              <Sun className="h-5 w-5 text-accent-cyan" />
-            ) : (
-              <Moon className="h-5 w-5 text-primary-dark" />
-            )}
-          </button>
-        )}
-
-        {/* Mobile Hamburger Menu */}
-        {mounted && <HamburgerMenu />}
-
-        <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6">
-          <div className="flex flex-col items-center space-y-12 animate-fade-in">
-            <div className="relative" style={{ padding: '30px' }}>
-              <svg
-                width="320"
-                height="320"
-                viewBox="0 0 320 320"
-                className="transform transition-transform duration-1000"
-                style={{ 
-                  transform: `scale(${breatheScale})`,
-                  overflow: 'visible',
-                }}
-              >
-                <defs>
-                  <filter id="timer-glow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
-                    <feMerge>
-                      <feMergeNode in="blur" />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
-                </defs>
-                <circle
-                  cx="160"
-                  cy="160"
-                  r="140"
-                  fill="none"
-                  stroke="oklch(0.3 0.05 220)"
-                  strokeWidth="8"
-                />
-                <circle
-                  cx="160"
-                  cy="160"
-                  r="140"
-                  fill="none"
-                  stroke="oklch(0.7 0.15 195)"
-                  strokeWidth="8"
-                  strokeDasharray={`${2 * Math.PI * 140}`}
-                  strokeDashoffset={`${2 * Math.PI * 140 * (1 - progress / 100)}`}
-                  strokeLinecap="round"
-                  transform="rotate(-90 160 160)"
-                  className="transition-all duration-1000"
-                  filter="url(#timer-glow)"
-                />
-                <circle
-                  cx="160"
-                  cy="160"
-                  r="120"
-                  fill="oklch(0.7 0.15 195 / 0.05)"
-                  className="animate-glow-pulse"
-                />
-              </svg>
-
-              <div className="absolute inset-0 flex items-center justify-center" style={{ padding: '30px' }}>
-                <div className="text-center">
-                  <div className="text-6xl sm:text-7xl font-bold text-accent-cyan-tinted">
-                    {formatTime(timeRemaining)}
+                {/* Timer display */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="text-5xl sm:text-6xl font-bold text-accent-cyan-tinted tabular-nums">
+                    {timer.formatTime(timer.timeRemaining)}
                   </div>
-                  <div className="text-lg sm:text-xl text-description-gray mt-2 capitalize">
-                    {meditationType}
+                  <div className="text-sm sm:text-base text-description-gray mt-2">
+                    {timer.isPaused ? 'Paused' : 'Remaining'}
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col items-center space-y-6 w-full max-w-md">
-              <Button
-                onClick={togglePause}
-                size="lg"
-                className="rounded-full w-16 h-16 bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark shadow-glow hover:shadow-glow-lg transition-all duration-300"
-              >
-                {isPaused ? (
-                  <Play className="w-8 h-8" fill="currentColor" />
-                ) : (
-                  <Pause className="w-8 h-8" fill="currentColor" />
-                )}
-              </Button>
+            {/* Controls */}
+            <div className="space-y-6">
+              {/* Play/Pause Button */}
+              <div className="flex justify-center">
+                <Button
+                  onClick={handleTogglePause}
+                  size="lg"
+                  variant="outline"
+                  className="rounded-full w-16 h-16 sm:w-20 sm:h-20 border-2 border-accent-cyan/60 hover:border-accent-cyan hover:bg-accent-cyan/10 transition-all duration-300"
+                >
+                  {timer.isPaused ? (
+                    <Play className="w-7 h-7 sm:w-9 sm:h-9 text-accent-cyan" />
+                  ) : (
+                    <Pause className="w-7 h-7 sm:w-9 sm:h-9 text-accent-cyan" />
+                  )}
+                </Button>
+              </div>
 
-              <div className="w-full max-[389px]:w-[77%] space-y-2">
-                <label className="text-sm text-description-gray text-center block">
-                  Volume: {volume}%
-                </label>
+              {/* Volume Control */}
+              <div className="bg-card/40 backdrop-blur-sm rounded-2xl p-4 sm:p-5 border border-border/30">
+                <Label className="text-sm font-medium text-foreground mb-3 block">Volume</Label>
                 <Slider
                   value={[volume]}
                   onValueChange={handleVolumeChange}
@@ -593,15 +574,14 @@ export default function PreMeditationPage() {
                 />
               </div>
 
-              <div className="w-full max-[389px]:w-[77%] space-y-2">
-                <label className="text-sm text-description-gray text-center block">
-                  Seek: {formatTime(timeRemaining)} / {formatTime(totalTime)}
-                </label>
+              {/* Time Seek */}
+              <div className="bg-card/40 backdrop-blur-sm rounded-2xl p-4 sm:p-5 border border-border/30">
+                <Label className="text-sm font-medium text-foreground mb-3 block">Seek Time</Label>
                 <Slider
-                  value={[timeRemaining]}
+                  value={[timer.timeRemaining]}
                   onValueChange={handleTimeSeek}
                   min={0}
-                  max={totalTime}
+                  max={timer.totalTime}
                   step={1}
                   className="w-full"
                 />
@@ -609,353 +589,175 @@ export default function PreMeditationPage() {
             </div>
           </div>
         </main>
-      </div>
+      </PageBackgroundShell>
     );
   }
 
-  if (viewState === 'reflection') {
-    const currentQ = moodQuestions[currentQuestion];
-
-    return (
-      <div className="relative min-h-screen overflow-hidden bg-background dark:bg-gradient-to-br dark:from-[#040f13] dark:to-background">
-        <LotusCanvas variant="premed" intensity={0.7} />
-
-        {/* Desktop Session Indicator */}
-        {mounted && (
-          <div className="hidden md:block">
-            <SessionIndicator />
-          </div>
-        )}
-
-        {/* Desktop Theme Toggle */}
-        {mounted && (
-          <button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="hidden md:block fixed top-6 right-6 z-50 rounded-full bg-card/80 backdrop-blur-sm p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-border/50"
-            aria-label="Toggle theme"
-          >
-            {theme === 'dark' ? (
-              <Sun className="h-5 w-5 text-accent-cyan" />
-            ) : (
-              <Moon className="h-5 w-5 text-primary-dark" />
-            )}
-          </button>
-        )}
-
-        {/* Mobile Hamburger Menu */}
-        {mounted && <HamburgerMenu />}
-
-        <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 py-12">
-          <div className="max-w-2xl mx-auto w-full space-y-8 animate-fade-in">
-            <div className="text-center space-y-2">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-accent-cyan-tinted">
-                Session Complete
-              </h1>
-              <p className="text-base sm:text-lg text-description-gray">
-                Take a moment to reflect on your experience
-              </p>
-            </div>
-
-            {!showEnergyQuestion && !showNotesSection ? (
-              <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-6 sm:p-8 space-y-6">
-                <div className="space-y-2">
-                  <h2 className="text-xl sm:text-2xl font-semibold text-foreground">
-                    {currentQ.question}
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4">
-                  {currentQ.options.map((option) => {
-                    const IconComponent = option.icon;
-                    const isSelected = selectedMoods.includes(option.value);
-                    const isDisabled = !isSelected && selectedMoods.length >= 2;
-                    return (
-                      <div
-                        key={option.value}
-                        className={`relative flex items-center space-x-3 p-4 rounded-xl border-2 transition-all ${
-                          isDisabled
-                            ? 'border-border/30 opacity-50 cursor-not-allowed'
-                            : isSelected
-                            ? 'border-accent-cyan bg-accent-cyan/10 cursor-pointer'
-                            : 'border-border/50 hover:border-accent-cyan/50 hover:bg-accent-cyan/5 cursor-pointer'
-                        }`}
-                        onClick={() => !isDisabled && handleMoodToggle(option.value)}
-                      >
-                        <Checkbox
-                          checked={isSelected}
-                          onCheckedChange={() => !isDisabled && handleMoodToggle(option.value)}
-                          id={option.value}
-                          disabled={isDisabled}
-                        />
-                        <IconComponent className="w-6 h-6 text-accent-cyan shrink-0" />
-                        <Label
-                          htmlFor={option.value}
-                          className={`text-base flex-1 ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'} text-foreground`}
-                        >
-                          {option.label}
-                        </Label>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="flex justify-end">
-                  <Button
-                    onClick={handleMoodNext}
-                    disabled={selectedMoods.length === 0}
-                    className="bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark font-semibold px-8 py-3 rounded-full"
-                  >
-                    Continue
-                  </Button>
-                </div>
-              </div>
-            ) : showEnergyQuestion && !showNotesSection ? (
-              <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-6 sm:p-8 space-y-6">
-                <div className="space-y-2">
-                  <h2 className="text-xl sm:text-2xl font-semibold text-foreground">
-                    {energyQuestion.question}
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4">
-                  {energyQuestion.options.map((option) => {
-                    const IconComponent = option.icon;
-                    const isSelected = selectedEnergy === option.value;
-                    return (
-                      <div
-                        key={option.value}
-                        className={`relative flex items-center space-x-3 p-4 rounded-xl border-2 transition-all cursor-pointer ${
-                          isSelected
-                            ? 'border-accent-cyan bg-accent-cyan/10'
-                            : 'border-border/50 hover:border-accent-cyan/50 hover:bg-accent-cyan/5'
-                        }`}
-                        onClick={() => setSelectedEnergy(option.value)}
-                      >
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                          isSelected ? 'border-accent-cyan' : 'border-border'
-                        }`}>
-                          {isSelected && <div className="w-3 h-3 rounded-full bg-accent-cyan" />}
-                        </div>
-                        <IconComponent className="w-6 h-6 text-accent-cyan shrink-0" />
-                        <Label
-                          className="text-base cursor-pointer text-foreground flex-1"
-                        >
-                          {option.label}
-                        </Label>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="flex justify-end">
-                  <Button
-                    onClick={handleEnergyNext}
-                    disabled={!selectedEnergy}
-                    className="bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark font-semibold px-8 py-3 rounded-full"
-                  >
-                    Continue
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl p-6 sm:p-8 space-y-4">
-                  <h2 className="text-xl sm:text-2xl font-semibold text-foreground">
-                    Personal Notes (Optional)
-                  </h2>
-                  <Textarea
-                    value={personalNotes}
-                    onChange={(e) => setPersonalNotes(e.target.value)}
-                    placeholder="How did this session feel? Any insights or observations you'd like to remember?"
-                    className="min-h-[150px] bg-background/50 border-border/50 focus:border-accent-cyan resize-none"
-                  />
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  <Button
-                    onClick={() => setIsFavorite(!isFavorite)}
-                    variant="outline"
-                    size="lg"
-                    className={`w-full sm:w-auto border-2 rounded-full transition-all duration-300 ${
-                      isFavorite
-                        ? 'border-red-500 bg-red-500/10 text-red-500 hover:bg-red-500/20'
-                        : 'border-accent-cyan/50 hover:border-accent-cyan hover:bg-accent-cyan/10'
-                    }`}
-                  >
-                    <Heart
-                      className={`w-5 h-5 mr-2 ${isFavorite ? 'fill-current' : ''}`}
-                    />
-                    {isFavorite ? 'Marked as Favorite' : 'Mark as Favorite'}
-                  </Button>
-
-                  <Button
-                    onClick={handleSaveAsRitual}
-                    variant="outline"
-                    size="lg"
-                    disabled={saveRitual.isPending}
-                    className="w-full sm:w-auto border-2 border-accent-cyan/50 hover:border-accent-cyan hover:bg-accent-cyan/10 text-foreground font-semibold rounded-full transition-all duration-300"
-                  >
-                    {saveRitual.isPending ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 text-accent-cyan animate-spin" />
-                        Saving ritual...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-5 h-5 mr-2 text-accent-cyan" />
-                        Save this as my ritual
-                      </>
-                    )}
-                  </Button>
-
-                  <Button
-                    onClick={handleSaveAndContinue}
-                    size="lg"
-                    className="w-full sm:w-auto bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark font-semibold px-8 py-6 text-lg rounded-full shadow-glow hover:shadow-glow-lg transition-all duration-300"
-                    disabled={saveJournalEntry.isPending}
-                  >
-                    {saveJournalEntry.isPending ? (
-                      <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      'Save & Continue'
-                    )}
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  // Setup view (default)
+  // REFLECTION VIEW
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background dark:bg-gradient-to-br dark:from-[#040f13] dark:to-background">
-      <LotusCanvas variant="premed" intensity={0.7} />
-
-      {/* Desktop Session Indicator */}
-      {mounted && (
-        <div className="hidden md:block">
-          <SessionIndicator />
-        </div>
-      )}
-
-      {/* Desktop Theme Toggle */}
-      {mounted && (
-        <button
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="hidden md:block fixed top-6 right-6 z-50 rounded-full bg-card/80 backdrop-blur-sm p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-border/50"
-          aria-label="Toggle theme"
-        >
-          {theme === 'dark' ? (
-            <Sun className="h-5 w-5 text-accent-cyan" />
-          ) : (
-            <Moon className="h-5 w-5 text-primary-dark" />
-          )}
-        </button>
-      )}
-
-      {/* Desktop Back Button */}
-      <button
-        onClick={handleBackToDashboard}
-        className="hidden md:block fixed top-20 left-6 z-50 rounded-full bg-card/80 backdrop-blur-sm p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-border/50"
-        aria-label="Back to dashboard"
-      >
-        <ArrowLeft className="h-5 w-5 text-accent-cyan" />
-      </button>
-
-      {/* Mobile Back Button */}
-      {mounted && <MobileBackButton show={true} />}
-
-      {/* Mobile Hamburger Menu */}
-      {mounted && <HamburgerMenu />}
-
-      <main className="relative z-10 flex flex-col items-center justify-start min-h-screen px-4 sm:px-6 py-8 sm:py-12">
-        <div className="max-w-4xl mx-auto w-full space-y-4 sm:space-y-6 animate-fade-in mt-24">
-          <div className="text-center space-y-2 sm:space-y-3">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-accent-cyan-tinted">
-              {getMeditationName()} Meditation
-            </h1>
-            {fromQuiz && (
-              <p className="text-base sm:text-lg text-accent-cyan-tinted font-medium">
-                Recommended for you based on your current state
-              </p>
-            )}
+    <PageBackgroundShell>
+      <StandardPageNav />
+      <main className="relative z-10 min-h-screen px-3 sm:px-4 py-16 sm:py-20">
+        <div className="max-w-2xl mx-auto space-y-6 sm:space-y-8">
+          {/* Header */}
+          <div className="text-center space-y-3">
+            <h1 className="text-3xl sm:text-4xl font-bold text-accent-cyan-tinted">Session Complete</h1>
+            <p className="text-base sm:text-lg text-description-gray">
+              Take a moment to reflect on your practice
+            </p>
           </div>
 
-          <div className="space-y-6 pt-4">
-            <h2 className="text-2xl sm:text-3xl font-semibold text-foreground text-center">Meditation Guide</h2>
-            <div className="bg-card/40 backdrop-blur-sm border border-border/50 rounded-2xl p-6 sm:p-8 shadow-lg relative pt-16 sm:pt-8">
-              {/* More details button inside container, top-right, with top-4 at all breakpoints */}
-              <button
-                onClick={() => navigate({ to: '/knowledge', search: { category: meditationType, scrollToContent: true } })}
-                className="absolute top-4 right-4 sm:right-6 inline-flex items-center gap-1.5 text-sm text-accent-cyan hover:text-accent-cyan/80 transition-colors group"
-                aria-label="View detailed guide on Knowledge page"
+          {/* Mood Question */}
+          {currentQuestion === 0 && (
+            <div className="bg-card/40 backdrop-blur-sm rounded-2xl p-5 sm:p-6 border border-border/30 space-y-5 animate-slide-in-right">
+              <h3 className="text-lg sm:text-xl font-semibold text-foreground">How are you feeling?</h3>
+              <p className="text-sm text-description-gray">Select all that apply</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                {[
+                  { mood: 'calm' as MoodState, icon: Smile, label: 'Calm', color: 'text-green-500' },
+                  { mood: 'happy' as MoodState, icon: Smile, label: 'Happy', color: 'text-yellow-500' },
+                  { mood: 'neutral' as MoodState, icon: Meh, label: 'Neutral', color: 'text-gray-500' },
+                  { mood: 'anxious' as MoodState, icon: Frown, label: 'Anxious', color: 'text-orange-500' },
+                  { mood: 'sad' as MoodState, icon: Frown, label: 'Sad', color: 'text-blue-500' },
+                ].map(({ mood, icon: Icon, label, color }) => (
+                  <button
+                    key={mood}
+                    onClick={() => handleMoodToggle(mood)}
+                    className={`
+                      flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-300
+                      ${
+                        selectedMoods.includes(mood)
+                          ? 'border-accent-cyan bg-accent-cyan/10 scale-105'
+                          : 'border-border/50 hover:border-accent-cyan/50 hover:bg-accent-cyan/5'
+                      }
+                    `}
+                  >
+                    <Icon className={`w-8 h-8 sm:w-10 sm:h-10 mb-2 ${color}`} />
+                    <span className="text-sm font-medium text-foreground">{label}</span>
+                  </button>
+                ))}
+              </div>
+              <Button
+                onClick={handleNextQuestion}
+                disabled={selectedMoods.length === 0}
+                size="lg"
+                className="w-full px-6 py-5 text-base font-bold rounded-full bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span className="font-medium">More details</span>
-                <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-              </button>
-              <MeditationGuideStepper steps={getGuideSteps()} />
+                Next
+              </Button>
             </div>
-          </div>
+          )}
 
-          <div className="space-y-3 pt-4">
-            <div className="space-y-1">
-              <h2 className="text-xl sm:text-2xl font-semibold text-foreground">Session Duration</h2>
-              <p className="text-base sm:text-lg text-accent-cyan font-medium">{getDurationText()}</p>
+          {/* Energy Question */}
+          {showEnergyQuestion && currentQuestion === 1 && (
+            <div className="bg-card/40 backdrop-blur-sm rounded-2xl p-5 sm:p-6 border border-border/30 space-y-5 animate-slide-in-right">
+              <h3 className="text-lg sm:text-xl font-semibold text-foreground">What's your energy level?</h3>
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                {[
+                  { energy: 'tired' as EnergyState, icon: Battery, label: 'Tired' },
+                  { energy: 'balanced' as EnergyState, icon: BatteryCharging, label: 'Balanced' },
+                  { energy: 'energized' as EnergyState, icon: Zap, label: 'Energized' },
+                  { energy: 'restless' as EnergyState, icon: Sparkles, label: 'Restless' },
+                ].map(({ energy, icon: Icon, label }) => (
+                  <button
+                    key={energy}
+                    onClick={() => setSelectedEnergy(energy)}
+                    className={`
+                      flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-300
+                      ${
+                        selectedEnergy === energy
+                          ? 'border-accent-cyan bg-accent-cyan/10 scale-105'
+                          : 'border-border/50 hover:border-accent-cyan/50 hover:bg-accent-cyan/5'
+                      }
+                    `}
+                  >
+                    <Icon className="w-8 h-8 sm:w-10 sm:h-10 mb-2 text-accent-cyan" />
+                    <span className="text-sm font-medium text-foreground">{label}</span>
+                  </button>
+                ))}
+              </div>
+              <Button
+                onClick={handleNextQuestion}
+                disabled={!selectedEnergy}
+                size="lg"
+                className="w-full px-6 py-5 text-base font-bold rounded-full bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </Button>
             </div>
-            <div className="space-y-3">
-              <Slider
-                value={[duration]}
-                onValueChange={(value) => setDuration(value[0])}
-                min={5}
-                max={60}
-                step={5}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs sm:text-sm text-muted-foreground">
-                <span>5 min</span>
-                <span>30 min</span>
-                <span>60 min</span>
+          )}
+
+          {/* Notes Section */}
+          {showNotesSection && currentQuestion === 2 && (
+            <div className="space-y-5 animate-slide-in-right">
+              <div className="bg-card/40 backdrop-blur-sm rounded-2xl p-5 sm:p-6 border border-border/30 space-y-4">
+                <h3 className="text-lg sm:text-xl font-semibold text-foreground">Personal Notes (Optional)</h3>
+                <Textarea
+                  value={personalNotes}
+                  onChange={(e) => setPersonalNotes(e.target.value)}
+                  placeholder="Any insights, thoughts, or observations from your practice..."
+                  className="min-h-[120px] resize-none bg-background/50 border-border/50 focus:border-accent-cyan"
+                />
+              </div>
+
+              <div className="bg-card/40 backdrop-blur-sm rounded-2xl p-5 sm:p-6 border border-border/30">
+                <div className="flex items-center space-x-3">
+                  <Checkbox
+                    id="favorite"
+                    checked={isFavorite}
+                    onCheckedChange={(checked) => setIsFavorite(checked as boolean)}
+                    className="border-accent-cyan/50 data-[state=checked]:bg-accent-cyan data-[state=checked]:border-accent-cyan"
+                  />
+                  <Label
+                    htmlFor="favorite"
+                    className="text-base font-medium text-foreground cursor-pointer flex items-center gap-2"
+                  >
+                    <Heart className="w-5 h-5 text-accent-cyan" />
+                    Mark as Favorite
+                  </Label>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <Button
+                  onClick={handleSaveReflection}
+                  disabled={saveJournalEntry.isPending}
+                  size="lg"
+                  className="w-full px-6 py-5 text-base font-bold rounded-full bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark shadow-glow hover:shadow-glow-strong transition-all duration-300"
+                >
+                  {saveJournalEntry.isPending ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save & Continue'
+                  )}
+                </Button>
+                <Button
+                  onClick={handleSaveRitual}
+                  disabled={saveRitual.isPending}
+                  variant="outline"
+                  size="lg"
+                  className="w-full px-6 py-5 text-base font-bold rounded-full border-2 border-accent-cyan/60 text-accent-cyan hover:bg-accent-cyan hover:text-primary-dark transition-all duration-300"
+                >
+                  {saveRitual.isPending ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-5 h-5 mr-2" />
+                      Save as Ritual
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
-          </div>
-
-          <div className="space-y-2 pt-2">
-            <h2 className="text-xl sm:text-2xl font-semibold text-foreground text-center">
-              Choose Ambient Sound
-            </h2>
-            <AmbientMusicCarousel 
-              selectedMusic={selectedMusic} 
-              onSelectMusic={setSelectedMusic}
-              volume={volume}
-              onVolumeChange={setVolume}
-            />
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-            <Button
-              size="lg"
-              onClick={handleStartMeditation}
-              className="w-full sm:w-auto bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark font-semibold px-8 py-6 text-lg rounded-full shadow-glow hover:shadow-glow-lg transition-all duration-300 hover:scale-105"
-            >
-              Start Meditation
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={handleChangeMeditationType}
-              className="w-full sm:w-auto border-2 border-accent-cyan/50 hover:border-accent-cyan hover:bg-accent-cyan/10 text-foreground font-semibold px-8 py-6 text-lg rounded-full transition-all duration-300"
-            >
-              Change Meditation Type
-            </Button>
-          </div>
+          )}
         </div>
       </main>
-    </div>
+    </PageBackgroundShell>
   );
 }

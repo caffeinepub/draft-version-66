@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
+import { CheckCircle2, XCircle, RotateCcw, ChevronLeft } from 'lucide-react';
 import type { QuizQuestion } from '../lib/knowledgeContent';
 
 interface KnowledgeQuizDialogProps {
@@ -33,7 +33,7 @@ export default function KnowledgeQuizDialog({
 }: KnowledgeQuizDialogProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string>('');
-  const [answers, setAnswers] = useState<number[]>([]);
+  const [answersByQuestion, setAnswersByQuestion] = useState<Map<number, number>>(new Map());
   const [showResults, setShowResults] = useState(false);
   const [shuffledQuestions, setShuffledQuestions] = useState<QuizQuestion[]>([]);
 
@@ -43,10 +43,20 @@ export default function KnowledgeQuizDialog({
       setShuffledQuestions(shuffleArray(questions));
       setCurrentQuestionIndex(0);
       setSelectedAnswer('');
-      setAnswers([]);
+      setAnswersByQuestion(new Map());
       setShowResults(false);
     }
   }, [open, questions]);
+
+  // Restore selected answer when navigating back to a question
+  useEffect(() => {
+    const savedAnswer = answersByQuestion.get(currentQuestionIndex);
+    if (savedAnswer !== undefined) {
+      setSelectedAnswer(savedAnswer.toString());
+    } else {
+      setSelectedAnswer('');
+    }
+  }, [currentQuestionIndex, answersByQuestion]);
 
   const currentQuestion = shuffledQuestions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / shuffledQuestions.length) * 100;
@@ -55,19 +65,25 @@ export default function KnowledgeQuizDialog({
     if (selectedAnswer === '') return;
 
     const answerIndex = Number(selectedAnswer);
-    const newAnswers = [...answers, answerIndex];
-    setAnswers(newAnswers);
+    const newAnswers = new Map(answersByQuestion);
+    newAnswers.set(currentQuestionIndex, answerIndex);
+    setAnswersByQuestion(newAnswers);
 
     if (currentQuestionIndex < shuffledQuestions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setSelectedAnswer('');
     } else {
-      // Quiz complete
-      const correctCount = newAnswers.reduce((count, answer, index) => {
-        return count + (answer === shuffledQuestions[index].correctAnswer ? 1 : 0);
+      // Quiz complete - compute results from final answers
+      const correctCount = Array.from(newAnswers.entries()).reduce((count, [qIndex, answer]) => {
+        return count + (answer === shuffledQuestions[qIndex].correctAnswer ? 1 : 0);
       }, 0);
       setShowResults(true);
       onComplete(correctCount, shuffledQuestions.length);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
     }
   };
 
@@ -75,29 +91,36 @@ export default function KnowledgeQuizDialog({
     setShuffledQuestions(shuffleArray(questions));
     setCurrentQuestionIndex(0);
     setSelectedAnswer('');
-    setAnswers([]);
+    setAnswersByQuestion(new Map());
     setShowResults(false);
   };
 
   const handleClose = () => {
     setCurrentQuestionIndex(0);
     setSelectedAnswer('');
-    setAnswers([]);
+    setAnswersByQuestion(new Map());
     setShowResults(false);
     onClose();
+  };
+
+  const handleOptionClick = (index: number) => {
+    setSelectedAnswer(index.toString());
   };
 
   if (!currentQuestion && !showResults) {
     return null;
   }
 
-  const correctCount = answers.reduce((count, answer, index) => {
-    return count + (answer === shuffledQuestions[index].correctAnswer ? 1 : 0);
+  const correctCount = Array.from(answersByQuestion.entries()).reduce((count, [qIndex, answer]) => {
+    return count + (answer === shuffledQuestions[qIndex].correctAnswer ? 1 : 0);
   }, 0);
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card/95 backdrop-blur-md border-2 border-accent-cyan/30">
+      <DialogContent 
+        id="wwm4eh"
+        className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card/95 backdrop-blur-md border-2 border-accent-cyan/30"
+      >
         <DialogHeader>
           <DialogTitle className="text-2xl font-playfair text-accent-cyan">
             {categoryTitle} Quiz
@@ -125,6 +148,7 @@ export default function KnowledgeQuizDialog({
                   {currentQuestion.choices.map((choice, index) => (
                     <div
                       key={`q${currentQuestionIndex}-choice${index}`}
+                      onClick={() => handleOptionClick(index)}
                       className="flex items-center space-x-3 p-4 rounded-lg border-2 border-border/50 hover:border-accent-cyan/50 transition-colors cursor-pointer"
                     >
                       <RadioGroupItem 
@@ -143,7 +167,16 @@ export default function KnowledgeQuizDialog({
               </RadioGroup>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-between">
+              <Button
+                onClick={handleBack}
+                disabled={currentQuestionIndex === 0}
+                variant="outline"
+                className="border-accent-cyan/50 hover:bg-accent-cyan/10"
+              >
+                <ChevronLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
               <Button
                 onClick={handleNext}
                 disabled={selectedAnswer === ''}
@@ -175,20 +208,22 @@ export default function KnowledgeQuizDialog({
 
             <div className="space-y-3 max-h-64 overflow-y-auto">
               {shuffledQuestions.map((question, index) => {
-                const userAnswer = answers[index];
+                const userAnswer = answersByQuestion.get(index);
                 const isCorrect = userAnswer === question.correctAnswer;
                 return (
                   <div
                     key={index}
                     className={`p-4 rounded-lg border-2 ${
-                      isCorrect ? 'border-green-500/50 bg-green-500/10' : 'border-red-500/50 bg-red-500/10'
+                      isCorrect 
+                        ? 'border-accent-cyan/50 bg-accent-cyan/5' 
+                        : 'border-muted/50 bg-muted/20'
                     }`}
                   >
                     <div className="flex items-start gap-3">
                       {isCorrect ? (
-                        <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <CheckCircle2 className="w-5 h-5 text-accent-cyan flex-shrink-0 mt-0.5" />
                       ) : (
-                        <XCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                        <XCircle className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
                       )}
                       <div className="flex-1 space-y-1">
                         <p className="font-medium text-foreground">{question.question}</p>

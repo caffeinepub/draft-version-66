@@ -1,40 +1,21 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Deep-link Pre-Meditation “More details” to Knowledge category via route search params",
+  "title": "Remove duplicate volume control in Pre‑Meditation setup container",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Update the Pre-Meditation “More details” button to navigate to Knowledge with the matching category selected for the current pre-meditation type.",
+      "summary": "Remove the duplicate volume input from the specified Pre‑Meditation setup container so only one ambient-volume control remains and continues to drive the same volume state/audio behavior.",
       "acceptanceCriteria": [
-        "When the current pre-meditation type is `metta`, clicking “More details” navigates to `/knowledge` with the Metta category selected.",
-        "When the current pre-meditation type is `ifs`, clicking “More details” navigates to `/knowledge` with the IFS category selected.",
-        "When the current pre-meditation type is `visualization`, clicking “More details” navigates to `/knowledge` with the Visualization category selected.",
-        "When the current pre-meditation type is `mindfulness`, clicking “More details” navigates to `/knowledge` with the Mindfulness category selected.",
-        "The change is applied only to the selected “More details” button element in `frontend/src/pages/PreMeditationPage.tsx` (currently the button that calls `navigate({ to: '/knowledge', search: { scrollToContent: true } })`)."
+        "In the Pre‑Meditation page UI, the selected container shows only one volume input/control (no duplicate/second volume input in the same container).",
+        "Changing the remaining volume control updates the ambient audio volume as before.",
+        "No other controls in that container (other than the duplicate volume element) are removed or functionally changed."
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Modify only the existing “More details” button’s navigate() call to include a Knowledge route search param for the current meditation type (e.g., `category: meditationType`) while preserving existing `scrollToContent: true` behavior."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Make the Knowledge page initialize its selected category from an optional `category` search param while keeping existing `scrollToContent` deep-link scrolling and avoiding unintended category resets when clearing params.",
-      "acceptanceCriteria": [
-        "`/knowledge` supports an optional search parameter for the category (e.g., `category=metta`, `category=ifs`, etc.).",
-        "If the category search param matches a `TECHNIQUE_CONTENT` id, the Knowledge page opens with that category selected.",
-        "If the category search param is missing or invalid, the Knowledge page falls back to the current default behavior (first category in `TECHNIQUE_CONTENT`).",
-        "If `scrollToContent` is provided, the page still scrolls to the content section anchor after rendering, and clearing search params after scrolling does not reset the selected category unintentionally."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/KnowledgePage.tsx",
-          "operation": "modify",
-          "description": "Extend route search typing to accept `category`; on initial render (and/or when `category` changes via navigation), validate it against `TECHNIQUE_CONTENT` ids and set initial `selectedCategory` accordingly. Update the deep-link scroll effect so it clears only `scrollToContent` (preserving `category` if present) and does not cause `selectedCategory` to reset."
+          "description": "Within the Pre‑Meditation setup view JSX, locate the UI block that corresponds to the selected container (XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[3]) and remove the duplicate volume input/Slider so only a single volume control remains in that container. Ensure the remaining control continues to update the existing `volume` state and still drives ambient audio volume changes (including the setup preview audio via AmbientMusicCarousel and the in-session audio via `audioRef`). Keep all other controls in that container intact and functionally unchanged."
         }
       ]
     }

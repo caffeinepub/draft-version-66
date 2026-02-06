@@ -5,13 +5,13 @@ import Int "mo:core/Int";
 import Time "mo:core/Time";
 import Array "mo:core/Array";
 import Order "mo:core/Order";
-import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
+import Runtime "mo:core/Runtime";
 import Iter "mo:core/Iter";
 import AccessControl "authorization/access-control";
-import MixinAuthorization "authorization/MixinAuthorization";
 import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
+import MixinAuthorization "authorization/MixinAuthorization";
 
 actor {
   type Book = {
@@ -217,12 +217,10 @@ actor {
 
   // Public endpoints accessible to all users (including guests)
   public query ({ caller }) func getBooks() : async [Book] {
-    // No authorization required - public content
     books.toArray();
   };
 
   public query ({ caller }) func getDailyQuotes() : async [Text] {
-    // No authorization required - public content
     quotes.toArray();
   };
 

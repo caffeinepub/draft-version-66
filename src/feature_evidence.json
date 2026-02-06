@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-pre-meditation-page-more-details-button-the-selected-element-so-it-navigates-to-the-knowledge-page-with-the-category-that-corresponds-to-the-current-pre-meditation-guide-meditation-type-e-g-metta-metta-category-ifs-ifs-category-instead-of-always-landing-on-mindfulness",
-      "featureTitle": "Update the Pre-Meditation page “More details” button (the selected element) so it navigates to the Knowledge page with the category that corresponds to the current pre-meditation guide/meditation type (e.g., metta -> Metta category, ifs -> IFS category) instead of always landing on Mindfulness.",
+      "featureId": "feature-on-the-pre-meditation-page-remove-the-duplicate-volume-input-element-from-the-selected-container-xpath-html-1-body-1-div-1-div-1-main-1-div-1-div-2-div-3-so-that-only-a-single-volume-control-remains-in-that-container-and-there-are-no-two-volume-inputs-that-control-the-same-audio-volume",
+      "featureTitle": "On the Pre‑Meditation page, remove the duplicate volume input element from the selected container (XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[3]) so that only a single volume control remains in that container and there are no two volume inputs that control the same audio volume.",
       "files": [
         "frontend/src/pages/PreMeditationPage.tsx"
       ],
@@ -18,26 +18,6 @@
       ],
       "testIds": [
         "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-knowledge-page-to-accept-a-category-identifier-via-route-search-params-and-initialize-the-selected-category-from-it-if-present-and-valid-while-preserving-the-existing-deep-link-scroll-behavior-scrolltocontent",
-      "featureTitle": "Update the Knowledge page to accept a category identifier via route search params and initialize the selected category from it (if present and valid), while preserving the existing deep-link scroll behavior (`scrollToContent`).",
-      "files": [
-        "frontend/src/pages/KnowledgePage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "authorization@4.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-2"
       ],
       "confidence": "high"
     }

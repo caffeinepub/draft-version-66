@@ -1,34 +1,66 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
-  "architectural_notes": [
-    "\"More details\" navigation should route to the Knowledge page category that matches the currently selected pre-meditation guide (e.g., Meta -> Meta category, IFS -> IFS category), rather than always defaulting to Mindfulness."
-  ],
+  "summary": "Meditation app UI/UX polish and bug fixes across Dashboard, Pre-med, and Meditation pages.",
+  "architectural_notes": [],
   "known_issues": [
-    "Clicking \"More details\" always redirects to Knowledge > Mindfulness category, instead of reflecting the current pre-meditation guide/category selection (e.g., Meta, IFS)."
+    "Pre-med page shows duplicate volume controls in the same container.",
+    "Dashboard carousel navigation refreshes/changes quote unexpectedly.",
+    "Dashboard and Pre-med UI elements (buttons, etc.) are oversized.",
+    "Dashboard shows incorrect/extra controls ('Begin Session' label and 'Take Quiz' button).",
+    "Pre-med 'Save as ritual' appears before meditation completion.",
+    "Meditation timer glow/progress style does not match desired circular fill behavior."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-update-the-pre-meditation-page-more-details-button-the-selected-element-so-it-navigates-to-the-knowledge-page-with-the-category-that-corresponds-to-the-current-pre-meditation-guide-meditation-type-e-g-metta-metta-category-ifs-ifs-category-instead-of-always-landing-on-mindfulness",
-      "title": "Update the Pre-Meditation page “More details” button (the selected element) so it navigates to the Knowledge page with the category that corresponds to the current pre-meditation guide/meditation type (e.g., metta -> Metta category, ifs -> IFS category) instead of always landing on Mindfulness.",
+      "id": "feature-on-the-pre-meditation-page-remove-the-duplicate-volume-input-element-from-the-selected-container-xpath-html-1-body-1-div-1-div-1-main-1-div-1-div-2-div-3-so-that-only-a-single-volume-control-remains-in-that-container-and-there-are-no-two-volume-inputs-that-control-the-same-audio-volume",
+      "title": "On the Pre‑Meditation page, remove the duplicate volume input element from the selected container (XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[3]) so that only a single volume control remains in that container and there are no two volume inputs that control the same audio volume.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
-    },
-    {
-      "id": "feature-update-the-knowledge-page-to-accept-a-category-identifier-via-route-search-params-and-initialize-the-selected-category-from-it-if-present-and-valid-while-preserving-the-existing-deep-link-scroll-behavior-scrolltocontent",
-      "title": "Update the Knowledge page to accept a category identifier via route search params and initialize the selected category from it (if present and valid), while preserving the existing deep-link scroll behavior (`scrollToContent`).",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
     }
   ],
-  "new_feature_requests": [],
-  "projectName": "Fix Pre-Meditation “More details” to deep-link to matching Knowledge category",
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Pre-med page: remove duplicate volume input element so only one volume control exists in the container.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Dashboard carousel: navigating the carousel should not refresh/change the displayed quote; quote should only change on full page refresh or revisit.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Reduce overall button/control sizing, especially on Dashboard and Pre-med pages.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Dashboard: change 'Begin Session' label to 'Begin' and remove the 'Take Quiz' button; if quiz is selected, clicking Begin should start the quiz flow.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Pre-med page: hide/remove 'Save as ritual' button until after meditation has finished.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Meditation page: replace timer with circular fill progress that fills as time approaches 0; filled portion should have a slight glow (not a large glow over the whole timer).",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Remove duplicate volume input in Pre‑Meditation setup container",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

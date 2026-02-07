@@ -1,67 +1,57 @@
 {
   "kind": "build_request",
-  "title": "Fix Meditation page timer controls and alignment regression",
+  "title": "Adjust Pre‑Meditation guide buttons: move “More Details” to bottom and increase “Begin Meditation” height on small screens",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "On the Meditation page (the pre-meditation flow at route \"/pre-meditation\"), replace the unexpected timer control buttons with a time range input UI (as it previously existed) so the user can set the session duration via input fields instead of those buttons.",
+      "text": "Update the selected “More Details” button in the Pre‑Meditation page’s Meditation Guide container (selected element XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[1]/div[2]/div[1]/div[3]/div[1]/button[1]) so it renders at the bottom of the guide container instead of in the guide header area, without changing its label or navigation behavior (it must still navigate to /knowledge with the current meditation type and scrollToContent search param).",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "In meditation page, they should be replaced with input time range. Like previously it was."
+          "place more details button ... in the bottom of guide container.",
+          "Only to the selected element yes(More details btn)"
         ]
       },
       "acceptanceCriteria": [
-        "In the \"/pre-meditation\" page, the timer duration can be set using a time range input UI (two inputs for start/end or equivalent range selector), not via the current unexpected buttons.",
-        "No extra/unintended control buttons are shown where the time range input is expected."
+        "On PreMeditationPage (setup phase), the “More Details” button no longer appears next to the “Meditation Guide” heading.",
+        "The “More Details” button appears after the guide content (below the MeditationGuideStepper) within the same guide container card.",
+        "Clicking “More Details” still navigates to /knowledge with search params { category: selectedType, scrollToContent: true }.",
+        "No other buttons or text in the guide container are modified beyond what is required to reposition this selected button."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Center-align the meditation timer display on the Meditation page so the timer (ring + time text) is visually centered horizontally (and not slightly left) across common viewport sizes.",
+      "text": "Update the selected “Begin Meditation” button (selected element XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[1]/div[2]/div[2]/button[1]) so that on lower-width screens—when the action buttons area collapses from a 2-column/side-by-side layout into a single-column stack—its visual height increases to better match the “Save as Ritual” button. This change must only affect the small-screen stacked layout and must not change the button’s width or behavior.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "Adjust timer to be in center position, because it is slightly to the left in meditation page."
+          "Begin meditation button only height increased... when ... 2 columns, becomes 1 row (Lower width screens). So there is visual incosistency compared to \"Save as Ritual\" button"
         ]
       },
       "acceptanceCriteria": [
-        "On the active meditation view in \"/pre-meditation\", the timer ring and time readout are centered within the page container (visually aligned with the page’s horizontal center).",
-        "Center alignment remains correct on mobile and desktop breakpoints."
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Limit changes to only what is necessary to restore the Meditation page’s previous duration input behavior and fix timer centering; avoid unrelated UI/behavior changes elsewhere in the app.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "I don't understand why you keep changing things I didn't request?"
-        ]
-      },
-      "acceptanceCriteria": [
-        "No unrelated UI changes are introduced outside the Meditation page as part of this fix.",
-        "Existing meditation session flow (start, pause/resume, completion -> reflection/save) continues to work after the UI regression fix."
+        "When the action buttons stack into a single column on small screens, the “Begin Meditation” button has increased height (e.g., via responsive min-height/padding) and no longer appears thinner than “Save as Ritual.”",
+        "On larger screens where the buttons remain side-by-side, the “Begin Meditation” button height remains unchanged from current desktop/tablet styling.",
+        "The “Begin Meditation” button continues to trigger the existing begin-meditation behavior (no logic changes).",
+        "No other elements besides the selected “Begin Meditation” button are restyled as part of this change."
       ]
     }
   ],
   "constraints": [
-    "Do not edit any files under frontend/src/components/ui or any other paths listed as immutable in SYSTEM_CONTEXT.",
-    "Keep backend architecture as a single Motoko actor; do not introduce new backend services."
+    "Apply changes ONLY to the two user-selected elements identified by the provided XPaths.",
+    "Do not modify any files under frontend/src/components/ui (read-only).",
+    "Do not change routing, backend APIs, or the existing navigation logic for the “More Details” button beyond repositioning it in the UI."
   ],
   "nonGoals": [
-    "Redesigning the overall Meditation experience beyond restoring the time range input and fixing centering.",
-    "Adding new meditation types, new audio content, or new backend persistence features."
+    "Redesigning the entire Pre‑Meditation page layout.",
+    "Changing the “Save as Ritual” button styling or behavior.",
+    "Adding new buttons, new guide content, or new navigation destinations."
   ],
   "imageRequirements": {
     "required": [],

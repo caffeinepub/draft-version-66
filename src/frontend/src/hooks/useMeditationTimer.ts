@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 interface UseMeditationTimerOptions {
   durationMinutes: number;
   onComplete: () => void;
+  autoStart?: boolean; // New option to control auto-start
 }
 
 interface UseMeditationTimerReturn {
@@ -11,17 +12,22 @@ interface UseMeditationTimerReturn {
   isPaused: boolean;
   progress: number;
   togglePause: () => void;
+  start: () => void;
+  reset: () => void;
   seekTime: (seconds: number) => void;
+  setDuration: (minutes: number) => void;
   formatTime: (seconds: number) => string;
 }
 
 export function useMeditationTimer({
   durationMinutes,
   onComplete,
+  autoStart = false,
 }: UseMeditationTimerOptions): UseMeditationTimerReturn {
   const totalSeconds = durationMinutes * 60;
   const [timeRemaining, setTimeRemaining] = useState(totalSeconds);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isPaused, setIsPaused] = useState(!autoStart);
+  const [isStarted, setIsStarted] = useState(autoStart);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const hasCompletedRef = useRef(false);
 
@@ -56,16 +62,16 @@ export function useMeditationTimer({
 
   // Handle completion when time reaches 0
   useEffect(() => {
-    if (timeRemaining === 0 && !hasCompletedRef.current) {
+    if (timeRemaining === 0 && !hasCompletedRef.current && isStarted) {
       hasCompletedRef.current = true;
       clearTimer();
       onComplete();
     }
-  }, [timeRemaining, onComplete, clearTimer]);
+  }, [timeRemaining, onComplete, clearTimer, isStarted]);
 
-  // Start/stop timer based on pause state
+  // Start/stop timer based on pause state and started state
   useEffect(() => {
-    if (!isPaused && timeRemaining > 0 && !hasCompletedRef.current) {
+    if (isStarted && !isPaused && timeRemaining > 0 && !hasCompletedRef.current) {
       startTimer();
     } else {
       clearTimer();
@@ -74,17 +80,42 @@ export function useMeditationTimer({
     return () => {
       clearTimer();
     };
-  }, [isPaused, timeRemaining, startTimer, clearTimer]);
+  }, [isPaused, timeRemaining, isStarted, startTimer, clearTimer]);
 
   const togglePause = useCallback(() => {
-    setIsPaused((prev) => !prev);
+    if (!isStarted) {
+      setIsStarted(true);
+      setIsPaused(false);
+    } else {
+      setIsPaused((prev) => !prev);
+    }
+  }, [isStarted]);
+
+  const start = useCallback(() => {
+    setIsStarted(true);
+    setIsPaused(false);
   }, []);
+
+  const reset = useCallback(() => {
+    clearTimer();
+    setTimeRemaining(totalSeconds);
+    setIsPaused(true);
+    setIsStarted(false);
+    hasCompletedRef.current = false;
+  }, [totalSeconds, clearTimer]);
 
   const seekTime = useCallback((seconds: number) => {
     const clampedSeconds = Math.max(0, Math.min(totalSeconds, seconds));
     setTimeRemaining(clampedSeconds);
     hasCompletedRef.current = false;
   }, [totalSeconds]);
+
+  const setDuration = useCallback((minutes: number) => {
+    const newTotalSeconds = minutes * 60;
+    // Clamp remaining time if new duration is shorter
+    setTimeRemaining((prev) => Math.min(prev, newTotalSeconds));
+    hasCompletedRef.current = false;
+  }, []);
 
   const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -98,7 +129,10 @@ export function useMeditationTimer({
     isPaused,
     progress,
     togglePause,
+    start,
+    reset,
     seekTime,
+    setDuration,
     formatTime,
   };
 }

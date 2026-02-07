@@ -1,12 +1,10 @@
 # Specification
 
 ## Summary
-**Goal:** Restore the Meditation page’s previous session-duration input UI and fix the timer centering regression on `/pre-meditation`.
+**Goal:** Refine the Pre‑Meditation page UI by repositioning the “More Details” button within the Meditation Guide card and improving the “Begin Meditation” button’s height only in the small-screen stacked layout.
 
 **Planned changes:**
-- Replace the unexpected timer control buttons on `/pre-meditation` with the prior time range input UI for setting session duration (range selector or equivalent start/end inputs).
-- Remove any extra/unintended controls shown where the time range input is expected on the pre-meditation flow.
-- Adjust layout/styles so the active meditation timer display (ring + time text) is horizontally centered across mobile and desktop breakpoints.
-- Keep changes limited to the Meditation page while ensuring the existing session flow (start, pause/resume, completion -> reflection/save) continues to work.
+- Move the existing “More Details” button from the Meditation Guide header area to the bottom of the same guide container card (after the guide stepper/content) without changing its label or navigation behavior (/knowledge with `{ category: selectedType, scrollToContent: true }`).
+- Adjust only the “Begin Meditation” button styling so that when the action buttons switch to a single-column stack on small screens, its height increases (e.g., via responsive padding/min-height) to visually match “Save as Ritual,” while leaving desktop/tablet (side-by-side) styling and all behavior unchanged.
 
-**User-visible outcome:** On the Meditation page, users set duration via the expected time range inputs (not buttons), and the timer display appears properly centered on screen.
+**User-visible outcome:** On the Pre‑Meditation setup screen, “More Details” appears beneath the guide content instead of beside the “Meditation Guide” title, and on small screens the “Begin Meditation” button no longer looks thinner than “Save as Ritual” when the buttons stack.

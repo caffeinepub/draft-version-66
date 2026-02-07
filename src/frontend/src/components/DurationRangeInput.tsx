@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
+import { useEffect, useRef } from 'react';
+import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 
 interface DurationRangeInputProps {
@@ -15,81 +15,55 @@ export default function DurationRangeInput({
   min = 5,
   max = 60,
 }: DurationRangeInputProps) {
-  // Initialize start and end based on current duration
-  const [startMinutes, setStartMinutes] = useState(0);
-  const [endMinutes, setEndMinutes] = useState(value);
+  const sliderRef = useRef<HTMLDivElement>(null);
 
-  // Update internal state when external value changes
+  const handleChange = (values: number[]) => {
+    const newValue = values[0];
+    onChange(newValue);
+  };
+
+  // Fix thumb visual positioning to match drag direction
   useEffect(() => {
-    setEndMinutes(value);
-  }, [value]);
+    if (!sliderRef.current) return;
 
-  const handleStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value) || 0;
-    const clampedStart = Math.max(0, Math.min(val, max - min));
-    setStartMinutes(clampedStart);
-    
-    // Ensure end is at least min minutes after start
-    const newEnd = Math.max(clampedStart + min, endMinutes);
-    setEndMinutes(newEnd);
-    
-    const duration = newEnd - clampedStart;
-    onChange(Math.max(min, Math.min(max, duration)));
-  };
+    const thumb = sliderRef.current.querySelector('[role="slider"]') as HTMLElement;
+    if (!thumb) return;
 
-  const handleEndChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value) || min;
-    const clampedEnd = Math.max(startMinutes + min, Math.min(val, startMinutes + max));
-    setEndMinutes(clampedEnd);
+    // Calculate correct position percentage (0-100)
+    const percentage = ((value - min) / (max - min)) * 100;
     
-    const duration = clampedEnd - startMinutes;
-    onChange(Math.max(min, Math.min(max, duration)));
-  };
-
-  const duration = endMinutes - startMinutes;
+    // Override the transform to position thumb correctly
+    // The thumb should be at the percentage position with centered alignment
+    thumb.style.left = `${percentage}%`;
+    thumb.style.transform = 'translateX(-50%)';
+    
+  }, [value, min, max]);
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <Label className="text-lg font-medium text-foreground">
-          Duration: {duration} minutes
+          Duration
         </Label>
+        <span className="text-2xl font-bold text-accent-cyan">
+          {value} min
+        </span>
       </div>
       
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="start-time" className="text-sm text-muted-foreground">
-            Start (min)
-          </Label>
-          <Input
-            id="start-time"
-            type="number"
-            value={startMinutes}
-            onChange={handleStartChange}
-            min={0}
-            max={max - min}
-            className="text-center"
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="end-time" className="text-sm text-muted-foreground">
-            End (min)
-          </Label>
-          <Input
-            id="end-time"
-            type="number"
-            value={endMinutes}
-            onChange={handleEndChange}
-            min={startMinutes + min}
-            max={startMinutes + max}
-            className="text-center"
-          />
-        </div>
+      <div ref={sliderRef}>
+        <Slider
+          value={[value]}
+          onValueChange={handleChange}
+          min={min}
+          max={max}
+          step={5}
+          className="w-full"
+        />
       </div>
       
-      <div className="text-sm text-muted-foreground text-center">
-        Session will run from minute {startMinutes} to minute {endMinutes}
+      <div className="flex justify-between text-sm text-muted-foreground">
+        <span>{min} min</span>
+        <span>{max} min</span>
       </div>
     </div>
   );

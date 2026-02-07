@@ -6,7 +6,11 @@ import SessionIndicator from './SessionIndicator';
 import HamburgerMenu from './HamburgerMenu';
 import MobileBackButton from './MobileBackButton';
 
-export default function StandardPageNav() {
+interface StandardPageNavProps {
+  showBackButton?: boolean;
+}
+
+export default function StandardPageNav({ showBackButton = true }: StandardPageNavProps) {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -39,17 +43,19 @@ export default function StandardPageNav() {
         </button>
       )}
 
-      {/* Desktop Back Button */}
-      <button
-        onClick={() => navigate({ to: '/dashboard' })}
-        className="hidden md:block fixed top-20 left-6 z-50 rounded-full bg-card/80 backdrop-blur-sm p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-border/50"
-        aria-label="Back to dashboard"
-      >
-        <ArrowLeft className="h-5 w-5 text-accent-cyan" />
-      </button>
+      {/* Desktop Back Button - conditionally rendered */}
+      {showBackButton && (
+        <button
+          onClick={() => navigate({ to: '/dashboard' })}
+          className="hidden md:block fixed top-20 left-6 z-50 rounded-full bg-card/80 backdrop-blur-sm p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-border/50"
+          aria-label="Back to dashboard"
+        >
+          <ArrowLeft className="h-5 w-5 text-accent-cyan" />
+        </button>
+      )}
 
-      {/* Mobile Back Button */}
-      {mounted && <MobileBackButton show={true} />}
+      {/* Mobile Back Button - conditionally rendered */}
+      {mounted && showBackButton && <MobileBackButton show={true} />}
 
       {/* Mobile Hamburger Menu */}
       {mounted && <HamburgerMenu />}

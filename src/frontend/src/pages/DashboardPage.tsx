@@ -1,206 +1,137 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Moon, Sun, Sparkles } from 'lucide-react';
-import { useTheme } from 'next-themes';
+import { Play, Heart } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import MeditationCarousel from '../components/MeditationCarousel';
 import FloatingNav from '../components/FloatingNav';
-import SessionIndicator from '../components/SessionIndicator';
-import HamburgerMenu from '../components/HamburgerMenu';
+import PageBackgroundShell from '../components/PageBackgroundShell';
+import StandardPageNav from '../components/StandardPageNav';
 import QuizDialog from '../components/QuizDialog';
 import RitualSelectionModal from '../components/RitualSelectionModal';
-import CloudSyncErrorBanner from '../components/CloudSyncErrorBanner';
-import PageBackgroundShell from '../components/PageBackgroundShell';
 import { useDailyQuotes, useRituals, useDeleteRitual } from '../hooks/useQueries';
-import type { Ritual } from '../backend';
 
 export default function DashboardPage() {
-  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
-  const [mounted, setMounted] = useState(false);
-  const [selectedType, setSelectedType] = useState('mindfulness');
-  const [quizOpen, setQuizOpen] = useState(false);
-  const [ritualsModalOpen, setRitualsModalOpen] = useState(false);
-
-  const { data: quotes, isLoading: quotesLoading } = useDailyQuotes();
-  const { data: rituals, isLoading: ritualsLoading, isError: ritualsError, refetch: refetchRituals } = useRituals();
+  const [selectedMeditation, setSelectedMeditation] = useState('mindfulness');
+  const [showQuizDialog, setShowQuizDialog] = useState(false);
+  const [showRitualModal, setShowRitualModal] = useState(false);
+  const { data: quotes } = useDailyQuotes();
+  const { data: rituals, isLoading: ritualsLoading } = useRituals();
   const deleteRitual = useDeleteRitual();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Memoize the quote selection so it doesn't change on carousel navigation
-  const displayQuote = useMemo(() => {
-    if (quotes && quotes.length > 0) {
-      // Filter out empty quotes
-      const validQuotes = quotes.filter(q => q && q.trim().length > 0);
-      if (validQuotes.length > 0) {
-        return validQuotes[Math.floor(Math.random() * validQuotes.length)];
-      }
-    }
-    return 'Welcome to your meditation journey.';
+  const sanitizedQuotes = useMemo(() => {
+    if (!quotes) return [];
+    return quotes.filter((q) => q && q.trim().length > 0);
   }, [quotes]);
 
-  const handleBegin = () => {
-    // If "Take Quiz" is selected, open quiz dialog instead of navigating
-    if (selectedType === 'quiz') {
-      setQuizOpen(true);
-      return;
+  const randomQuote = useMemo(() => {
+    if (sanitizedQuotes.length === 0) return 'Begin your meditation journey today.';
+    const randomIndex = Math.floor(Math.random() * sanitizedQuotes.length);
+    return sanitizedQuotes[randomIndex];
+  }, [sanitizedQuotes]);
+
+  const handleBeginClick = () => {
+    if (selectedMeditation === 'quiz') {
+      setShowQuizDialog(true);
+    } else if (selectedMeditation === 'ritual') {
+      setShowRitualModal(true);
+    } else {
+      navigate({ to: '/pre-meditation', search: { type: selectedMeditation } });
     }
-    
-    navigate({
-      to: '/pre-meditation',
-      search: { type: selectedType },
-    });
   };
 
   const handleQuizComplete = (recommendedType: string) => {
-    setQuizOpen(false);
-    // Auto-navigate to pre-meditation after quiz with fromQuiz flag
-    navigate({
-      to: '/pre-meditation',
-      search: { type: recommendedType, fromQuiz: true },
+    setShowQuizDialog(false);
+    navigate({ to: '/pre-meditation', search: { type: recommendedType } });
+  };
+
+  const handleRitualStart = (ritual: any) => {
+    setShowRitualModal(false);
+    navigate({ 
+      to: '/pre-meditation', 
+      search: { type: ritual.meditationType }
     });
   };
 
-  const handleStartRitual = (ritual: { meditationType: string; duration: number; ambientSound: string; ambientSoundVolume: number; timestamp: string; displayName: string }) => {
-    navigate({
-      to: '/pre-meditation',
-      search: {
-        type: ritual.meditationType,
-        ritualDuration: ritual.duration,
-        ritualSound: ritual.ambientSound,
-        ritualVolume: ritual.ambientSoundVolume,
-        instantStart: true,
-      },
-    });
-    setRitualsModalOpen(false);
+  const handleRitualDelete = async (ritual: any) => {
+    await deleteRitual.mutateAsync(ritual);
   };
 
-  const handleDeleteRitual = async (ritual: { meditationType: string; duration: number; ambientSound: string; ambientSoundVolume: number; timestamp: string; displayName: string }) => {
-    // Convert back to backend Ritual type
-    const backendRitual: Ritual = {
-      meditationType: ritual.meditationType as any,
-      duration: BigInt(ritual.duration),
-      ambientSound: ritual.ambientSound,
-      ambientSoundVolume: BigInt(ritual.ambientSoundVolume),
-      timestamp: BigInt(ritual.timestamp),
-    };
-    await deleteRitual.mutateAsync(backendRitual);
-  };
+  const formattedRituals = useMemo(() => {
+    if (!rituals) return [];
+    return rituals.map(r => ({
+      meditationType: r.meditationType,
+      duration: Number(r.duration),
+      ambientSound: r.ambientSound,
+      ambientSoundVolume: Number(r.ambientSoundVolume),
+      timestamp: new Date(Number(r.timestamp) / 1_000_000).toISOString(),
+      displayName: `${r.meditationType} - ${Number(r.duration)} min`,
+    }));
+  }, [rituals]);
 
+  // Determine if we have rituals (non-empty array)
   const hasRituals = rituals && rituals.length > 0;
-  const showRitualsButton = hasRituals && !ritualsError;
 
   return (
-    <PageBackgroundShell>
-      {/* Desktop Session Indicator */}
-      {mounted && (
-        <div className="hidden md:block">
-          <SessionIndicator />
-        </div>
-      )}
+    <PageBackgroundShell variant="default" intensity={0.3}>
+      <StandardPageNav showBackButton={false} />
+      <FloatingNav />
 
-      {/* Desktop Theme Toggle */}
-      {mounted && (
-        <button
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="hidden md:block fixed top-6 right-6 z-50 rounded-full bg-card/80 backdrop-blur-sm p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-border/50"
-          aria-label="Toggle theme"
-        >
-          {theme === 'dark' ? (
-            <Sun className="h-5 w-5 text-accent-cyan" />
-          ) : (
-            <Moon className="h-5 w-5 text-primary-dark" />
-          )}
-        </button>
-      )}
-
-      {/* Mobile Hamburger Menu */}
-      {mounted && <HamburgerMenu />}
-
-      <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-3 sm:px-4 py-8 sm:py-12">
-        <div className="max-w-5xl mx-auto w-full space-y-8 sm:space-y-12 animate-fade-in">
-          {/* Daily Quote */}
-          <div className="text-center space-y-4 sm:space-y-6">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-accent-cyan-tinted animate-breathe-gentle">
-              Find Your Center
+      <main className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-12">
+        <div className="w-full max-w-6xl mx-auto space-y-12 animate-fade-in">
+          <div className="text-center space-y-6">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-accent-cyan-tinted animate-breathe-gentle">
+              Find Your Peace
             </h1>
-            <div className="max-w-3xl mx-auto">
-              <p className="text-lg sm:text-xl md:text-2xl text-description-gray leading-relaxed font-medium italic">
-                {quotesLoading ? 'Loading wisdom...' : `"${displayQuote}"`}
-              </p>
-            </div>
-            <div className="w-24 h-1 bg-gradient-to-r from-transparent via-accent-cyan to-transparent mx-auto mt-6"></div>
+            <p className="text-xl sm:text-2xl text-description-gray max-w-3xl mx-auto leading-relaxed font-medium">
+              {randomQuote}
+            </p>
+            <div className="w-32 h-1 bg-gradient-to-r from-transparent via-accent-cyan to-transparent mx-auto mt-8"></div>
           </div>
 
-          {/* Rituals Error Banner */}
-          {ritualsError && (
-            <div className="max-w-2xl mx-auto">
-              <CloudSyncErrorBanner
-                onRetry={refetchRituals}
-                isRetrying={ritualsLoading}
-                title="Failed to Load Rituals"
-                description="We couldn't load your saved rituals. Please check your connection and try again."
-              />
-            </div>
-          )}
+          <div className="space-y-8">
+            <MeditationCarousel selectedMeditation={selectedMeditation} onSelectMeditation={setSelectedMeditation} />
 
-          {/* Meditation Type Carousel */}
-          <div className="space-y-6">
-            <MeditationCarousel selectedMeditation={selectedType} onSelectMeditation={setSelectedType} />
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-            <Button
-              onClick={handleBegin}
-              size="lg"
-              className="w-full sm:w-auto px-6 sm:px-8 py-4 sm:py-5 text-base sm:text-lg font-bold rounded-full bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
-            >
-              Begin
-            </Button>
-
-            {showRitualsButton && (
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button
-                onClick={() => setRitualsModalOpen(true)}
+                onClick={handleBeginClick}
                 size="lg"
-                variant="outline"
-                className="w-full sm:w-auto px-6 sm:px-8 py-4 sm:py-5 text-base sm:text-lg font-bold rounded-full border-2 border-accent-cyan/60 text-accent-cyan hover:bg-accent-cyan hover:text-primary-dark transition-all duration-300 hover:scale-105"
+                className="w-full sm:w-auto bg-accent-cyan hover:bg-accent-cyan-tinted text-white font-semibold px-12 py-6 text-lg rounded-full shadow-glow-strong transition-all"
               >
-                <Sparkles className="w-4 h-4 mr-2" />
-                Your Rituals
+                <Play className="w-6 h-6 mr-2" />
+                Begin
               </Button>
-            )}
+
+              {hasRituals && (
+                <Button
+                  onClick={() => setShowRitualModal(true)}
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto border-accent-cyan/50 hover:bg-accent-cyan/10 text-accent-cyan-tinted font-semibold px-12 py-6 text-lg rounded-full transition-all"
+                >
+                  <Heart className="w-6 h-6 mr-2" />
+                  Your Rituals
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </main>
 
-      {/* Floating Navigation */}
-      <FloatingNav />
+      <QuizDialog
+        open={showQuizDialog}
+        onClose={() => setShowQuizDialog(false)}
+        onComplete={handleQuizComplete}
+      />
 
-      {/* Quiz Dialog */}
-      <QuizDialog open={quizOpen} onClose={() => setQuizOpen(false)} onComplete={handleQuizComplete} />
-
-      {/* Rituals Modal */}
-      {hasRituals && (
-        <RitualSelectionModal
-          open={ritualsModalOpen}
-          onClose={() => setRitualsModalOpen(false)}
-          rituals={rituals.map((r) => ({
-            meditationType: r.meditationType,
-            displayName: r.meditationType.charAt(0).toUpperCase() + r.meditationType.slice(1),
-            duration: Number(r.duration),
-            ambientSound: r.ambientSound,
-            ambientSoundVolume: Number(r.ambientSoundVolume),
-            timestamp: Number(r.timestamp).toString(),
-          }))}
-          onStart={handleStartRitual}
-          onDelete={handleDeleteRitual}
-          isDeleting={deleteRitual.isPending}
-        />
-      )}
+      <RitualSelectionModal
+        open={showRitualModal}
+        onClose={() => setShowRitualModal(false)}
+        rituals={formattedRituals}
+        onStart={handleRitualStart}
+        onDelete={handleRitualDelete}
+        isDeleting={deleteRitual.isPending}
+      />
     </PageBackgroundShell>
   );
 }

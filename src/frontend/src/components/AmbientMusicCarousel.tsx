@@ -2,58 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-
-interface MusicOption {
-  id: string;
-  name: string;
-  icon: string;
-  audio: string;
-}
-
-const musicOptions: MusicOption[] = [
-  {
-    id: 'temple',
-    name: 'Temple Bells',
-    icon: '/assets/temple.png',
-    audio: '/assets/Temple.mp3',
-  },
-  {
-    id: 'singing-bowl',
-    name: 'Singing Bowl',
-    icon: '/assets/singing-bowl.png',
-    audio: '/assets/Singing bowl.mp3',
-  },
-  {
-    id: 'rain',
-    name: 'Gentle Rain',
-    icon: '/assets/rainy.png',
-    audio: '/assets/Rain.mp3',
-  },
-  {
-    id: 'ocean',
-    name: 'Ocean Waves',
-    icon: '/assets/ocean wave.png',
-    audio: '/assets/Ocean.mp3',
-  },
-  {
-    id: 'soothing',
-    name: 'Soothing Melody',
-    icon: '/assets/soothing.png',
-    audio: '/assets/Soothing.mp3',
-  },
-  {
-    id: 'birds',
-    name: 'Forest Birds',
-    icon: '/assets/birds.png',
-    audio: '/assets/Birds.mp3',
-  },
-  {
-    id: 'crickets',
-    name: 'Night Crickets',
-    icon: '/assets/cricket.png',
-    audio: '/assets/Crickets.mp3',
-  },
-];
+import { ambientSounds } from '../utils/ambientSounds';
 
 interface AmbientMusicCarouselProps {
   selectedMusic: string;
@@ -68,7 +17,7 @@ export default function AmbientMusicCarousel({ selectedMusic, onSelectMusic, vol
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const currentIndex = musicOptions.findIndex((m) => m.id === selectedMusic);
+  const currentIndex = ambientSounds.findIndex((m) => m.id === selectedMusic);
 
   // Minimum swipe distance (in px)
   const minSwipeDistance = 50;
@@ -83,9 +32,9 @@ export default function AmbientMusicCarousel({ selectedMusic, onSelectMusic, vol
     }
 
     // Only start new audio if not muted
-    const selectedOption = musicOptions.find((m) => m.id === selectedMusic);
+    const selectedOption = ambientSounds.find((m) => m.id === selectedMusic);
     if (selectedOption && !isMuted) {
-      const audio = new Audio(selectedOption.audio);
+      const audio = new Audio(selectedOption.audioPath);
       audio.loop = true;
       audio.volume = volume / 100;
       
@@ -119,13 +68,13 @@ export default function AmbientMusicCarousel({ selectedMusic, onSelectMusic, vol
   }, [volume, isMuted]);
 
   const handlePrevious = () => {
-    const newIndex = currentIndex === 0 ? musicOptions.length - 1 : currentIndex - 1;
-    onSelectMusic(musicOptions[newIndex].id);
+    const newIndex = currentIndex === 0 ? ambientSounds.length - 1 : currentIndex - 1;
+    onSelectMusic(ambientSounds[newIndex].id);
   };
 
   const handleNext = () => {
-    const newIndex = currentIndex === musicOptions.length - 1 ? 0 : currentIndex + 1;
-    onSelectMusic(musicOptions[newIndex].id);
+    const newIndex = currentIndex === ambientSounds.length - 1 ? 0 : currentIndex + 1;
+    onSelectMusic(ambientSounds[newIndex].id);
   };
 
   const toggleMute = () => {
@@ -173,7 +122,7 @@ export default function AmbientMusicCarousel({ selectedMusic, onSelectMusic, vol
   };
 
   const getCardStyle = (index: number) => {
-    const totalItems = musicOptions.length;
+    const totalItems = ambientSounds.length;
     let diff = index - currentIndex;
     
     // Calculate shortest circular distance
@@ -229,7 +178,7 @@ export default function AmbientMusicCarousel({ selectedMusic, onSelectMusic, vol
         onTouchEnd={onTouchEnd}
       >
         <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-          {musicOptions.map((music, index) => {
+          {ambientSounds.map((music, index) => {
             const style = getCardStyle(index);
             const isCenter = index === currentIndex;
 

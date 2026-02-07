@@ -4,32 +4,23 @@
   "summary": "New project",
   "architectural_notes": [],
   "known_issues": [
-    "Meditation page UI regression: unexpected buttons shown instead of time range inputs",
-    "Meditation page timer alignment issue (slightly left of center)"
+    "UI inconsistency on small screens: \"Begin Meditation\" button appears too thin in height compared to \"Save as Ritual\" when the guide container buttons stack into a single column."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-on-the-meditation-page-the-pre-meditation-flow-at-route-pre-meditation-replace-the-unexpected-timer-control-buttons-with-a-time-range-input-ui-as-it-previously-existed-so-the-user-can-set-the-session-duration-via-input-fields-instead-of-those-buttons",
-      "title": "On the Meditation page (the pre-meditation flow at route \"/pre-meditation\"), replace the unexpected timer control buttons with a time range input UI (as it previously existed) so the user can set the session duration via input fields instead of those buttons.",
+      "id": "feature-update-the-selected-more-details-button-in-the-pre-meditation-page-s-meditation-guide-container-selected-element-xpath-html-1-body-1-div-1-div-1-main-1-div-1-div-1-div-2-div-1-div-3-div-1-button-1-so-it-renders-at-the-bottom-of-the-guide-container-instead-of-in-the-guide-header-area-without-changing-its-label-or-navigation-behavior-it-must-still-navigate-to-knowledge-with-the-current-meditation-type-and-scrolltocontent-search-param",
+      "title": "Update the selected “More Details” button in the Pre‑Meditation page’s Meditation Guide container (selected element XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[1]/div[2]/div[1]/div[3]/div[1]/button[1]) so it renders at the bottom of the guide container instead of in the guide header area, without changing its label or navigation behavior (it must still navigate to /knowledge with the current meditation type and scrollToContent search param).",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-center-align-the-meditation-timer-display-on-the-meditation-page-so-the-timer-ring-time-text-is-visually-centered-horizontally-and-not-slightly-left-across-common-viewport-sizes",
-      "title": "Center-align the meditation timer display on the Meditation page so the timer (ring + time text) is visually centered horizontally (and not slightly left) across common viewport sizes.",
+      "id": "feature-update-the-selected-begin-meditation-button-selected-element-xpath-html-1-body-1-div-1-div-1-main-1-div-1-div-1-div-2-div-2-button-1-so-that-on-lower-width-screens-when-the-action-buttons-area-collapses-from-a-2-column-side-by-side-layout-into-a-single-column-stack-its-visual-height-increases-to-better-match-the-save-as-ritual-button-this-change-must-only-affect-the-small-screen-stacked-layout-and-must-not-change-the-button-s-width-or-behavior",
+      "title": "Update the selected “Begin Meditation” button (selected element XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[1]/div[2]/div[2]/button[1]) so that on lower-width screens—when the action buttons area collapses from a 2-column/side-by-side layout into a single-column stack—its visual height increases to better match the “Save as Ritual” button. This change must only affect the small-screen stacked layout and must not change the button’s width or behavior.",
       "reqIds": [
         "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-limit-changes-to-only-what-is-necessary-to-restore-the-meditation-page-s-previous-duration-input-behavior-and-fix-timer-centering-avoid-unrelated-ui-behavior-changes-elsewhere-in-the-app",
-      "title": "Limit changes to only what is necessary to restore the Meditation page’s previous duration input behavior and fix timer centering; avoid unrelated UI/behavior changes elsewhere in the app.",
-      "reqIds": [
-        "REQ-3"
       ],
       "version": 1
     }
@@ -37,18 +28,18 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Meditation page: replace unexpected buttons with time range input (as previously)",
+      "summary": "Move the selected \"More Details\" button (links to knowledge page) to the bottom of the guide container.",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Meditation page: center-align the timer (currently slightly left)",
+      "summary": "Increase the \"Begin Meditation\" button height on lower-width screens when the guide container buttons collapse from 2 columns into a single column, to match visual weight vs \"Save as Ritual\".",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Fix Meditation page timer controls and alignment regression",
+  "projectName": "Adjust Pre‑Meditation guide buttons: move “More Details” to bottom and increase “Begin Meditation” height on small screens",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -20,8 +20,9 @@ export default function KnowledgePage() {
   const search = useSearch({ from: '/knowledge' }) as KnowledgeSearch;
   const { identity } = useInternetIdentity();
   
-  // Initialize category from search param or default to first
-  const initialCategoryId = search.category || TECHNIQUE_CONTENT[0].id;
+  // Sync category with search param, validate it exists
+  const validCategory = TECHNIQUE_CONTENT.find((t) => t.id === search.category);
+  const initialCategoryId = validCategory ? search.category! : TECHNIQUE_CONTENT[0].id;
   const [selectedCategoryId, setSelectedCategoryId] = useState(initialCategoryId);
   
   const [quizOpen, setQuizOpen] = useState(false);
@@ -30,6 +31,16 @@ export default function KnowledgePage() {
   const hasScrolledRef = useRef(false);
 
   const selectedTechnique = TECHNIQUE_CONTENT.find((t) => t.id === selectedCategoryId) || TECHNIQUE_CONTENT[0];
+
+  // Sync selectedCategoryId when search.category changes
+  useEffect(() => {
+    if (search.category) {
+      const validCat = TECHNIQUE_CONTENT.find((t) => t.id === search.category);
+      if (validCat) {
+        setSelectedCategoryId(search.category);
+      }
+    }
+  }, [search.category]);
 
   // Load quiz scores on mount and when identity changes
   useEffect(() => {

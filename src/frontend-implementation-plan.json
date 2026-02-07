@@ -1,60 +1,39 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Restore pre-meditation duration range inputs and fix timer centering",
+  "title": "Pre‑Meditation UI tweaks: move “More Details” button and adjust “Begin Meditation” button height on small screens",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Replace unexpected timer control buttons with a duration time range input UI on /pre-meditation.",
+      "summary": "Move the “More Details” button from the Meditation Guide header to the bottom of the guide container while keeping its label and navigation behavior unchanged.",
       "acceptanceCriteria": [
-        "In the \"/pre-meditation\" page, the timer duration can be set using a time range input UI (two inputs for start/end or equivalent range selector), not via the current unexpected buttons.",
-        "No extra/unintended control buttons are shown where the time range input is expected."
+        "On PreMeditationPage (setup phase), the “More Details” button no longer appears next to the “Meditation Guide” heading.",
+        "The “More Details” button appears after the guide content (below the MeditationGuideStepper) within the same guide container card.",
+        "Clicking “More Details” still navigates to /knowledge with search params { category: selectedType, scrollToContent: true }.",
+        "No other buttons or text in the guide container are modified beyond what is required to reposition this selected button."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/DurationRangeInput.tsx",
-          "operation": "create",
-          "description": "Create a small, self-contained duration range input component (two inputs representing a range, e.g., start/end in minutes) that validates/clamps values and emits the computed session duration back to the parent without relying on any files under frontend/src/components/ui. Verify the component's usage instructions before implementing."
-        },
-        {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Update the /pre-meditation setup UI to use the new DurationRangeInput for setting session duration (two-input range UI) and remove the currently shown unexpected timer control buttons from the duration-setting area so only the intended range inputs are presented. Keep the existing session start and save/ritual logic intact. Verify the component's usage instructions before implementing."
+          "description": "Update only the user-selected “More Details” Button currently rendered in the Meditation Guide header row: remove it from the header layout and re-render the same Button (same onClick handler, label, icon, variant/size, and className) after <MeditationGuideStepper /> within the same Meditation Guide section/card so it appears at the bottom of the guide container. Ensure navigation remains exactly navigate({ to: '/knowledge', search: { category: selectedType, scrollToContent: true } })."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Center-align the active meditation timer ring + time readout on /pre-meditation across breakpoints.",
+      "summary": "Increase the “Begin Meditation” button height only in the small-screen stacked action-buttons layout without changing its width or behavior.",
       "acceptanceCriteria": [
-        "On the active meditation view in \"/pre-meditation\", the timer ring and time readout are centered within the page container (visually aligned with the page’s horizontal center).",
-        "Center alignment remains correct on mobile and desktop breakpoints."
+        "When the action buttons stack into a single column on small screens, the “Begin Meditation” button has increased height (e.g., via responsive min-height/padding) and no longer appears thinner than “Save as Ritual.”",
+        "On larger screens where the buttons remain side-by-side, the “Begin Meditation” button height remains unchanged from current desktop/tablet styling.",
+        "The “Begin Meditation” button continues to trigger the existing begin-meditation behavior (no logic changes).",
+        "No other elements besides the selected “Begin Meditation” button are restyled as part of this change."
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Adjust the active phase layout wrappers around the timer visualization so the timer container is horizontally centered (e.g., ensure full-width centering with flex/grid and consistent max-width + auto margins) and the overlay time text remains centered over the ring. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/MeditationWaveFillIndicator.tsx",
-          "operation": "modify",
-          "description": "Ensure the canvas element is rendered in a way that centers reliably within its parent (e.g., make it a block-level element and allow auto horizontal margins via className) so the ring is not visually shifted left. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Constrain the fix to the Meditation page only and preserve the existing meditation session flow behavior.",
-      "acceptanceCriteria": [
-        "No unrelated UI changes are introduced outside the Meditation page as part of this fix.",
-        "Existing meditation session flow (start, pause/resume, completion -> reflection/save) continues to work after the UI regression fix."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/PreMeditationPage.tsx",
-          "operation": "modify",
-          "description": "Audit changes to ensure they are limited to restoring the previous duration-input behavior and fixing centering: keep existing state transitions (setup -> active -> reflection), timer start/pause/resume behavior via useMeditationTimer, and completion handling unchanged aside from wiring the new duration input values. Verify the component's usage instructions before implementing."
+          "description": "Locate the action buttons area that switches from stacked (flex-col) on small screens to side-by-side (sm:flex-row). Update only the user-selected “Begin Meditation” Button within this area to add responsive height styling that applies on small screens only (e.g., a base min-height and/or padding increase paired with an sm: override that preserves the current desktop/tablet height). Do not change its click handler, variant, width-related classes, or any other element styling."
         }
       ]
     }

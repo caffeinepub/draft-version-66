@@ -1,31 +1,44 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T09:03:00.278Z",
-  "summary": "REQ-1 and REQ-2 appear to be addressed on /pre-meditation via a new DurationRangeInput component and purported timer centering changes, but the diff also includes unrelated modifications (notably backend/main.mo and animation behavior changes) that go beyond the requested scope (REQ-3).",
-  "missing_requirements": [],
+  "generatedAt": "2026-02-07T11:51:53.567Z",
+  "summary": "REQ-2 appears to be implemented (responsive min-height classes for the “Begin Meditation” button on small screens). REQ-1 is partially evidenced (the “More Details” button is described as moved to the bottom and still navigating to Knowledge), but the required `scrollToContent=true` search param is not explicitly evidenced in the provided diff summary. Additionally, the diff shows new/expanded in-page guide content being added, which is explicitly a non-goal and violates the constraint to apply changes only to the two selected elements.",
+  "missing_requirements": [
+    {
+      "id": "REQ-1",
+      "requirement": "Clicking “More Details” must still navigate to /knowledge with search params { category: selectedType, scrollToContent: true }.",
+      "reason": "The diff summary mentions navigation to the Knowledge page with the corresponding meditation category, but does not explicitly show that the `scrollToContent` search param is preserved as `true`.",
+      "evidence": [
+        "frontend-file-summaries.txt (entry for frontend/src/pages/PreMeditationPage.tsx: mentions navigation with corresponding meditation category but not scrollToContent)"
+      ]
+    }
+  ],
   "hallucinated_features": [
     {
-      "description": "Backend changes in backend/main.mo unrelated to restoring the pre-meditation duration input UI or centering the timer display.",
-      "reason": "BuildRequest is frontend-only except for the general constraint to keep changes minimal (REQ-3). No backend changes were requested for this fix.",
+      "description": "Added/expanded detailed meditation guide content (multiple step titles/contents) in PreMeditationPage.",
+      "reason": "BuildRequest explicitly lists as non-goals: “Adding new buttons, new guide content, or new navigation destinations” and constrains changes to ONLY the two selected elements. The diff shows large blocks of new guide content being introduced.",
       "evidence": [
-        "backend/main.mo"
+        "frontend/src/pages/PreMeditationPage.tsx (adds/contains large `detailedGuides` content with many steps; visible in truncated diff)"
       ]
     },
     {
-      "description": "Changes to MeditationWaveFillIndicator animation behavior (e.g., smooth interpolation/easing and additional rendering logic) not explicitly required for timer centering or restoring duration inputs.",
-      "reason": "REQ-2 is about horizontal centering of the timer ring + time text; altering fill animation smoothing is an unrelated visual/behavior change and risks violating REQ-3's scope limit.",
+      "description": "Updated project metadata/state tracking files (project_state.json) to add new_feature_requests AR-1..AR-4.",
+      "reason": "The BuildRequest does not request changes to project tracking/state files; it requests only UI adjustments to two elements on the Pre‑Meditation page.",
       "evidence": [
-        "frontend/src/components/MeditationWaveFillIndicator.tsx"
+        "project_state.json"
+      ]
+    },
+    {
+      "description": "Updated frontend-file-summaries.txt content describing multiple unrelated features across the app.",
+      "reason": "The BuildRequest is narrowly scoped to two UI changes on PreMeditationPage; modifying a repository-wide summaries file is not requested.",
+      "evidence": [
+        "frontend-file-summaries.txt"
       ]
     }
   ],
   "confidence": 0.62,
   "changed_files": [
-    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/DurationRangeInput.tsx",
-    "frontend/src/components/MeditationWaveFillIndicator.tsx",
     "frontend/src/pages/PreMeditationPage.tsx",
     "project_state.json"
   ]

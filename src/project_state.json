@@ -2,25 +2,47 @@
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
   "summary": "New project",
-  "architectural_notes": [],
+  "architectural_notes": [
+    "Audio playback should be managed as a single global instance and must be stopped/paused on navigation away from meditation sessions (e.g., back button).",
+    "Knowledge page routing for “More details” should be driven by the category selected on the pre-meditation screen (category-to-category mapping like Meta -> Meta)."
+  ],
   "known_issues": [
-    "UI inconsistency on small screens: \"Begin Meditation\" button appears too thin in height compared to \"Save as Ritual\" when the guide container buttons stack into a single column."
+    "Ambient audio continues playing after leaving a meditation session via back navigation.",
+    "Pre-meditation screen is incorrectly displayed in two columns instead of a single column.",
+    "Guide “More details” button is missing from the pre-meditation guide container.",
+    "Meditation timer display is not centered and shows overflow/precision issues (needs .toFixed(2))."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-update-the-selected-more-details-button-in-the-pre-meditation-page-s-meditation-guide-container-selected-element-xpath-html-1-body-1-div-1-div-1-main-1-div-1-div-1-div-2-div-1-div-3-div-1-button-1-so-it-renders-at-the-bottom-of-the-guide-container-instead-of-in-the-guide-header-area-without-changing-its-label-or-navigation-behavior-it-must-still-navigate-to-knowledge-with-the-current-meditation-type-and-scrolltocontent-search-param",
-      "title": "Update the selected “More Details” button in the Pre‑Meditation page’s Meditation Guide container (selected element XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[1]/div[2]/div[1]/div[3]/div[1]/button[1]) so it renders at the bottom of the guide container instead of in the guide header area, without changing its label or navigation behavior (it must still navigate to /knowledge with the current meditation type and scrollToContent search param).",
+      "id": "feature-ensure-ambient-audio-fully-stops-when-the-user-leaves-an-active-meditation-session-via-any-back-navigation-e-g-standardpagenav-mobile-back-button-routing-to-dashboard-this-must-stop-the-single-global-ambient-audio-instance-pause-reset-currenttime-and-release-the-audio-source-if-applicable-so-no-sound-continues-after-leaving-the-meditation-screen",
+      "title": "Ensure ambient audio fully stops when the user leaves an active meditation session via any back navigation (e.g., StandardPageNav/Mobile back button routing to /dashboard). This must stop the single global ambient audio instance (pause, reset currentTime, and release the audio source if applicable) so no sound continues after leaving the meditation screen.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-update-the-selected-begin-meditation-button-selected-element-xpath-html-1-body-1-div-1-div-1-main-1-div-1-div-1-div-2-div-2-button-1-so-that-on-lower-width-screens-when-the-action-buttons-area-collapses-from-a-2-column-side-by-side-layout-into-a-single-column-stack-its-visual-height-increases-to-better-match-the-save-as-ritual-button-this-change-must-only-affect-the-small-screen-stacked-layout-and-must-not-change-the-button-s-width-or-behavior",
-      "title": "Update the selected “Begin Meditation” button (selected element XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[1]/div[2]/div[2]/button[1]) so that on lower-width screens—when the action buttons area collapses from a 2-column/side-by-side layout into a single-column stack—its visual height increases to better match the “Save as Ritual” button. This change must only affect the small-screen stacked layout and must not change the button’s width or behavior.",
+      "id": "feature-update-the-premeditationpage-setup-ui-to-use-a-single-column-layout-no-side-by-side-two-column-split-all-existing-setup-elements-must-stack-vertically-in-the-current-order-shown-in-the-ui-as-previously",
+      "title": "Update the PreMeditationPage setup UI to use a single-column layout (no side-by-side/two-column split). All existing setup elements must stack vertically in the current order shown in the UI (as previously).",
       "reqIds": [
         "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-re-add-a-more-details-button-inside-the-premeditationpage-guide-container-that-navigates-to-the-knowledge-page-preselecting-the-category-that-was-selected-in-pre-meditation-e-g-metta-metta-via-the-knowledge-route-search-parameter-the-navigation-should-deep-link-to-the-content-area-use-the-knowledgepage-deep-link-mechanism",
+      "title": "Re-add a “More details” button inside the PreMeditationPage guide container that navigates to the Knowledge page, preselecting the category that was selected in pre-meditation (e.g., metta -> metta) via the /knowledge route search parameter. The navigation should deep-link to the content area (use the KnowledgePage deep-link mechanism).",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-active-meditation-timer-display-so-the-time-text-is-visually-centered-inside-the-circular-timer-indicator-and-the-displayed-time-value-is-formatted-with-two-decimal-places-using-tofixed-2-to-prevent-overflow-precision-display-issues",
+      "title": "Fix the active meditation timer display so the time text is visually centered inside the circular timer indicator and the displayed time value is formatted with two decimal places using .toFixed(2) to prevent overflow/precision display issues.",
+      "reqIds": [
+        "REQ-4"
       ],
       "version": 1
     }
@@ -28,18 +50,30 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Move the selected \"More Details\" button (links to knowledge page) to the bottom of the guide container.",
+      "summary": "Stop/fully pause ambient audio when leaving a meditation session via the back button (ensure only one global audio instance is stopped).",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Increase the \"Begin Meditation\" button height on lower-width screens when the guide container buttons collapse from 2 columns into a single column, to match visual weight vs \"Save as Ritual\".",
+      "summary": "Change pre-meditation page layout to a single-column stacked layout in the current (previous) order.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Re-add the Guide container “More details” button that routes to the corresponding meditation knowledge page based on the selected pre-meditation category (e.g., Meta -> Meta).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Meditation page: center the timer inside the circle and format the displayed time with .toFixed(2) to prevent number overflow display issues.",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Adjust Pre‑Meditation guide buttons: move “More Details” to bottom and increase “Begin Meditation” height on small screens",
+  "projectName": "Polish meditation flow: stop ambient audio on back, single-column pre-meditation layout, restore guide “More details” deep-link, and fix timer centering/formatting",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

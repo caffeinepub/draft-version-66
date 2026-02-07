@@ -115,7 +115,7 @@ export interface backendInterface {
     getCurrentUserExportData(): Promise<ExportData>;
     getDailyQuotes(): Promise<Array<string>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
-    importData(importData: ImportData, overwrite: boolean): Promise<void>;
+    importData(importData: ImportData): Promise<void>;
     isCallerAdmin(): Promise<boolean>;
     listCallerRituals(): Promise<Array<Ritual>>;
     recordMeditationSession(session: MeditationSession, _monthlyStats: bigint, _currentStreak: bigint): Promise<ProgressStats>;

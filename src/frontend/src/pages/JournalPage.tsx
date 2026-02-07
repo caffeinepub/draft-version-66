@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Download, Upload, Heart, Trash2, Edit2, X, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,7 @@ import type { JournalEntry, MoodState, EnergyState } from '../backend';
 import { toast } from 'sonner';
 import { classifyCloudSyncError } from '../utils/cloudSync';
 import { moodIconMap, energyIconMap } from './PreMeditationPage';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
 
 export default function JournalPage() {
   const [filterFavorites, setFilterFavorites] = useState(false);
@@ -26,6 +27,14 @@ export default function JournalPage() {
   const [editedReflection, setEditedReflection] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<bigint | null>(null);
+  const [deletingEntryId, setDeletingEntryId] = useState<bigint | null>(null);
+  const [favoritingEntryId, setFavoritingEntryId] = useState<bigint | null>(null);
+  const [importConfirmOpen, setImportConfirmOpen] = useState(false);
+  const [pendingImportFile, setPendingImportFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { identity } = useInternetIdentity();
+  const isAuthenticated = !!identity;
 
   const { data: entries, isLoading, isError, error, refetch } = useJournalEntries();
   const updateEntry = useUpdateJournalEntry();
@@ -35,10 +44,24 @@ export default function JournalPage() {
   const exportData = useExportData();
 
   const handleToggleFavorite = async (entry: JournalEntry) => {
+    if (!isAuthenticated) {
+      // Guest mode - instant local toggle
+      try {
+        await toggleFavorite.mutateAsync(entry.id);
+      } catch (error: any) {
+        // Error already handled by mutation onError
+      }
+      return;
+    }
+
+    // Authenticated mode - show row-level loading
+    setFavoritingEntryId(entry.id);
     try {
       await toggleFavorite.mutateAsync(entry.id);
     } catch (error: any) {
       // Error already handled by mutation onError
+    } finally {
+      setFavoritingEntryId(null);
     }
   };
 
@@ -81,11 +104,14 @@ export default function JournalPage() {
 
   const handleConfirmDelete = async () => {
     if (entryToDelete !== null) {
+      setDeletingEntryId(entryToDelete);
       try {
         await deleteEntry.mutateAsync(entryToDelete);
         toast.success('Entry deleted successfully');
       } catch (error: any) {
         // Error already handled by mutation onError
+      } finally {
+        setDeletingEntryId(null);
       }
     }
     setDeleteDialogOpen(false);
@@ -101,18 +127,40 @@ export default function JournalPage() {
     }
   };
 
-  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    setPendingImportFile(file);
+    setImportConfirmOpen(true);
+  };
+
+  const handleCancelImport = () => {
+    setImportConfirmOpen(false);
+    setPendingImportFile(null);
+    // Clear file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleConfirmImport = async () => {
+    if (!pendingImportFile) return;
+
+    setImportConfirmOpen(false);
+    
     try {
-      await importData.mutateAsync({ file, overwrite: false });
+      await importData.mutateAsync({ file: pendingImportFile, overwrite: true });
       toast.success('Journal imported successfully');
     } catch (error: any) {
       // Error already handled by mutation onError
+    } finally {
+      setPendingImportFile(null);
+      // Clear file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
-
-    event.target.value = '';
   };
 
   const handleClearFilters = () => {
@@ -160,6 +208,9 @@ export default function JournalPage() {
 
   // Classify error type for better messaging
   const errorType = isError && error ? classifyCloudSyncError(error) : 'other';
+
+  // Track if we're currently deleting the entry in the dialog
+  const isDeletingEntry = deleteEntry.isPending && entryToDelete !== null;
 
   return (
     <PageBackgroundShell>
@@ -219,12 +270,17 @@ export default function JournalPage() {
             <div className="space-y-4">
               {sortedEntries.map((entry) => {
                 const isEditing = editingId === entry.id;
+                const isSavingThisEntry = isAuthenticated && updateEntry.isPending && editingId === entry.id;
+                const isDeletingThisEntry = deletingEntryId === entry.id;
+                const isFavoritingThisEntry = favoritingEntryId === entry.id;
                 const date = new Date(Number(entry.timestamp) / 1000000);
 
                 return (
                   <div
                     key={entry.id.toString()}
-                    className="bg-card/70 backdrop-blur-sm rounded-xl p-6 border border-accent-cyan/20 shadow-lg hover:shadow-glow transition-all"
+                    className={`bg-card/70 backdrop-blur-sm rounded-xl p-6 border border-accent-cyan/20 shadow-lg hover:shadow-glow transition-all ${
+                      isDeletingThisEntry ? 'opacity-50' : ''
+                    }`}
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
@@ -275,14 +331,18 @@ export default function JournalPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleToggleFavorite(entry)}
-                          disabled={toggleFavorite.isPending}
+                          disabled={isFavoritingThisEntry || isDeletingThisEntry}
                           className="hover:bg-accent-cyan/10"
                         >
-                          <Heart
-                            className={`w-5 h-5 ${
-                              entry.isFavorite ? 'fill-accent-cyan text-accent-cyan' : 'text-muted-foreground'
-                            }`}
-                          />
+                          {isFavoritingThisEntry ? (
+                            <Loader2 className="w-5 h-5 animate-spin text-accent-cyan" />
+                          ) : (
+                            <Heart
+                              className={`w-5 h-5 ${
+                                entry.isFavorite ? 'fill-accent-cyan text-accent-cyan' : 'text-muted-foreground'
+                              }`}
+                            />
+                          )}
                         </Button>
                         {!isEditing && (
                           <>
@@ -290,6 +350,7 @@ export default function JournalPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleStartEdit(entry)}
+                              disabled={isDeletingThisEntry}
                               className="hover:bg-accent-cyan/10"
                             >
                               <Edit2 className="w-4 h-4 text-accent-cyan" />
@@ -298,9 +359,14 @@ export default function JournalPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDeleteClick(entry.id)}
+                              disabled={isDeletingThisEntry}
                               className="hover:bg-red-500/10"
                             >
-                              <Trash2 className="w-4 h-4 text-red-500" />
+                              {isDeletingThisEntry ? (
+                                <Loader2 className="w-4 h-4 animate-spin text-red-500" />
+                              ) : (
+                                <Trash2 className="w-4 h-4 text-red-500" />
+                              )}
                             </Button>
                           </>
                         )}
@@ -313,15 +379,16 @@ export default function JournalPage() {
                           value={editedReflection}
                           onChange={(e) => setEditedReflection(e.target.value)}
                           className="min-h-[100px] bg-background/50 border-accent-cyan/30 focus:border-accent-cyan"
+                          disabled={isSavingThisEntry}
                         />
                         <div className="flex gap-2">
                           <Button
                             onClick={() => handleSaveEdit(entry)}
-                            disabled={updateEntry.isPending}
+                            disabled={isSavingThisEntry}
                             size="sm"
                             className="bg-accent-cyan hover:bg-accent-cyan-tinted"
                           >
-                            {updateEntry.isPending ? (
+                            {isSavingThisEntry ? (
                               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             ) : (
                               <Check className="w-4 h-4 mr-2" />
@@ -332,6 +399,7 @@ export default function JournalPage() {
                             onClick={handleCancelEdit}
                             variant="outline"
                             size="sm"
+                            disabled={isSavingThisEntry}
                             className="border-border hover:bg-muted"
                           >
                             <X className="w-4 h-4 mr-2" />
@@ -377,10 +445,17 @@ export default function JournalPage() {
               Import
             </span>
           </Button>
-          <input type="file" accept=".json" onChange={handleImport} className="hidden" />
+          <input 
+            ref={fileInputRef}
+            type="file" 
+            accept=".json" 
+            onChange={handleImportFileSelect} 
+            className="hidden" 
+          />
         </label>
       </div>
 
+      {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -390,12 +465,51 @@ export default function JournalPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeletingEntry}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
+              disabled={isDeletingEntry}
               className="bg-red-500 hover:bg-red-600"
             >
-              Delete
+              {isDeletingEntry ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Import Confirmation Dialog */}
+      <AlertDialog open={importConfirmOpen} onOpenChange={setImportConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Import Journal Data</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will replace all your existing journal entries, progress stats, and session records with the imported data. This action cannot be undone. Are you sure you want to continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelImport} disabled={importData.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmImport}
+              disabled={importData.isPending}
+              className="bg-accent-cyan hover:bg-accent-cyan-tinted"
+            >
+              {importData.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Importing...
+                </>
+              ) : (
+                'Import'
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

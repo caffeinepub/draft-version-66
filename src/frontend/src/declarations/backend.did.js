@@ -157,7 +157,7 @@ export const idlService = IDL.Service({
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
-  'importData' : IDL.Func([ImportData, IDL.Bool], [], []),
+  'importData' : IDL.Func([ImportData], [], []),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'listCallerRituals' : IDL.Func([], [IDL.Vec(Ritual)], ['query']),
   'recordMeditationSession' : IDL.Func(
@@ -331,7 +331,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
-    'importData' : IDL.Func([ImportData, IDL.Bool], [], []),
+    'importData' : IDL.Func([ImportData], [], []),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'listCallerRituals' : IDL.Func([], [IDL.Vec(Ritual)], ['query']),
     'recordMeditationSession' : IDL.Func(

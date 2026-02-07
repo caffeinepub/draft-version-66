@@ -113,7 +113,6 @@ actor {
     timestamp : Int;
   };
 
-  // Books and quotes data for persistent storage
   let books = List.fromArray<Book>([
     {
       title = "Ten Percent Happier";
@@ -265,7 +264,7 @@ actor {
   };
 
   // Import/Export endpoints - authenticated users only
-  public shared ({ caller }) func importData(importData : ImportData, overwrite : Bool) : async () {
+  public shared ({ caller }) func importData(importData : ImportData) : async () {
     ensureUserInitialized(caller);
 
     // Security: Ensure all imported journal entries are assigned to the caller
@@ -273,66 +272,21 @@ actor {
       { entry with user = caller };
     });
 
-    if (overwrite) {
-      nextEntryId += sanitizedEntries.size();
-      journalEntries.add(caller, List.fromArray<JournalEntry>(sanitizedEntries));
-      sessionRecords.add(caller, List.fromArray<MeditationSession>(importData.sessionRecords));
+    nextEntryId += sanitizedEntries.size();
+    journalEntries.add(caller, List.fromArray<JournalEntry>(sanitizedEntries));
+    sessionRecords.add(caller, List.fromArray<MeditationSession>(importData.sessionRecords));
 
-      let progressStore : ProgressStore = {
-        currentStreak = importData.progressStats.currentStreak;
-        totalMinutes = importData.progressStats.totalMinutes;
-        sessions = List.fromArray<MeditationSession>(importData.sessionRecords);
-      };
-      progressStats.add(caller, progressStore);
-      progressCache.add(caller, importData.progressStats);
+    let progressStore : ProgressStore = {
+      currentStreak = importData.progressStats.currentStreak;
+      totalMinutes = importData.progressStats.totalMinutes;
+      sessions = List.fromArray<MeditationSession>(importData.sessionRecords);
+    };
+    progressStats.add(caller, progressStore);
+    progressCache.add(caller, importData.progressStats);
 
-      switch (importData.userProfile) {
-        case (?profile) { userProfiles.add(caller, profile) };
-        case (null) {};
-      };
-    } else {
-      // Assign unique IDs to new entries to avoid collisions
-      let newEntries = List.fromArray<JournalEntry>(
-        sanitizedEntries.map(func(entry : JournalEntry) : JournalEntry {
-          let newId = nextEntryId;
-          nextEntryId += 1;
-          { entry with id = newId; user = caller };
-        })
-      );
-
-      switch (journalEntries.get(caller)) {
-        case (?existing) {
-          existing.addAll(newEntries.values());
-          journalEntries.add(caller, existing);
-        };
-        case (null) {
-          journalEntries.add(caller, newEntries);
-        };
-      };
-
-      let newSessions = List.fromArray<MeditationSession>(importData.sessionRecords);
-      switch (sessionRecords.get(caller)) {
-        case (?existing) {
-          existing.addAll(newSessions.values());
-          sessionRecords.add(caller, existing);
-        };
-        case (null) {
-          sessionRecords.add(caller, newSessions);
-        };
-      };
-
-      let currentStats : ProgressStore = {
-        currentStreak = importData.progressStats.currentStreak;
-        totalMinutes = importData.progressStats.totalMinutes;
-        sessions = List.fromArray<MeditationSession>(importData.sessionRecords);
-      };
-      progressStats.add(caller, currentStats);
-      progressCache.add(caller, importData.progressStats);
-
-      switch (importData.userProfile) {
-        case (?profile) { userProfiles.add(caller, profile) };
-        case (null) {};
-      };
+    switch (importData.userProfile) {
+      case (?profile) { userProfiles.add(caller, profile) };
+      case (null) {};
     };
   };
 

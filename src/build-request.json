@@ -1,57 +1,92 @@
 {
   "kind": "build_request",
-  "title": "Adjust Pre‑Meditation guide buttons: move “More Details” to bottom and increase “Begin Meditation” height on small screens",
+  "title": "Polish meditation flow: stop ambient audio on back, single-column pre-meditation layout, restore guide “More details” deep-link, and fix timer centering/formatting",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Update the selected “More Details” button in the Pre‑Meditation page’s Meditation Guide container (selected element XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[1]/div[2]/div[1]/div[3]/div[1]/button[1]) so it renders at the bottom of the guide container instead of in the guide header area, without changing its label or navigation behavior (it must still navigate to /knowledge with the current meditation type and scrollToContent search param).",
+      "text": "Ensure ambient audio fully stops when the user leaves an active meditation session via any back navigation (e.g., StandardPageNav/Mobile back button routing to /dashboard). This must stop the single global ambient audio instance (pause, reset currentTime, and release the audio source if applicable) so no sound continues after leaving the meditation screen.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "recent-messages-4",
+          "recent-messages-6"
         ],
         "quotes": [
-          "place more details button ... in the bottom of guide container.",
-          "Only to the selected element yes(More details btn)"
+          "I noticed when I am in a meditation session, and click back button, it still plays ambient sound like it did in meditation session. It should completely pause that.",
+          "Technically, there should be only one instance, so yes, all and one."
         ]
       },
       "acceptanceCriteria": [
-        "On PreMeditationPage (setup phase), the “More Details” button no longer appears next to the “Meditation Guide” heading.",
-        "The “More Details” button appears after the guide content (below the MeditationGuideStepper) within the same guide container card.",
-        "Clicking “More Details” still navigates to /knowledge with search params { category: selectedType, scrollToContent: true }.",
-        "No other buttons or text in the guide container are modified beyond what is required to reposition this selected button."
+        "From an active meditation session, clicking the back button results in no ambient audio continuing to play after navigation completes.",
+        "Audio is paused and reset (e.g., currentTime set back to 0) when leaving the active meditation UI.",
+        "No duplicate ambient audio instances can remain playing after repeated start/back cycles."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Update the selected “Begin Meditation” button (selected element XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[1]/div[2]/div[2]/button[1]) so that on lower-width screens—when the action buttons area collapses from a 2-column/side-by-side layout into a single-column stack—its visual height increases to better match the “Save as Ritual” button. This change must only affect the small-screen stacked layout and must not change the button’s width or behavior.",
+      "text": "Update the PreMeditationPage setup UI to use a single-column layout (no side-by-side/two-column split). All existing setup elements must stack vertically in the current order shown in the UI (as previously).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "recent-messages-4",
+          "recent-messages-6"
         ],
         "quotes": [
-          "Begin meditation button only height increased... when ... 2 columns, becomes 1 row (Lower width screens). So there is visual incosistency compared to \"Save as Ritual\" button"
+          "Also, pre meditation page content, should be in a single column. Now I see two columns, one for guide, other for saving ritual, starting meditation, and selecting ambient sound. So make it single column content page.",
+          "Yes in the current order(as previously it was)"
         ]
       },
       "acceptanceCriteria": [
-        "When the action buttons stack into a single column on small screens, the “Begin Meditation” button has increased height (e.g., via responsive min-height/padding) and no longer appears thinner than “Save as Ritual.”",
-        "On larger screens where the buttons remain side-by-side, the “Begin Meditation” button height remains unchanged from current desktop/tablet styling.",
-        "The “Begin Meditation” button continues to trigger the existing begin-meditation behavior (no logic changes).",
-        "No other elements besides the selected “Begin Meditation” button are restyled as part of this change."
+        "On the pre-meditation setup screen, guide, ritual save, start controls, and ambient sound selection are rendered in one vertical column (no multi-column/grid split at common breakpoints).",
+        "The order of elements matches the current order (no reordering)."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Re-add a “More details” button inside the PreMeditationPage guide container that navigates to the Knowledge page, preselecting the category that was selected in pre-meditation (e.g., metta -> metta) via the /knowledge route search parameter. The navigation should deep-link to the content area (use the KnowledgePage deep-link mechanism).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages-4",
+          "recent-messages-6"
+        ],
+        "quotes": [
+          "And re-add the more details button in the guide container, that redirects to coresponding meditation knowledge page to learn about it as previously it was.",
+          "More details just redirects to knowledge page with a category that was selected in pre-meditation. Meta = Meta etc."
+        ]
+      },
+      "acceptanceCriteria": [
+        "A visible “More details” button appears within the guide container on the pre-meditation setup screen.",
+        "Clicking “More details” navigates to /knowledge with the selected pre-meditation category passed as the search param (category=<selectedType>).",
+        "After navigation, the Knowledge page shows the matching category selected and auto-scrolls to the content section."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Fix the active meditation timer display so the time text is visually centered inside the circular timer indicator and the displayed time value is formatted with two decimal places using .toFixed(2) to prevent overflow/precision display issues.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages-4"
+        ],
+        "quotes": [
+          "Lastly, in meditation page, the timer should be centered inside the circle, and the time should be .toFixed(2), because there are some number overflow that is happening for some reason, cheers!"
+        ]
+      },
+      "acceptanceCriteria": [
+        "In the active meditation UI, the timer text is centered within the circle at common screen sizes.",
+        "The displayed time uses two decimal places (via .toFixed(2)) and does not render overflowing/unstable digits."
       ]
     }
   ],
   "constraints": [
-    "Apply changes ONLY to the two user-selected elements identified by the provided XPaths.",
-    "Do not modify any files under frontend/src/components/ui (read-only).",
-    "Do not change routing, backend APIs, or the existing navigation logic for the “More Details” button beyond repositioning it in the UI."
+    "Frontend immutable paths must not be modified: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui."
   ],
   "nonGoals": [
-    "Redesigning the entire Pre‑Meditation page layout.",
-    "Changing the “Save as Ritual” button styling or behavior.",
-    "Adding new buttons, new guide content, or new navigation destinations."
+    "Do not introduce new authentication providers (Internet Identity only).",
+    "Do not add new backend APIs or modify backend schema for these UI/audio/layout fixes.",
+    "Do not change the order of pre-meditation setup elements beyond converting the layout to a single column."
   ],
   "imageRequirements": {
     "required": [],

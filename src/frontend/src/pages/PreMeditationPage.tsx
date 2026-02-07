@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { Play, Pause, Heart, Smile, Meh, Frown, Zap, Battery, BatteryCharging, Sparkles, Loader2, CheckCircle2, BookOpen, Save } from 'lucide-react';
+import { Play, Pause, Heart, Smile, Meh, Frown, Zap, Battery, BatteryCharging, Sparkles, Loader2, CheckCircle2, BookOpen, Save, ExternalLink } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import { getCloudSyncErrorMessage } from '../utils/cloudSync';
 import { validateMeditationType } from '../utils/meditationType';
 import { getAmbientSoundPath } from '../utils/ambientSounds';
+import { ambientAudioManager } from '../utils/ambientAudioManager';
 
 const detailedGuides: Record<string, { steps: Array<{ title: string; content: string }> }> = {
   mindfulness: {
@@ -121,21 +122,32 @@ export const energyIconMap: Record<EnergyState, any> = {
 
 export default function PreMeditationPage() {
   const navigate = useNavigate();
-  const search = useSearch({ from: '/pre-meditation' }) as { type?: string };
+  const search = useSearch({ from: '/pre-meditation' }) as { 
+    type?: string; 
+    duration?: string; 
+    ambientSound?: string; 
+    ambientSoundVolume?: string;
+    autoStart?: string;
+  };
   
   // Parse meditation type from route search params
   const selectedType = validateMeditationType(search.type);
 
+  // Check if this is an auto-start ritual
+  const isAutoStartRitual = search.autoStart === 'true';
+  const ritualDuration = search.duration ? parseInt(search.duration, 10) : null;
+  const ritualAmbientSound = search.ambientSound || null;
+  const ritualAmbientSoundVolume = search.ambientSoundVolume ? parseInt(search.ambientSoundVolume, 10) : null;
+
   const [phase, setPhase] = useState<'setup' | 'active' | 'reflection'>('setup');
-  const [duration, setDuration] = useState(15);
-  const [selectedMusicId, setSelectedMusicId] = useState('temple');
-  const [volume, setVolume] = useState(50);
+  const [duration, setDuration] = useState(ritualDuration || 15);
+  const [selectedMusicId, setSelectedMusicId] = useState(ritualAmbientSound || 'temple');
+  const [volume, setVolume] = useState(ritualAmbientSoundVolume || 50);
   const [selectedMoods, setSelectedMoods] = useState<MoodState[]>([]);
   const [selectedEnergy, setSelectedEnergy] = useState<EnergyState | null>(null);
   const [reflection, setReflection] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const { data: meditationTypes } = useMeditationTypes();
   const { data: progressStats } = useProgressStats();
   const recordSession = useRecordSession();
@@ -156,432 +168,394 @@ export default function PreMeditationPage() {
     durationMinutes: duration,
     autoStart: false,
     onComplete: () => {
-      // Stop and reset audio when session completes
-      if (audioRef.current) {
-        const fadeOut = setInterval(() => {
-          if (audioRef.current && audioRef.current.volume > 0.05) {
-            audioRef.current.volume = Math.max(0, audioRef.current.volume - 0.05);
-          } else {
-            clearInterval(fadeOut);
-            if (audioRef.current) {
-              audioRef.current.pause();
-              audioRef.current.currentTime = 0;
-            }
-          }
-        }, 100);
-      }
-      setPhase('reflection');
+      // Fade out and stop audio when session completes
+      ambientAudioManager.fadeOut(1000, () => {
+        setPhase('reflection');
+      });
     },
   });
 
-  // Update volume when slider changes
+  // Auto-start if this is a ritual
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume / 100;
+    if (isAutoStartRitual && phase === 'setup') {
+      handleStartMeditation();
     }
-  }, [volume]);
+  }, [isAutoStartRitual]);
 
-  // Handle audio playback during active phase
-  useEffect(() => {
-    if (phase === 'active' && audioRef.current && !isPaused) {
-      audioRef.current.play().catch((err) => console.error('Audio play error:', err));
-    } else if (audioRef.current && isPaused) {
-      audioRef.current.pause();
-    }
-  }, [phase, isPaused]);
-
-  // Cleanup audio on unmount or when leaving active phase
+  // Cleanup: stop audio when component unmounts
   useEffect(() => {
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
+      ambientAudioManager.stop();
     };
   }, []);
 
-  // Stop audio when exiting active phase
+  // Update volume when it changes during active phase
   useEffect(() => {
-    if (phase !== 'active' && audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+    if (phase === 'active') {
+      ambientAudioManager.setVolume(volume / 100);
     }
-  }, [phase]);
+  }, [volume, phase]);
 
-  const handleBeginMeditation = () => {
-    // Reset and prepare audio for session start
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current.loop = true;
-      audioRef.current.volume = volume / 100;
-      
-      // Start playing from the beginning
-      audioRef.current.play().catch((err) => {
-        console.error('Audio play error on session start:', err);
-      });
-    }
-    
+  const handleStartMeditation = () => {
     setPhase('active');
     start();
+
+    const soundPath = getAmbientSoundPath(selectedMusicId);
+    ambientAudioManager.play(soundPath, selectedMusicId, volume / 100, true);
   };
 
-  const handleMoodToggle = (mood: MoodState) => {
-    setSelectedMoods((prev) =>
-      prev.includes(mood) ? prev.filter((m) => m !== mood) : [...prev, mood]
-    );
+  const handleVolumeChange = (newVolume: number) => {
+    setVolume(newVolume);
+    ambientAudioManager.setVolume(newVolume / 100);
+  };
+
+  const handleBackNavigation = () => {
+    // Stop audio before navigating back
+    ambientAudioManager.stop();
   };
 
   const handleSaveReflection = async () => {
     if (selectedMoods.length === 0 || !selectedEnergy) {
-      toast.error('Please select at least one mood and energy level');
+      toast.error('Please select at least one mood and an energy level');
       return;
     }
 
     try {
+      const timestamp = BigInt(Date.now() * 1_000_000);
+      const sessionMinutes = BigInt(duration);
+
+      // Record session
       const currentStreak = progressStats?.currentStreak ? Number(progressStats.currentStreak) : 0;
       const monthlyMinutes = progressStats?.monthlyMinutes ? Number(progressStats.monthlyMinutes) : 0;
 
       await recordSession.mutateAsync({
-        minutes: duration,
-        monthlyMinutes: monthlyMinutes + duration,
-        currentStreak: currentStreak + 1,
+        session: { minutes: sessionMinutes, timestamp },
+        monthlyStats: BigInt(monthlyMinutes + duration),
+        currentStreak: BigInt(currentStreak + 1),
       });
 
-      const journalData = {
-        meditationType: selectedType as MeditationType,
-        duration: BigInt(duration),
+      // Create journal entry
+      await createJournalEntry.mutateAsync({
+        meditationType: selectedType,
+        duration: sessionMinutes,
         mood: selectedMoods,
         energy: selectedEnergy,
         reflection,
-        timestamp: BigInt(Date.now() * 1_000_000),
+        timestamp,
         isFavorite,
-      };
-
-      await createJournalEntry.mutateAsync(journalData);
+      });
 
       toast.success('Session saved successfully!');
-      navigate({ to: '/' });
+      navigate({ to: '/dashboard' });
     } catch (error: any) {
-      const errorMsg = getCloudSyncErrorMessage(error);
-      toast.error(errorMsg);
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message);
     }
   };
 
   const handleSaveRitual = async () => {
     try {
       const ritualData = {
-        meditationType: selectedType as MeditationType,
-        duration: duration,
+        meditationType: selectedType,
+        duration: BigInt(duration),
         ambientSound: selectedMusicId,
-        ambientSoundVolume: volume,
+        ambientSoundVolume: BigInt(volume),
+        timestamp: BigInt(Date.now() * 1_000_000),
       };
 
       await saveRitual.mutateAsync(ritualData);
-      toast.success('Ritual saved successfully!');
+      toast.success('Ritual soundscape saved!');
     } catch (error: any) {
-      if (error.message?.includes('DuplicateSoundscape')) {
-        toast.error('Duplicate Ritual', {
-          description: 'This exact soundscape already exists in your rituals.',
-        });
-      } else if (error.message?.includes('RitualLimitExceeded')) {
-        toast.error('Ritual Limit Reached', {
-          description: 'You can only save up to 5 rituals. Please delete one before saving a new one.',
-        });
-      } else {
-        const errorMsg = getCloudSyncErrorMessage(error);
-        toast.error(errorMsg);
-      }
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message);
     }
   };
 
-  const handleMoreDetails = () => {
-    navigate({ 
-      to: '/knowledge', 
-      search: { 
-        category: selectedType,
-        scrollToContent: true 
-      } 
-    });
+  const toggleMood = (mood: MoodState) => {
+    setSelectedMoods((prev) =>
+      prev.includes(mood) ? prev.filter((m) => m !== mood) : [...prev, mood]
+    );
   };
 
-  const currentGuide = detailedGuides[selectedType] || detailedGuides.mindfulness;
+  const guide = detailedGuides[selectedType] || detailedGuides.mindfulness;
 
-  // Calculate elapsed time for the slider (0 to totalTime)
-  const elapsedTime = totalTime - timeRemaining;
-
-  // Handler for time seek slider - converts elapsed time to remaining time
-  const handleTimeSeek = (values: number[]) => {
-    const newElapsedTime = values[0];
-    // Clamp to valid range
-    const clampedElapsed = Math.max(0, Math.min(newElapsedTime, totalTime));
-    // Convert elapsed time to remaining time for seekTime
-    const newTimeRemaining = totalTime - clampedElapsed;
-    seekTime(newTimeRemaining);
-  };
-
-  return (
-    <PageBackgroundShell variant="premed" intensity={0.5}>
-      <StandardPageNav />
-
-      <audio ref={audioRef} src={getAmbientSoundPath(selectedMusicId)} loop />
-
-      <main className="relative z-10 min-h-screen flex items-center justify-center px-4 py-20">
-        <div className="w-full max-w-4xl mx-auto">
-          {phase === 'setup' && (
-            <div className="space-y-8 animate-fade-in">
-              <div className="text-center space-y-4">
-                <h1 className="text-4xl md:text-5xl font-bold text-foreground capitalize">
-                  {selectedType} Meditation
-                </h1>
-                <p className="text-lg text-muted-foreground">
-                  Prepare your session with personalized settings
-                </p>
-              </div>
-
-              <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-border/50 space-y-8">
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-xl font-semibold mb-4 text-foreground">Duration</h3>
-                    <DurationRangeInput value={duration} onChange={setDuration} />
-                  </div>
-
-                  <div>
-                    <h3 className="text-xl font-semibold mb-4 text-foreground">Ambient Sound</h3>
-                    <AmbientMusicCarousel
-                      selectedMusic={selectedMusicId}
-                      onSelectMusic={setSelectedMusicId}
-                      volume={volume}
-                      onVolumeChange={setVolume}
-                    />
+  if (phase === 'active') {
+    return (
+      <PageBackgroundShell variant="premed" intensity={0.15}>
+        <StandardPageNav onBack={handleBackNavigation} />
+        <main className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-12">
+          <div className="w-full max-w-2xl mx-auto space-y-12 animate-fade-in">
+            <div className="flex flex-col items-center space-y-8">
+              <div className="relative w-80 h-80 sm:w-96 sm:h-96">
+                <MeditationWaveFillIndicator progress={progress} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="text-6xl sm:text-7xl font-bold text-accent-cyan-tinted animate-breathe-gentle tabular-nums">
+                      {(timeRemaining / 60).toFixed(2)}
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-2">
+                      {selectedType.charAt(0).toUpperCase() + selectedType.slice(1)}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-border/50 space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold text-foreground">Meditation Guide</h3>
-                </div>
-                <MeditationGuideStepper steps={currentGuide.steps} />
-                
-                {/* More Details button moved to bottom of guide container */}
-                <div className="flex justify-center pt-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleMoreDetails}
-                    className="gap-2"
-                  >
-                    <BookOpen className="h-4 w-4" />
-                    More Details
-                  </Button>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex items-center gap-4">
                 <Button
-                  onClick={handleBeginMeditation}
+                  onClick={togglePause}
                   size="lg"
-                  className="flex-1 gap-2 min-h-14 sm:min-h-12"
+                  className="bg-accent-cyan hover:bg-accent-cyan-tinted text-white rounded-full w-16 h-16 p-0"
                 >
-                  <Play className="h-5 w-5" />
-                  Begin Meditation
+                  {isPaused ? <Play className="w-8 h-8" /> : <Pause className="w-8 h-8" />}
                 </Button>
+              </div>
+
+              <div className="w-full max-w-md space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">Volume</Label>
+                  <Slider
+                    value={[volume]}
+                    onValueChange={(vals) => handleVolumeChange(vals[0])}
+                    min={0}
+                    max={100}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">Seek Time</Label>
+                  <Slider
+                    value={[timeRemaining]}
+                    onValueChange={(vals) => seekTime(vals[0])}
+                    min={0}
+                    max={totalTime}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </PageBackgroundShell>
+    );
+  }
+
+  if (phase === 'reflection') {
+    return (
+      <PageBackgroundShell variant="premed" intensity={0.2}>
+        <StandardPageNav />
+        <main className="relative z-10 min-h-screen flex items-center justify-center px-4 py-12">
+          <div className="w-full max-w-2xl mx-auto space-y-8 animate-fade-in">
+            <div className="text-center space-y-2">
+              <CheckCircle2 className="w-16 h-16 mx-auto text-accent-cyan animate-glow-pulse" />
+              <h2 className="text-3xl font-bold">Session Complete</h2>
+              <p className="text-muted-foreground">
+                Take a moment to reflect on your experience
+              </p>
+            </div>
+
+            <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 space-y-6 shadow-lg border border-border/50">
+              <div className="space-y-4">
+                <Label className="text-lg font-semibold">How are you feeling?</Label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {Object.entries(moodIconMap).map(([mood, Icon]) => {
+                    const isSelected = selectedMoods.includes(mood as MoodState);
+                    return (
+                      <button
+                        key={mood}
+                        onClick={() => toggleMood(mood as MoodState)}
+                        className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                          isSelected
+                            ? 'border-accent-cyan bg-accent-cyan/10 shadow-glow'
+                            : 'border-border hover:border-accent-cyan/50'
+                        }`}
+                      >
+                        <Icon className={`w-8 h-8 ${isSelected ? 'text-accent-cyan' : 'text-muted-foreground'}`} />
+                        <span className="text-sm capitalize">{mood}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <Label className="text-lg font-semibold">Energy Level</Label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {Object.entries(energyIconMap).map(([energy, Icon]) => {
+                    const isSelected = selectedEnergy === energy;
+                    return (
+                      <button
+                        key={energy}
+                        onClick={() => setSelectedEnergy(energy as EnergyState)}
+                        className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                          isSelected
+                            ? 'border-accent-cyan bg-accent-cyan/10 shadow-glow'
+                            : 'border-border hover:border-accent-cyan/50'
+                        }`}
+                      >
+                        <Icon className={`w-8 h-8 ${isSelected ? 'text-accent-cyan' : 'text-muted-foreground'}`} />
+                        <span className="text-sm capitalize">{energy}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <Label htmlFor="reflection" className="text-lg font-semibold">
+                  Personal Notes (Optional)
+                </Label>
+                <Textarea
+                  id="reflection"
+                  placeholder="What insights or experiences stood out during your practice?"
+                  value={reflection}
+                  onChange={(e) => setReflection(e.target.value)}
+                  className="min-h-[120px] resize-none"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="favorite"
+                  checked={isFavorite}
+                  onCheckedChange={(checked) => setIsFavorite(checked as boolean)}
+                />
+                <Label htmlFor="favorite" className="flex items-center gap-2 cursor-pointer">
+                  <Heart className={`w-5 h-5 ${isFavorite ? 'fill-accent-cyan text-accent-cyan' : ''}`} />
+                  Mark as Favorite
+                </Label>
+              </div>
+
+              <Button
+                onClick={handleSaveReflection}
+                disabled={recordSession.isPending || createJournalEntry.isPending}
+                className="w-full bg-accent-cyan hover:bg-accent-cyan-tinted text-white"
+                size="lg"
+              >
+                {recordSession.isPending || createJournalEntry.isPending ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save & Continue'
+                )}
+              </Button>
+            </div>
+          </div>
+        </main>
+      </PageBackgroundShell>
+    );
+  }
+
+  // Setup phase - single column layout
+  return (
+    <PageBackgroundShell variant="premed" intensity={0.25}>
+      <StandardPageNav />
+      <main className="relative z-10 min-h-screen px-4 py-24">
+        <div className="max-w-3xl mx-auto space-y-8 animate-fade-in">
+          <div className="text-center space-y-2">
+            <h1 className="text-4xl font-bold">
+              {selectedType.charAt(0).toUpperCase() + selectedType.slice(1)} Meditation
+            </h1>
+            <p className="text-muted-foreground">
+              Prepare your practice with intention
+            </p>
+          </div>
+
+          {/* Single column layout */}
+          <div className="space-y-6">
+            {/* Guide Section */}
+            <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-border/50">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-accent-cyan" />
+                  <h3 className="text-lg font-semibold">Meditation Guide</h3>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate({ 
+                    to: '/knowledge', 
+                    search: { category: selectedType, scrollToContent: true } 
+                  })}
+                  className="text-accent-cyan hover:text-accent-cyan-tinted hover:bg-accent-cyan/10"
+                >
+                  More details
+                  <ExternalLink className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+              <MeditationGuideStepper steps={guide.steps} />
+            </div>
+
+            {/* Save Ritual Section */}
+            <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-border/50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Save className="w-5 h-5 text-accent-cyan" />
+                  <div>
+                    <h3 className="text-lg font-semibold">Save as Ritual</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Save this configuration for quick access later
+                    </p>
+                  </div>
+                </div>
                 <Button
                   onClick={handleSaveRitual}
-                  variant="outline"
-                  size="lg"
                   disabled={saveRitual.isPending}
-                  className="flex-1 gap-2"
+                  variant="outline"
+                  className="border-accent-cyan text-accent-cyan hover:bg-accent-cyan/10"
                 >
                   {saveRitual.isPending ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : (
-                    <Save className="h-5 w-5" />
-                  )}
-                  Save as Ritual
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {phase === 'active' && (
-            <div className="space-y-8 animate-fade-in">
-              <div className="flex flex-col items-center space-y-8">
-                <div className="relative">
-                  <MeditationWaveFillIndicator progress={progress} size={300} />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-5xl font-bold text-foreground">
-                        {formatTime(timeRemaining)}
-                      </div>
-                      <div className="text-sm text-muted-foreground mt-2 capitalize">
-                        {selectedType}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="w-full max-w-md space-y-6">
-                  <div className="flex justify-center">
-                    <Button
-                      onClick={togglePause}
-                      size="lg"
-                      variant="outline"
-                      className="rounded-full w-16 h-16"
-                    >
-                      {isPaused ? (
-                        <Play className="h-6 w-6" />
-                      ) : (
-                        <Pause className="h-6 w-6" />
-                      )}
-                    </Button>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <span>Volume</span>
-                      <span>{volume}%</span>
-                    </div>
-                    <Slider
-                      value={[volume]}
-                      onValueChange={(values) => setVolume(values[0])}
-                      max={100}
-                      step={1}
-                      className="w-full"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <span>Time</span>
-                      <span>
-                        {formatTime(elapsedTime)} / {formatTime(totalTime)}
-                      </span>
-                    </div>
-                    <Slider
-                      value={[elapsedTime]}
-                      onValueChange={handleTimeSeek}
-                      max={totalTime}
-                      step={1}
-                      className="w-full"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {phase === 'reflection' && (
-            <div className="space-y-8 animate-fade-in">
-              <div className="text-center space-y-4">
-                <div className="flex justify-center">
-                  <CheckCircle2 className="h-16 w-16 text-accent-cyan" />
-                </div>
-                <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-                  Session Complete
-                </h1>
-                <p className="text-lg text-muted-foreground">
-                  Take a moment to reflect on your experience
-                </p>
-              </div>
-
-              <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-border/50 space-y-6">
-                <div>
-                  <h3 className="text-xl font-semibold mb-4 text-foreground">
-                    How are you feeling?
-                  </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                    {Object.entries(moodIconMap).map(([mood, Icon]) => {
-                      const isSelected = selectedMoods.includes(mood as MoodState);
-                      return (
-                        <button
-                          key={mood}
-                          onClick={() => handleMoodToggle(mood as MoodState)}
-                          className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                            isSelected
-                              ? 'border-accent-cyan bg-accent-cyan/10'
-                              : 'border-border hover:border-accent-cyan/50'
-                          }`}
-                        >
-                          <Icon className="h-6 w-6" />
-                          <span className="text-sm capitalize">{mood}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-xl font-semibold mb-4 text-foreground">
-                    Energy Level
-                  </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {Object.entries(energyIconMap).map(([energy, Icon]) => {
-                      const isSelected = selectedEnergy === energy;
-                      return (
-                        <button
-                          key={energy}
-                          onClick={() => setSelectedEnergy(energy as EnergyState)}
-                          className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                            isSelected
-                              ? 'border-accent-cyan bg-accent-cyan/10'
-                              : 'border-border hover:border-accent-cyan/50'
-                          }`}
-                        >
-                          <Icon className="h-6 w-6" />
-                          <span className="text-sm capitalize">{energy}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-xl font-semibold mb-4 text-foreground">
-                    Personal Notes (Optional)
-                  </h3>
-                  <Textarea
-                    value={reflection}
-                    onChange={(e) => setReflection(e.target.value)}
-                    placeholder="What insights or feelings arose during your practice?"
-                    className="min-h-[120px] resize-none"
-                  />
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="favorite"
-                    checked={isFavorite}
-                    onCheckedChange={(checked) => setIsFavorite(checked as boolean)}
-                  />
-                  <Label
-                    htmlFor="favorite"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex items-center gap-2"
-                  >
-                    <Heart className="h-4 w-4" />
-                    Mark as Favorite
-                  </Label>
-                </div>
-
-                <Button
-                  onClick={handleSaveReflection}
-                  size="lg"
-                  className="w-full"
-                  disabled={recordSession.isPending || createJournalEntry.isPending}
-                >
-                  {recordSession.isPending || createJournalEntry.isPending ? (
                     <>
-                      <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       Saving...
                     </>
                   ) : (
-                    'Save & Continue'
+                    <>
+                      <Save className="w-4 h-4 mr-2" />
+                      Save
+                    </>
                   )}
                 </Button>
               </div>
             </div>
-          )}
+
+            {/* Duration Section */}
+            <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-border/50">
+              <Label className="text-lg font-semibold mb-4 block">Duration</Label>
+              <DurationRangeInput
+                value={duration}
+                onChange={(val) => {
+                  setDuration(val);
+                  setTimerDuration(val);
+                }}
+              />
+            </div>
+
+            {/* Ambient Sound Section */}
+            <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-border/50">
+              <Label className="text-lg font-semibold mb-4 block">Ambient Sound</Label>
+              <AmbientMusicCarousel
+                selectedMusic={selectedMusicId}
+                onSelectMusic={setSelectedMusicId}
+                volume={volume}
+                onVolumeChange={setVolume}
+              />
+            </div>
+
+            {/* Start Button */}
+            <Button
+              onClick={handleStartMeditation}
+              size="lg"
+              className="w-full bg-accent-cyan hover:bg-accent-cyan-tinted text-white text-lg py-6"
+            >
+              <Play className="w-6 h-6 mr-2" />
+              Begin Meditation
+            </Button>
+          </div>
         </div>
       </main>
     </PageBackgroundShell>

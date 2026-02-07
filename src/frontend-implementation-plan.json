@@ -1,39 +1,87 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Pre‑Meditation UI tweaks: move “More Details” button and adjust “Begin Meditation” button height on small screens",
+  "title": "Meditation flow polish: stop ambient audio on back, single-column pre-meditation layout, restore Knowledge deep-link, and fix timer centering/formatting",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Move the “More Details” button from the Meditation Guide header to the bottom of the guide container while keeping its label and navigation behavior unchanged.",
+      "summary": "Stop and fully reset the single global ambient audio instance whenever the user leaves an active meditation session via back navigation or route unmount.",
       "acceptanceCriteria": [
-        "On PreMeditationPage (setup phase), the “More Details” button no longer appears next to the “Meditation Guide” heading.",
-        "The “More Details” button appears after the guide content (below the MeditationGuideStepper) within the same guide container card.",
-        "Clicking “More Details” still navigates to /knowledge with search params { category: selectedType, scrollToContent: true }.",
-        "No other buttons or text in the guide container are modified beyond what is required to reposition this selected button."
+        "From an active meditation session, clicking the back button results in no ambient audio continuing to play after navigation completes.",
+        "Audio is paused and reset (e.g., currentTime set back to 0) when leaving the active meditation UI.",
+        "No duplicate ambient audio instances can remain playing after repeated start/back cycles."
       ],
       "file_operations": [
         {
+          "path": "frontend/src/utils/ambientAudioManager.ts",
+          "operation": "create",
+          "description": "Create a singleton ambient audio manager that owns the single global HTMLAudioElement instance and exposes capabilities to play looped ambient audio and to fully stop/reset/release the current audio source (pause, currentTime=0, clear src, release references)."
+        },
+        {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Update only the user-selected “More Details” Button currently rendered in the Meditation Guide header row: remove it from the header layout and re-render the same Button (same onClick handler, label, icon, variant/size, and className) after <MeditationGuideStepper /> within the same Meditation Guide section/card so it appears at the bottom of the guide container. Ensure navigation remains exactly navigate({ to: '/knowledge', search: { category: selectedType, scrollToContent: true } })."
+          "description": "Refactor active-session ambient audio playback to use the global ambient audio manager (instead of a page-local ref), and ensure ambient audio is stopped/reset when leaving the active meditation phase (e.g., via back navigation handler) and when the page unmounts (cleanup effect) to prevent audio persisting across route changes."
+        },
+        {
+          "path": "frontend/src/components/StandardPageNav.tsx",
+          "operation": "modify",
+          "description": "Add an optional onBack callback prop that is invoked before navigating back to /dashboard, and wire it into both desktop and mobile back button flows. Keep existing behavior as default when onBack is not provided."
+        },
+        {
+          "path": "frontend/src/components/MobileBackButton.tsx",
+          "operation": "modify",
+          "description": "Add an optional onBack callback prop and invoke it before navigating back to /dashboard, enabling pages to stop ambient audio reliably for mobile back navigation."
+        },
+        {
+          "path": "frontend/src/components/AmbientMusicCarousel.tsx",
+          "operation": "modify",
+          "description": "Update ambient sound preview playback to use the global ambient audio manager so the app maintains only one ambient audio instance at a time, preventing overlapping audio between previews and active sessions."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Increase the “Begin Meditation” button height only in the small-screen stacked action-buttons layout without changing its width or behavior.",
+      "summary": "Convert the PreMeditationPage setup UI to a single-column stacked layout while preserving the existing element order.",
       "acceptanceCriteria": [
-        "When the action buttons stack into a single column on small screens, the “Begin Meditation” button has increased height (e.g., via responsive min-height/padding) and no longer appears thinner than “Save as Ritual.”",
-        "On larger screens where the buttons remain side-by-side, the “Begin Meditation” button height remains unchanged from current desktop/tablet styling.",
-        "The “Begin Meditation” button continues to trigger the existing begin-meditation behavior (no logic changes).",
-        "No other elements besides the selected “Begin Meditation” button are restyled as part of this change."
+        "On the pre-meditation setup screen, guide, ritual save, start controls, and ambient sound selection are rendered in one vertical column (no multi-column/grid split at common breakpoints).",
+        "The order of elements matches the current order (no reordering)."
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Locate the action buttons area that switches from stacked (flex-col) on small screens to side-by-side (sm:flex-row). Update only the user-selected “Begin Meditation” Button within this area to add responsive height styling that applies on small screens only (e.g., a base min-height and/or padding increase paired with an sm: override that preserves the current desktop/tablet height). Do not change its click handler, variant, width-related classes, or any other element styling."
+          "description": "Adjust the setup-phase layout containers/classes to remove any two-column/grid split and enforce a single vertical stack for all existing setup sections in their current order. Use existing shadcn-ui Button/Slider/etc. where already present (Verify the component's usage instructions before implementing)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Restore a “More details” button in the pre-meditation guide container that deep-links to the Knowledge page with the selected category and auto-scrolls to the content section.",
+      "acceptanceCriteria": [
+        "A visible “More details” button appears within the guide container on the pre-meditation setup screen.",
+        "Clicking “More details” navigates to /knowledge with the selected pre-meditation category passed as the search param (category=<selectedType>).",
+        "After navigation, the Knowledge page shows the matching category selected and auto-scrolls to the content section."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/PreMeditationPage.tsx",
+          "operation": "modify",
+          "description": "Add a visible “More details” action inside the guide container in setup phase that navigates to /knowledge with search params category=<selectedType> and scrollToContent=true to trigger KnowledgePage deep-link scrolling. Implement using the existing shadcn-ui Button component (Verify the component's usage instructions before implementing)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Center the active meditation timer text within the circular indicator and format the displayed time with two decimal places to prevent overflow/precision issues.",
+      "acceptanceCriteria": [
+        "In the active meditation UI, the timer text is centered within the circle at common screen sizes.",
+        "The displayed time uses two decimal places (via .toFixed(2)) and does not render overflowing/unstable digits."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/PreMeditationPage.tsx",
+          "operation": "modify",
+          "description": "Update the active-phase timer overlay to ensure strict centering (text container alignment/leading/tabular numerals) and change the displayed time value to a two-decimal numeric format using .toFixed(2) (e.g., minutes remaining derived from seconds). Ensure the formatted value fits within the circular indicator at common breakpoints."
         }
       ]
     }

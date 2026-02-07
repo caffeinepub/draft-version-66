@@ -212,3 +212,55 @@ export function clearGuestRituals(): void {
     console.error('Error clearing guest rituals:', error);
   }
 }
+
+// Add a guest ritual with duplicate and limit checks
+export function addGuestRitual(ritual: Omit<GuestRitual, 'timestamp'>): void {
+  const rituals = getGuestRituals();
+
+  // Check for duplicates
+  const isDuplicate = rituals.some(
+    (existing) =>
+      existing.meditationType === ritual.meditationType &&
+      existing.duration === ritual.duration &&
+      existing.ambientSound === ritual.ambientSound &&
+      existing.ambientSoundVolume === ritual.ambientSoundVolume
+  );
+
+  if (isDuplicate) {
+    throw new Error('DuplicateSoundscape: An identical soundscape already exists in your rituals collection.');
+  }
+
+  // Check limit
+  if (rituals.length >= 5) {
+    throw new Error('RitualLimitExceeded: You can only save up to 5 ritual soundscapes. Please delete one before saving a new one.');
+  }
+
+  // Add new ritual
+  const newRitual: GuestRitual = {
+    ...ritual,
+    timestamp: new Date().toISOString(),
+  };
+
+  rituals.push(newRitual);
+  setGuestRituals(rituals);
+}
+
+// Delete a guest ritual by matching identity fields
+export function deleteGuestRitual(ritual: Omit<GuestRitual, 'timestamp'>): void {
+  const rituals = getGuestRituals();
+  const filtered = rituals.filter(
+    (existing) =>
+      !(
+        existing.meditationType === ritual.meditationType &&
+        existing.duration === ritual.duration &&
+        existing.ambientSound === ritual.ambientSound &&
+        existing.ambientSoundVolume === ritual.ambientSoundVolume
+      )
+  );
+
+  if (filtered.length === rituals.length) {
+    throw new Error('RitualNotFound: The specified ritual was not found and could not be deleted.');
+  }
+
+  setGuestRituals(filtered);
+}

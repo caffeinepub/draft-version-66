@@ -1,18 +1,37 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T11:51:53.570Z",
+  "generatedAt": "2026-02-07T14:04:16.174Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 2,
+    "total": 4,
+    "implemented": 4,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Update the selected “More Details” button in the Pre‑Meditation page’s Meditation Guide container (selected element XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[1]/div[2]/div[1]/div[3]/div[1]/button[1]) so it renders at the bottom of the guide container instead of in the guide header area, without changing its label or navigation behavior (it must still navigate to /knowledge with the current meditation type and scrollToContent search param).",
+        "summary": "Ensure ambient audio fully stops when the user leaves an active meditation session via any back navigation (e.g., StandardPageNav/Mobile back button routing to /dashboard). This must stop the single global ambient audio instance (pause, reset currentTime, and release the audio source if applicable) so no sound continues after leaving the meditation screen.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/utils/ambientAudioManager.ts",
+          "frontend/src/pages/PreMeditationPage.tsx",
+          "frontend/src/components/StandardPageNav.tsx",
+          "frontend/src/components/MobileBackButton.tsx",
+          "frontend/src/components/AmbientMusicCarousel.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/utils/ambientAudioManager.ts",
+          "frontend/src/pages/PreMeditationPage.tsx",
+          "frontend/src/components/StandardPageNav.tsx",
+          "frontend/src/components/MobileBackButton.tsx",
+          "frontend/src/components/AmbientMusicCarousel.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Update the PreMeditationPage setup UI to use a single-column layout (no side-by-side/two-column split). All existing setup elements must stack vertically in the current order shown in the UI (as previously).",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/pages/PreMeditationPage.tsx"
@@ -22,8 +41,19 @@
         ]
       },
       {
-        "id": "REQ-2",
-        "summary": "Update the selected “Begin Meditation” button (selected element XPath: /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[1]/div[2]/div[2]/button[1]) so that on lower-width screens—when the action buttons area collapses from a 2-column/side-by-side layout into a single-column stack—its visual height increases to better match the “Save as Ritual” button. This change must only affect the small-screen stacked layout and must not change the button’s width or behavior.",
+        "id": "REQ-3",
+        "summary": "Re-add a “More details” button inside the PreMeditationPage guide container that navigates to the Knowledge page, preselecting the category that was selected in pre-meditation (e.g., metta -> metta) via the /knowledge route search parameter. The navigation should deep-link to the content area (use the KnowledgePage deep-link mechanism).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/PreMeditationPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/PreMeditationPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Fix the active meditation timer display so the time text is visually centered inside the circular timer indicator and the displayed time value is formatted with two decimal places using .toFixed(2) to prevent overflow/precision display issues.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/pages/PreMeditationPage.tsx"
@@ -39,7 +69,12 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/components/AmbientMusicCarousel.tsx",
+    "frontend/src/components/MobileBackButton.tsx",
+    "frontend/src/components/StandardPageNav.tsx",
+    "frontend/src/pages/BookRecommendationsPage.tsx",
     "frontend/src/pages/PreMeditationPage.tsx",
+    "frontend/src/utils/ambientAudioManager.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

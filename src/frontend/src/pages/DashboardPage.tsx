@@ -47,9 +47,16 @@ export default function DashboardPage() {
 
   const handleRitualStart = (ritual: any) => {
     setShowRitualModal(false);
+    // Navigate with full ritual settings and auto-start flag
     navigate({ 
       to: '/pre-meditation', 
-      search: { type: ritual.meditationType }
+      search: { 
+        type: ritual.meditationType,
+        duration: ritual.duration,
+        ambientSound: ritual.ambientSound,
+        ambientSoundVolume: ritual.ambientSoundVolume,
+        autoStart: 'true'
+      }
     });
   };
 

@@ -128,7 +128,7 @@ export interface _SERVICE {
   'getCurrentUserExportData' : ActorMethod<[], ExportData>,
   'getDailyQuotes' : ActorMethod<[], Array<string>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
-  'importData' : ActorMethod<[ImportData, boolean], undefined>,
+  'importData' : ActorMethod<[ImportData], undefined>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'listCallerRituals' : ActorMethod<[], Array<Ritual>>,
   'recordMeditationSession' : ActorMethod<

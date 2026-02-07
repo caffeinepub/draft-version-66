@@ -1,64 +1,68 @@
-import { ArrowLeft, Moon, Sun } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
-import { useTheme } from 'next-themes';
-import { useState, useEffect } from 'react';
+import { ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import SessionIndicator from './SessionIndicator';
-import HamburgerMenu from './HamburgerMenu';
+import { useTheme } from 'next-themes';
+import { Moon, Sun } from 'lucide-react';
 import MobileBackButton from './MobileBackButton';
+import HamburgerMenu from './HamburgerMenu';
 
 interface StandardPageNavProps {
   showBackButton?: boolean;
+  onBack?: () => void;
 }
 
-export default function StandardPageNav({ showBackButton = true }: StandardPageNavProps) {
+export default function StandardPageNav({ showBackButton = true, onBack }: StandardPageNavProps) {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const handleBackClick = () => {
+    if (onBack) {
+      onBack();
+    }
+    navigate({ to: '/dashboard' });
+  };
 
   return (
     <>
-      {/* Desktop Session Indicator */}
-      {mounted && (
-        <div className="hidden md:block">
-          <SessionIndicator />
+      {/* Desktop back button - top left */}
+      {showBackButton && (
+        <div className="fixed top-6 left-6 z-50 hidden sm:block">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleBackClick}
+            className="bg-card/80 backdrop-blur-sm hover:bg-card border border-border/50 shadow-lg"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
         </div>
       )}
 
-      {/* Desktop Theme Toggle */}
-      {mounted && (
-        <button
+      {/* Theme toggle - top right */}
+      <div className="fixed top-6 right-6 z-50 hidden sm:block">
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="hidden md:block fixed top-6 right-6 z-50 rounded-full bg-card/80 backdrop-blur-sm p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-border/50"
-          aria-label="Toggle theme"
+          className="bg-card/80 backdrop-blur-sm hover:bg-card border border-border/50 shadow-lg"
         >
-          {theme === 'dark' ? (
-            <Sun className="h-5 w-5 text-accent-cyan" />
-          ) : (
-            <Moon className="h-5 w-5 text-primary-dark" />
-          )}
-        </button>
-      )}
+          {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+        </Button>
+      </div>
 
-      {/* Desktop Back Button - conditionally rendered */}
-      {showBackButton && (
-        <button
-          onClick={() => navigate({ to: '/dashboard' })}
-          className="hidden md:block fixed top-20 left-6 z-50 rounded-full bg-card/80 backdrop-blur-sm p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-border/50"
-          aria-label="Back to dashboard"
-        >
-          <ArrowLeft className="h-5 w-5 text-accent-cyan" />
-        </button>
-      )}
+      {/* Session indicator - top center */}
+      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 hidden sm:block">
+        <SessionIndicator />
+      </div>
 
-      {/* Mobile Back Button - conditionally rendered */}
-      {mounted && showBackButton && <MobileBackButton show={true} />}
+      {/* Mobile back button - top left on mobile */}
+      {showBackButton && <MobileBackButton onBack={onBack} />}
 
-      {/* Mobile Hamburger Menu */}
-      {mounted && <HamburgerMenu />}
+      {/* Mobile hamburger menu - top right on mobile */}
+      <div className="sm:hidden">
+        <HamburgerMenu />
+      </div>
     </>
   );
 }

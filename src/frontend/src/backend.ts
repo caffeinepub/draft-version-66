@@ -208,7 +208,7 @@ export interface backendInterface {
     getCurrentUserExportData(): Promise<ExportData>;
     getDailyQuotes(): Promise<Array<string>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
-    importData(importData: ImportData, overwrite: boolean): Promise<void>;
+    importData(importData: ImportData): Promise<void>;
     isCallerAdmin(): Promise<boolean>;
     listCallerRituals(): Promise<Array<Ritual>>;
     recordMeditationSession(session: MeditationSession, _monthlyStats: bigint, _currentStreak: bigint): Promise<ProgressStats>;
@@ -514,17 +514,17 @@ export class Backend implements backendInterface {
             return from_candid_opt_n31(this._uploadFile, this._downloadFile, result);
         }
     }
-    async importData(arg0: ImportData, arg1: boolean): Promise<void> {
+    async importData(arg0: ImportData): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.importData(await to_candid_ImportData_n41(this._uploadFile, this._downloadFile, arg0), arg1);
+                const result = await this.actor.importData(await to_candid_ImportData_n41(this._uploadFile, this._downloadFile, arg0));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.importData(await to_candid_ImportData_n41(this._uploadFile, this._downloadFile, arg0), arg1);
+            const result = await this.actor.importData(await to_candid_ImportData_n41(this._uploadFile, this._downloadFile, arg0));
             return result;
         }
     }

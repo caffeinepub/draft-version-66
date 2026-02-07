@@ -1,73 +1,38 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T19:04:13.830Z",
-  "summary": "REQ-2 and REQ-3 appear to be implemented in DashboardPage via opening QuizDialog for the 'quiz' carousel item and navigating to /pre-meditation with a validated `type` search param on quiz completion. REQ-1 is implemented structurally (switch to <img> icons), but the asset paths used include a leading `/` for all icons, which may not match the exact paths requested for mindfulness/ifs/metta.",
+  "generatedAt": "2026-02-07T17:33:17.596Z",
+  "summary": "The diff updates `frontend/src/index.css` to define light (`:root`) and dark (`.dark`) theme tokens as space-separated OKLCH channels (Tailwind-compatible) and includes the requested custom tokens. However, the diff also introduces non-requested global styling changes (font import, multiple new animations/utilities) that go beyond “restoring/aliging global theme variables,” and the truncated diff does not provide evidence that the token values exactly match the user-provided palette.",
   "missing_requirements": [
     {
       "id": "REQ-1",
-      "requirement": "Use the exact asset paths provided for ritual meditation type icons: mindfulness -> assets/mindfulness.png, ifs -> assets/ifs.png, metta -> assets/meta.png, visualization -> /assets/visualization.png.",
-      "reason": "The diff uses `/assets/...` (leading slash) for mindfulness/metta/ifs as well, which does not match the exact paths listed in the BuildRequest for those three types.",
+      "requirement": "Replace the app’s global theme CSS variables in `frontend/src/index.css` with the exact user-provided OKLCH values for all listed tokens (light `:root` and dark `.dark`).",
+      "reason": "While the required tokens appear to be present, the BuildRequest requires the variables to \"exactly match the user-provided values.\" The diff summary does not include the user-provided reference values, and the file content is truncated, so exact matching cannot be verified from the provided evidence.",
       "evidence": [
-        "frontend/src/components/SavedRitualsCarousel.tsx (meditationTypeIcons uses '/assets/mindfulness.png', '/assets/meta.png', '/assets/ifs.png')"
+        "frontend/src/index.css (truncated)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Large-scale styling/theme and Tailwind token changes (OKLCH color system, new animations/shadows/fonts).",
-      "reason": "Not requested by any REQ; BuildRequest explicitly scoped changes to icon swap in rituals UI and quiz launch/navigation behavior.",
+      "description": "Added/changed global typography by importing a Google Font (Playfair Display) and setting it on `body`.",
+      "reason": "The BuildRequest restricts changes to restoring/aligning global theme variables and says not to introduce new app features; changing global font styling is not part of restoring OKLCH theme variables.",
       "evidence": [
-        "frontend/src/index.css (per frontend-file-summaries.txt)",
-        "frontend/tailwind.config.js (per frontend-file-summaries.txt)"
+        "frontend/src/index.css"
       ]
     },
     {
-      "description": "Landing page behavior change to auto-redirect authenticated users to dashboard.",
-      "reason": "Not requested in the BuildRequest.",
+      "description": "Added multiple custom utility animations/effects (e.g., fade-in, breathe-gentle, glow-pulse, glow-pulse-strong, float, wave keyframes) and related styling beyond theme token restoration.",
+      "reason": "These are additional global styles/visual behaviors not requested by REQ-1/REQ-2 and appear outside the scope of restoring global theme variables.",
       "evidence": [
-        "frontend/src/pages/LandingPage.tsx (per frontend-file-summaries.txt)"
-      ]
-    },
-    {
-      "description": "Floating navigation redesign/behavior updates (drifting icons, labels on hover, new routes like Knowledge).",
-      "reason": "Not requested; also BuildRequest non-goal says not to redesign the entire dashboard carousel UI beyond quiz-trigger and icon swap, and does not request nav changes.",
-      "evidence": [
-        "frontend/src/components/FloatingNav.tsx (per frontend-file-summaries.txt)",
-        "frontend/src/App.tsx (mentions /knowledge route in frontend-file-summaries.txt)"
-      ]
-    },
-    {
-      "description": "Changes to JournalPage (imports/exports, guest-mode favorite toggling, editing flows, etc.).",
-      "reason": "Not requested by any REQ.",
-      "evidence": [
-        "frontend/src/pages/JournalPage.tsx"
-      ]
-    },
-    {
-      "description": "Changes to queries hook behavior (ritual deletion passing timestamp and toast notifications).",
-      "reason": "Not requested by any REQ.",
-      "evidence": [
-        "frontend/src/hooks/useQueries.ts (per frontend-file-summaries.txt)"
-      ]
-    },
-    {
-      "description": "Changes to ActiveMeditationPage and other meditation UI components (timer/breathing animation, ambient music carousel updates, lotus canvas variants).",
-      "reason": "Not requested by any REQ (and BuildRequest non-goals discourage unrelated meditation content/guide changes except URL param navigation).",
-      "evidence": [
-        "frontend/src/pages/ActiveMeditationPage.tsx (per frontend-file-summaries.txt)",
-        "frontend/src/components/AmbientMusicCarousel.tsx (per frontend-file-summaries.txt)",
-        "frontend/src/components/LotusCanvas.tsx (per frontend-file-summaries.txt)"
+        "frontend/src/index.css"
       ]
     }
   ],
-  "confidence": 0.63,
+  "confidence": 0.6,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/SavedRitualsCarousel.tsx",
-    "frontend/src/pages/DashboardPage.tsx",
-    "frontend/src/pages/JournalPage.tsx",
-    "frontend/src/pages/PreMeditationPage.tsx",
+    "frontend/src/index.css",
     "project_state.json"
   ]
 }

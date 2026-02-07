@@ -1,35 +1,28 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
+  "summary": "Restore the app’s original global theme colors by replacing the current :root and .dark CSS variables with the provided OKLCH light/dark palettes applied across the entire app.",
   "architectural_notes": [
-    "Rituals container meditation tag icons should use assets: assets/mindfulness.png (mindfulness), assets/ifs.png (ifs), assets/meta.png (metta), assets/visualization.png (visualization).",
-    "Quiz completion should navigate via URL parameter to a single pre-meditation page, e.g., pre-meditation?type=visualization."
+    "Use the provided OKLCH design tokens as the single source of truth for global theming by fully replacing current :root and .dark variables and applying them app-wide."
   ],
-  "known_issues": [],
-  "isFixRequest": false,
+  "known_issues": [
+    "Global color styles appear missing (site mostly black/white); needs restoration of original background, border, and text colors via theme variables."
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-in-the-rituals-ui-saved-rituals-carousel-within-the-rituals-modal-replace-the-current-meditation-type-emoji-icon-with-the-same-png-icon-assets-used-on-the-dashboard-carousel-for-these-tags-mindfulness-assets-mindfulness-png-ifs-assets-ifs-png-metta-assets-meta-png-visualization-assets-visualization-png-render-the-icon-as-an-img-or-equivalent-next-to-the-meditation-type-label-with-appropriate-alt-text-and-sizing-consistent-with-the-existing-tag-pill-layout",
-      "title": "In the rituals UI (saved rituals carousel within the rituals modal), replace the current meditation-type emoji icon with the same PNG icon assets used on the dashboard carousel for these tags: mindfulness -> assets/mindfulness.png, ifs -> assets/ifs.png, metta -> assets/meta.png, visualization -> /assets/visualization.png. Render the icon as an <img> (or equivalent) next to the meditation type label, with appropriate alt text and sizing consistent with the existing tag pill layout.",
+      "id": "feature-replace-the-app-s-global-theme-css-variables-in-frontend-src-index-css-by-updating-the-root-light-and-dark-dark-blocks-to-use-the-exact-oklch-variable-values-provided-by-the-user-for-all-listed-tokens-and-add-any-missing-custom-tokens-from-the-provided-list-so-they-are-available-globally",
+      "title": "Replace the app’s global theme CSS variables in `frontend/src/index.css` by updating the `:root` (light) and `.dark` (dark) blocks to use the exact OKLCH variable values provided by the user for all listed tokens, and add any missing custom tokens from the provided list so they are available globally.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-update-the-dashboard-begin-flow-so-that-when-the-user-selects-the-dashboard-carousel-item-take-quiz-meditation-type-id-quiz-and-presses-begin-the-app-opens-the-existing-5-question-recommendation-quiz-dialog-instead-of-navigating-directly-to-the-pre-meditation-page",
-      "title": "Update the Dashboard Begin flow so that when the user selects the dashboard carousel item \"Take Quiz\" (meditation type id \"quiz\") and presses Begin, the app opens the existing 5-question recommendation quiz dialog instead of navigating directly to the pre-meditation page.",
+      "id": "feature-ensure-the-restored-theme-variables-are-used-consistently-by-tailwind-utilities-and-existing-component-styles-by-keeping-variable-formats-compatible-with-the-tailwind-config-i-e-variables-used-via-oklch-var-token-must-be-defined-as-space-separated-oklch-channels-rather-than-nested-oklch-strings",
+      "title": "Ensure the restored theme variables are used consistently by Tailwind utilities and existing component styles by keeping variable formats compatible with the Tailwind config (i.e., variables used via `oklch(var(--token))` must be defined as space-separated OKLCH channels rather than nested `oklch(...)` strings).",
       "reqIds": [
         "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-when-the-user-completes-the-recommendation-quiz-from-the-dashboard-redirect-them-to-the-pre-meditation-page-with-the-recommended-meditation-type-passed-as-a-url-search-parameter-in-the-format-pre-meditation-type-recommendedtype-e-g-pre-meditation-type-visualization",
-      "title": "When the user completes the recommendation quiz from the dashboard, redirect them to the pre-meditation page with the recommended meditation type passed as a URL search parameter in the format /pre-meditation?type=<recommendedType> (e.g., /pre-meditation?type=visualization).",
-      "reqIds": [
-        "REQ-3"
       ],
       "version": 1
     }
@@ -37,18 +30,12 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Replace meditation tag icons in rituals container with dashboard icon assets (mindfulness/ifs/metta/visualization).",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Add 5-question meditation recommendation quiz when selecting Dashboard carousel 'Take quiz' and tapping Begin; redirect to pre-meditation page with recommended type as URL parameter.",
+      "summary": "Restore original global theme colors by replacing current :root and .dark OKLCH variables with the provided values (light/dark) across the entire app.",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Replace ritual tag icons with dashboard assets and launch recommendation quiz from Dashboard carousel",
+  "projectName": "Restore original global OKLCH theme variables (light/dark)",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

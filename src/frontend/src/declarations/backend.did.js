@@ -63,13 +63,6 @@ export const JournalEntry = IDL.Record({
   'meditationType' : MeditationType,
   'energy' : EnergyState,
 });
-export const Ritual = IDL.Record({
-  'duration' : IDL.Nat,
-  'ambientSoundVolume' : IDL.Nat,
-  'timestamp' : IDL.Int,
-  'ambientSound' : IDL.Text,
-  'meditationType' : MeditationType,
-});
 export const Book = IDL.Record({
   'title' : IDL.Text,
   'goodreadsLink' : IDL.Text,
@@ -106,6 +99,13 @@ export const ImportData = IDL.Record({
   'sessionRecords' : IDL.Vec(MeditationSession),
   'userProfile' : IDL.Opt(UserProfile),
 });
+export const Ritual = IDL.Record({
+  'duration' : IDL.Nat,
+  'ambientSoundVolume' : IDL.Nat,
+  'timestamp' : IDL.Int,
+  'ambientSound' : IDL.Text,
+  'meditationType' : MeditationType,
+});
 
 export const idlService = IDL.Service({
   '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -138,7 +138,7 @@ export const idlService = IDL.Service({
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'createJournalEntry' : IDL.Func([JournalEntryInput], [JournalEntry], []),
   'deleteJournalEntry' : IDL.Func([IDL.Nat], [], []),
-  'deleteRitual' : IDL.Func([Ritual], [], []),
+  'deleteRitual' : IDL.Func([IDL.Nat], [], []),
   'editJournalEntry' : IDL.Func([JournalEntryInput], [JournalEntry], []),
   'getBooks' : IDL.Func([], [IDL.Vec(Book)], ['query']),
   'getCallerJournalEntries' : IDL.Func([], [IDL.Vec(JournalEntry)], ['query']),
@@ -233,13 +233,6 @@ export const idlFactory = ({ IDL }) => {
     'meditationType' : MeditationType,
     'energy' : EnergyState,
   });
-  const Ritual = IDL.Record({
-    'duration' : IDL.Nat,
-    'ambientSoundVolume' : IDL.Nat,
-    'timestamp' : IDL.Int,
-    'ambientSound' : IDL.Text,
-    'meditationType' : MeditationType,
-  });
   const Book = IDL.Record({
     'title' : IDL.Text,
     'goodreadsLink' : IDL.Text,
@@ -276,6 +269,13 @@ export const idlFactory = ({ IDL }) => {
     'sessionRecords' : IDL.Vec(MeditationSession),
     'userProfile' : IDL.Opt(UserProfile),
   });
+  const Ritual = IDL.Record({
+    'duration' : IDL.Nat,
+    'ambientSoundVolume' : IDL.Nat,
+    'timestamp' : IDL.Int,
+    'ambientSound' : IDL.Text,
+    'meditationType' : MeditationType,
+  });
   
   return IDL.Service({
     '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -308,7 +308,7 @@ export const idlFactory = ({ IDL }) => {
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'createJournalEntry' : IDL.Func([JournalEntryInput], [JournalEntry], []),
     'deleteJournalEntry' : IDL.Func([IDL.Nat], [], []),
-    'deleteRitual' : IDL.Func([Ritual], [], []),
+    'deleteRitual' : IDL.Func([IDL.Nat], [], []),
     'editJournalEntry' : IDL.Func([JournalEntryInput], [JournalEntry], []),
     'getBooks' : IDL.Func([], [IDL.Vec(Book)], ['query']),
     'getCallerJournalEntries' : IDL.Func(

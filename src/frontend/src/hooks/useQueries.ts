@@ -539,10 +539,12 @@ export function useDeleteRitual() {
       }
 
       if (!actor) throw new Error('Actor not available');
-      return actor.deleteRitual(ritual);
+      // Backend expects ritualId (bigint timestamp), not the full ritual object
+      return actor.deleteRitual(ritual.timestamp);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rituals'] });
+      toast.success('Ritual deleted successfully');
     },
     onError: (error: any) => {
       const message = getCloudSyncErrorMessage(error);

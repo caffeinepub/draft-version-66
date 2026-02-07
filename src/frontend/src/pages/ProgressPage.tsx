@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Download, Upload, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useTheme } from 'next-themes';
 import PageBackgroundShell from '../components/PageBackgroundShell';
 import StandardPageNav from '../components/StandardPageNav';
@@ -16,6 +17,9 @@ export default function ProgressPage() {
   const { data: stats, isLoading, isError, error, refetch } = useProgressStats();
   const importData = useImportData();
   const exportData = useExportData();
+  const [importConfirmOpen, setImportConfirmOpen] = useState(false);
+  const [pendingImportFile, setPendingImportFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExport = async () => {
     try {
@@ -26,18 +30,40 @@ export default function ProgressPage() {
     }
   };
 
-  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    setPendingImportFile(file);
+    setImportConfirmOpen(true);
+  };
+
+  const handleCancelImport = () => {
+    setImportConfirmOpen(false);
+    setPendingImportFile(null);
+    // Clear file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleConfirmImport = async () => {
+    if (!pendingImportFile) return;
+
+    setImportConfirmOpen(false);
+
     try {
-      await importData.mutateAsync({ file, overwrite: false });
+      await importData.mutateAsync({ file: pendingImportFile, overwrite: true });
       toast.success('Progress data imported successfully');
     } catch (error: any) {
       // Error already handled by mutation onError
+    } finally {
+      setPendingImportFile(null);
+      // Clear file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
-
-    event.target.value = '';
   };
 
   const totalMinutes = stats ? Number(stats.totalMinutes) : 0;
@@ -145,9 +171,46 @@ export default function ProgressPage() {
               Import
             </span>
           </Button>
-          <input type="file" accept=".json" onChange={handleImport} className="hidden" />
+          <input 
+            ref={fileInputRef}
+            type="file" 
+            accept=".json" 
+            onChange={handleImportFileSelect} 
+            className="hidden" 
+          />
         </label>
       </div>
+
+      {/* Import Confirmation Dialog */}
+      <AlertDialog open={importConfirmOpen} onOpenChange={setImportConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Replace All Data?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will replace all your existing journal entries, progress stats, and session records with the data from the imported file. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelImport} disabled={importData.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmImport}
+              disabled={importData.isPending}
+              className="bg-accent-cyan hover:bg-accent-cyan-tinted"
+            >
+              {importData.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Importing...
+                </>
+              ) : (
+                'Import'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageBackgroundShell>
   );
 }

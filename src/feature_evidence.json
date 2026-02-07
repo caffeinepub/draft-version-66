@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-pre-meditation-page-layout-so-the-more-details-button-with-id-1dl1fqs-is-positioned-at-the-bottom-of-the-guide-container-within-the-parent-container-1j6s3jt-the-selected-element-at-xpath-html-1-body-1-div-1-div-1-main-1-div-1-div-3-the-button-should-remain-at-the-bottom-of-that-container-regardless-of-guide-content-height-i-e-guide-content-above-button-pinned-to-the-bottom",
-      "featureTitle": "Update the Pre‑Meditation page layout so the “More details” button with id '1dl1fqs' is positioned at the bottom of the guide container within the parent container '1j6s3jt' (the selected element at XPath `/html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[3]`). The button should remain at the bottom of that container regardless of guide content height (i.e., guide content above, button pinned to the bottom).",
+      "featureId": "feature-in-the-rituals-ui-saved-rituals-carousel-within-the-rituals-modal-replace-the-current-meditation-type-emoji-icon-with-the-same-png-icon-assets-used-on-the-dashboard-carousel-for-these-tags-mindfulness-assets-mindfulness-png-ifs-assets-ifs-png-metta-assets-meta-png-visualization-assets-visualization-png-render-the-icon-as-an-img-or-equivalent-next-to-the-meditation-type-label-with-appropriate-alt-text-and-sizing-consistent-with-the-existing-tag-pill-layout",
+      "featureTitle": "In the rituals UI (saved rituals carousel within the rituals modal), replace the current meditation-type emoji icon with the same PNG icon assets used on the dashboard carousel for these tags: mindfulness -> assets/mindfulness.png, ifs -> assets/ifs.png, metta -> assets/meta.png, visualization -> /assets/visualization.png. Render the icon as an <img> (or equivalent) next to the meditation type label, with appropriate alt text and sizing consistent with the existing tag pill layout.",
       "files": [
-        "frontend/src/pages/PreMeditationPage.tsx"
+        "frontend/src/components/SavedRitualsCarousel.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -18,6 +18,47 @@
       ],
       "testIds": [
         "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-the-dashboard-begin-flow-so-that-when-the-user-selects-the-dashboard-carousel-item-take-quiz-meditation-type-id-quiz-and-presses-begin-the-app-opens-the-existing-5-question-recommendation-quiz-dialog-instead-of-navigating-directly-to-the-pre-meditation-page",
+      "featureTitle": "Update the Dashboard Begin flow so that when the user selects the dashboard carousel item \"Take Quiz\" (meditation type id \"quiz\") and presses Begin, the app opens the existing 5-question recommendation quiz dialog instead of navigating directly to the pre-meditation page.",
+      "files": [
+        "frontend/src/pages/DashboardPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-when-the-user-completes-the-recommendation-quiz-from-the-dashboard-redirect-them-to-the-pre-meditation-page-with-the-recommended-meditation-type-passed-as-a-url-search-parameter-in-the-format-pre-meditation-type-recommendedtype-e-g-pre-meditation-type-visualization",
+      "featureTitle": "When the user completes the recommendation quiz from the dashboard, redirect them to the pre-meditation page with the recommended meditation type passed as a URL search parameter in the format /pre-meditation?type=<recommendedType> (e.g., /pre-meditation?type=visualization).",
+      "files": [
+        "frontend/src/pages/DashboardPage.tsx",
+        "frontend/src/pages/PreMeditationPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
       ],
       "confidence": "high"
     }

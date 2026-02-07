@@ -1,21 +1,58 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Pin “More details” button to bottom of guide container on Pre‑Meditation page",
+  "title": "Swap ritual tag emojis to dashboard PNG assets and trigger recommendation quiz from Dashboard Begin",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Adjust the Pre‑Meditation guide container layout so the “More details” button (id '1dl1fqs') stays pinned to the bottom of its parent container (id '1j6s3jt') regardless of guide content height, without changing the button’s navigation behavior.",
+      "summary": "Replace saved ritual meditation-type emoji icons with the same PNG assets used by the dashboard carousel, rendered as an img within the existing pill layout.",
       "acceptanceCriteria": [
-        "On the Pre‑Meditation page, within the guide parent container '1j6s3jt', the '1dl1fqs' “More details” button renders at the bottom edge of that container (visually below the guide content).",
-        "When the guide content height changes (short vs. long text), the '1dl1fqs' button remains at the bottom of the container and does not float mid-container.",
-        "The button continues to perform its existing navigation behavior (redirect to Knowledge page) without introducing regressions."
+        "In the saved rituals carousel, the meditation type pill no longer shows emoji icons (🧘, 💗, 🌟, 🧩).",
+        "For each ritual, the meditation type pill shows the correct PNG icon for its meditationType using the exact asset paths provided by the user.",
+        "Icons have non-empty alt text and display at a visually balanced size within the existing pill styling without breaking layout in mobile and desktop widths."
       ],
       "file_operations": [
         {
+          "path": "frontend/src/components/SavedRitualsCarousel.tsx",
+          "operation": "modify",
+          "description": "Replace the current emoji-based meditationType icon mapping with a PNG src mapping that uses the exact user-provided strings: mindfulness -> \"assets/mindfulness.png\", ifs -> \"assets/ifs.png\", metta -> \"assets/meta.png\", visualization -> \"/assets/visualization.png\". Render an <img> next to the meditation type label with non-empty alt text and size classes consistent with the existing pill spacing so the layout remains intact on mobile/desktop."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "On Dashboard, when the selected carousel item is \"Take Quiz\" (id \"quiz\"), clicking Begin should open the existing 5-question recommendation quiz dialog instead of navigating.",
+      "acceptanceCriteria": [
+        "On /dashboard, selecting the carousel item with id \"quiz\" and clicking Begin opens the quiz dialog UI.",
+        "The quiz contains exactly 5 questions and can be completed end-to-end.",
+        "Clicking Cancel in the dialog closes it and returns the user to the dashboard without navigation."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/DashboardPage.tsx",
+          "operation": "modify",
+          "description": "Add state to control showing the existing QuizDialog when selectedMeditation is \"quiz\" and the user clicks Begin. Wire QuizDialog into the Dashboard render tree and ensure its Cancel/close handler only closes the dialog without navigation. Use the existing shadcn-ui Dialog-based QuizDialog component for the quiz UI; verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "After completing the dashboard-launched quiz, navigate to /pre-meditation with the recommended meditation type in the `type` URL search param and ensure invalid values fall back safely.",
+      "acceptanceCriteria": [
+        "Completing the quiz and choosing to begin navigates to /pre-meditation with a search param `type` set to the recommended type (mindfulness|metta|visualization|ifs).",
+        "The PreMeditation page loads with the meditation session configured for the recommended type based on the `type` search param.",
+        "If the quiz returns an unexpected type value, the app falls back to a valid meditation type (consistent with existing `validateMeditationType` behavior) rather than crashing."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/DashboardPage.tsx",
+          "operation": "modify",
+          "description": "In the QuizDialog onComplete handler, normalize/coerce the returned recommendedType using validateMeditationType before navigating, then navigate to \"/pre-meditation\" with search { type: <coercedType> } so the URL is in the required format and unexpected values fall back safely."
+        },
+        {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Within the selected layout scope for the Pre‑Meditation setup UI (the container corresponding to /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[3]), update the guide parent container with id '1j6s3jt' to use a column flex layout and reserve remaining vertical space for the guide content (e.g., make guide content area flex-grow) so the “More details” button with id '1dl1fqs' can be placed after the guide content and pinned to the bottom (e.g., via mt-auto / flex alignment). Keep the existing click handler/navigation logic unchanged and avoid modifying unrelated elements listed in non-goals."
+          "description": "Confirm the page continues to derive the selected meditation type from the `type` search param using validateMeditationType and uses that validated value to configure the session. If any logic assumes only known values, adjust it to rely on the validated selectedType to prevent crashes when `type` is unexpected."
         }
       ]
     }

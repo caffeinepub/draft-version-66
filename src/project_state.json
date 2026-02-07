@@ -2,18 +2,34 @@
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
   "summary": "New project",
-  "architectural_notes": [],
-  "known_issues": [
-    "'bpmktq' custom time range slider responds visually in reverse direction (thumb appears opposite to drag).",
-    "'1iwj49n' timer waveform fill reaches only ~85% at 0:00 instead of 100%."
+  "architectural_notes": [
+    "Rituals container meditation tag icons should use assets: assets/mindfulness.png (mindfulness), assets/ifs.png (ifs), assets/meta.png (metta), assets/visualization.png (visualization).",
+    "Quiz completion should navigate via URL parameter to a single pre-meditation page, e.g., pre-meditation?type=visualization."
   ],
-  "isFixRequest": true,
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-update-the-pre-meditation-page-layout-so-the-more-details-button-with-id-1dl1fqs-is-positioned-at-the-bottom-of-the-guide-container-within-the-parent-container-1j6s3jt-the-selected-element-at-xpath-html-1-body-1-div-1-div-1-main-1-div-1-div-3-the-button-should-remain-at-the-bottom-of-that-container-regardless-of-guide-content-height-i-e-guide-content-above-button-pinned-to-the-bottom",
-      "title": "Update the Pre‑Meditation page layout so the “More details” button with id '1dl1fqs' is positioned at the bottom of the guide container within the parent container '1j6s3jt' (the selected element at XPath `/html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[3]`). The button should remain at the bottom of that container regardless of guide content height (i.e., guide content above, button pinned to the bottom).",
+      "id": "feature-in-the-rituals-ui-saved-rituals-carousel-within-the-rituals-modal-replace-the-current-meditation-type-emoji-icon-with-the-same-png-icon-assets-used-on-the-dashboard-carousel-for-these-tags-mindfulness-assets-mindfulness-png-ifs-assets-ifs-png-metta-assets-meta-png-visualization-assets-visualization-png-render-the-icon-as-an-img-or-equivalent-next-to-the-meditation-type-label-with-appropriate-alt-text-and-sizing-consistent-with-the-existing-tag-pill-layout",
+      "title": "In the rituals UI (saved rituals carousel within the rituals modal), replace the current meditation-type emoji icon with the same PNG icon assets used on the dashboard carousel for these tags: mindfulness -> assets/mindfulness.png, ifs -> assets/ifs.png, metta -> assets/meta.png, visualization -> /assets/visualization.png. Render the icon as an <img> (or equivalent) next to the meditation type label, with appropriate alt text and sizing consistent with the existing tag pill layout.",
       "reqIds": [
         "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-dashboard-begin-flow-so-that-when-the-user-selects-the-dashboard-carousel-item-take-quiz-meditation-type-id-quiz-and-presses-begin-the-app-opens-the-existing-5-question-recommendation-quiz-dialog-instead-of-navigating-directly-to-the-pre-meditation-page",
+      "title": "Update the Dashboard Begin flow so that when the user selects the dashboard carousel item \"Take Quiz\" (meditation type id \"quiz\") and presses Begin, the app opens the existing 5-question recommendation quiz dialog instead of navigating directly to the pre-meditation page.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-when-the-user-completes-the-recommendation-quiz-from-the-dashboard-redirect-them-to-the-pre-meditation-page-with-the-recommended-meditation-type-passed-as-a-url-search-parameter-in-the-format-pre-meditation-type-recommendedtype-e-g-pre-meditation-type-visualization",
+      "title": "When the user completes the recommendation quiz from the dashboard, redirect them to the pre-meditation page with the recommended meditation type passed as a URL search parameter in the format /pre-meditation?type=<recommendedType> (e.g., /pre-meditation?type=visualization).",
+      "reqIds": [
+        "REQ-3"
       ],
       "version": 1
     }
@@ -21,47 +37,18 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Place '1dl1fqs' (More details button) at the bottom of the guide container within parent '1j6s3jt'",
-      "reqIds": [
-        "1dl1fqs",
-        "1j6s3jt"
-      ],
+      "summary": "Replace meditation tag icons in rituals container with dashboard icon assets (mindfulness/ifs/metta/visualization).",
+      "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Add py-3 padding to 'cigrx0' (Begin meditation button)",
-      "reqIds": [
-        "cigrx0"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Fix 'bpmktq' (custom input time range) thumb/visual response so dragging direction matches user input (not reversed)",
-      "reqIds": [
-        "bpmktq"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Update 't4f3jw' (notification element) to use theme-fitting background (e.g., --background), accent-cyan text, and an accent-cyan close (X) button positioned top-right",
-      "reqIds": [
-        "t4f3jw"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Adjust '1iwj49n' (timer canvas waveform) to smoothly fill the circle to 100% at 0:00 (bottom=max time left to top=min time left)",
-      "reqIds": [
-        "1iwj49n"
-      ],
+      "summary": "Add 5-question meditation recommendation quiz when selecting Dashboard carousel 'Take quiz' and tapping Begin; redirect to pre-meditation page with recommended type as URL parameter.",
+      "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Place “More details” button at bottom of the guide container on Pre‑Meditation page",
+  "projectName": "Replace ritual tag icons with dashboard assets and launch recommendation quiz from Dashboard carousel",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

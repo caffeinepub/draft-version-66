@@ -1,82 +1,42 @@
-import { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import SavedRitualsCarousel from './SavedRitualsCarousel';
-
-interface Ritual {
-  meditationType: string;
-  duration: number;
-  ambientSound: string;
-  ambientSoundVolume: number;
-  timestamp: string;
-  displayName: string;
-}
+import type { Ritual } from '../backend';
 
 interface RitualSelectionModalProps {
   open: boolean;
-  onClose: () => void;
+  onOpenChange: (open: boolean) => void;
   rituals: Ritual[];
-  onStart: (ritual: Ritual) => void;
+  onSelect: (ritual: Ritual) => void;
   onDelete: (ritual: Ritual) => Promise<void>;
   isDeleting?: boolean;
 }
 
-export default function RitualSelectionModal({ 
-  open, 
-  onClose, 
-  rituals, 
-  onStart, 
+export default function RitualSelectionModal({
+  open,
+  onOpenChange,
+  rituals,
+  onSelect,
   onDelete,
-  isDeleting = false 
+  isDeleting = false,
 }: RitualSelectionModalProps) {
-  // Limit to 5 rituals
-  const displayRituals = rituals.slice(0, 5);
-
-  // Reset active index when modal opens
-  const handleOpenChange = (newOpen: boolean) => {
-    if (!newOpen) {
-      onClose();
-    }
+  const handleSelect = (ritual: Ritual) => {
+    onSelect(ritual);
+    onOpenChange(false);
   };
 
-  if (displayRituals.length === 0) {
-    return (
-      <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-accent-cyan-tinted">Your Rituals</DialogTitle>
-            <DialogDescription className="text-base text-description-gray">
-              You have no saved rituals yet.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-center py-6">
-            <p className="text-foreground text-center">
-              Complete a meditation session and save it as a ritual to see it here.
-            </p>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[600px] bg-background/95 backdrop-blur-sm border-accent-cyan/20">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-accent-cyan-tinted">Your Rituals</DialogTitle>
-          <DialogDescription className="text-base text-description-gray">
-            Select a ritual to begin your meditation
+          <DialogTitle className="text-2xl font-bold text-accent-cyan">Your Rituals</DialogTitle>
+          <DialogDescription className="text-muted-foreground">
+            Select a ritual to begin your meditation session
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4">
+        <div className="py-6">
           <SavedRitualsCarousel 
-            rituals={displayRituals} 
-            onStart={onStart} 
+            rituals={rituals} 
+            onSelect={handleSelect} 
             onDelete={onDelete}
             isDeleting={isDeleting}
           />

@@ -13,6 +13,8 @@ import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
 import MixinAuthorization "authorization/MixinAuthorization";
 
+
+
 actor {
   type Book = {
     title : Text;
@@ -205,7 +207,7 @@ actor {
     "Your journey is uniquely yours; celebrate each step along the path."
   ]);
 
-  var journalEntries = Map.empty<Principal, List.List<JournalEntry>>();
+  let journalEntries = Map.empty<Principal, List.List<JournalEntry>>();
   let sessionRecords = Map.empty<Principal, List.List<MeditationSession>>();
   let progressStats = Map.empty<Principal, ProgressStore>();
   let progressCache = Map.empty<Principal, ProgressStats>();
@@ -603,25 +605,16 @@ actor {
     };
   };
 
-  public shared ({ caller }) func deleteRitual(ritualToDelete : Ritual) : async () {
+  public shared ({ caller }) func deleteRitual(ritualId : Nat) : async () {
     ensureUserInitialized(caller);
 
     switch (ritualsStore.get(caller)) {
       case (null) { Runtime.trap("RitualNotFound: No rituals found for this user") };
       case (?ritualsList) {
-        let filteredRituals = ritualsList.filter(
-          func(existing) {
-            not (
-              existing.meditationType == ritualToDelete.meditationType and
-              existing.duration == ritualToDelete.duration and
-              existing.ambientSound == ritualToDelete.ambientSound and
-              existing.ambientSoundVolume == ritualToDelete.ambientSoundVolume
-            );
-          }
-        );
+        let filteredRituals = ritualsList.filter(func(existing) { not (existing.timestamp == ritualId) });
 
         if (filteredRituals.size() == ritualsList.size()) {
-          Runtime.trap("RitualNotFound: The specified ritual was not found and could not be deleted.");
+          Runtime.trap("RitualNotFound: The specified ritual was not found.");
         };
 
         ritualsStore.add(caller, filteredRituals);

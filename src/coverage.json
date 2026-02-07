@@ -1,23 +1,47 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T16:04:30.128Z",
+  "generatedAt": "2026-02-07T19:04:13.832Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 1,
-    "implemented": 1,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Update the Pre‑Meditation page layout so the “More details” button with id '1dl1fqs' is positioned at the bottom of the guide container within the parent container '1j6s3jt' (the selected element at XPath `/html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[3]`). The button should remain at the bottom of that container regardless of guide content height (i.e., guide content above, button pinned to the bottom).",
+        "summary": "In the rituals UI (saved rituals carousel within the rituals modal), replace the current meditation-type emoji icon with the same PNG icon assets used on the dashboard carousel for these tags: mindfulness -> assets/mindfulness.png, ifs -> assets/ifs.png, metta -> assets/meta.png, visualization -> /assets/visualization.png. Render the icon as an <img> (or equivalent) next to the meditation type label, with appropriate alt text and sizing consistent with the existing tag pill layout.",
         "status": "implemented",
         "plannedFiles": [
+          "frontend/src/components/SavedRitualsCarousel.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/SavedRitualsCarousel.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Update the Dashboard Begin flow so that when the user selects the dashboard carousel item \"Take Quiz\" (meditation type id \"quiz\") and presses Begin, the app opens the existing 5-question recommendation quiz dialog instead of navigating directly to the pre-meditation page.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/DashboardPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/DashboardPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "When the user completes the recommendation quiz from the dashboard, redirect them to the pre-meditation page with the recommended meditation type passed as a URL search parameter in the format /pre-meditation?type=<recommendedType> (e.g., /pre-meditation?type=visualization).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/DashboardPage.tsx",
           "frontend/src/pages/PreMeditationPage.tsx"
         ],
         "matchedFiles": [
+          "frontend/src/pages/DashboardPage.tsx",
           "frontend/src/pages/PreMeditationPage.tsx"
         ]
       }
@@ -28,6 +52,9 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/components/SavedRitualsCarousel.tsx",
+    "frontend/src/pages/DashboardPage.tsx",
+    "frontend/src/pages/JournalPage.tsx",
     "frontend/src/pages/PreMeditationPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",

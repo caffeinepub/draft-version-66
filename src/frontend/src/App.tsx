@@ -1,6 +1,6 @@
 import { RouterProvider, createRouter, createRootRoute, createRoute } from '@tanstack/react-router';
 import { ThemeProvider } from 'next-themes';
-import { Toaster } from '@/components/ui/sonner';
+import ThemedToaster from './components/ThemedToaster';
 import AppErrorBoundary from './components/AppErrorBoundary';
 
 // Import pages
@@ -84,7 +84,7 @@ function App() {
     <AppErrorBoundary>
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
         <RouterProvider router={router} />
-        <Toaster />
+        <ThemedToaster />
       </ThemeProvider>
     </AppErrorBoundary>
   );

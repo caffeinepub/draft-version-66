@@ -117,7 +117,7 @@ export interface _SERVICE {
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'createJournalEntry' : ActorMethod<[JournalEntryInput], JournalEntry>,
   'deleteJournalEntry' : ActorMethod<[bigint], undefined>,
-  'deleteRitual' : ActorMethod<[Ritual], undefined>,
+  'deleteRitual' : ActorMethod<[bigint], undefined>,
   'editJournalEntry' : ActorMethod<[JournalEntryInput], JournalEntry>,
   'getBooks' : ActorMethod<[], Array<Book>>,
   'getCallerJournalEntries' : ActorMethod<[], Array<JournalEntry>>,

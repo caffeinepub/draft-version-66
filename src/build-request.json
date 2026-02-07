@@ -1,35 +1,73 @@
 {
   "kind": "build_request",
-  "title": "Place “More details” button at bottom of the guide container on Pre‑Meditation page",
+  "title": "Replace ritual tag icons with dashboard assets and launch recommendation quiz from Dashboard carousel",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Update the Pre‑Meditation page layout so the “More details” button with id '1dl1fqs' is positioned at the bottom of the guide container within the parent container '1j6s3jt' (the selected element at XPath `/html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[3]`). The button should remain at the bottom of that container regardless of guide content height (i.e., guide content above, button pinned to the bottom).",
+      "text": "In the rituals UI (saved rituals carousel within the rituals modal), replace the current meditation-type emoji icon with the same PNG icon assets used on the dashboard carousel for these tags: mindfulness -> assets/mindfulness.png, ifs -> assets/ifs.png, metta -> assets/meta.png, visualization -> /assets/visualization.png. Render the icon as an <img> (or equivalent) next to the meditation type label, with appropriate alt text and sizing consistent with the existing tag pill layout.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-5"
+          "msg-4"
         ],
         "quotes": [
-          "'1dl1fqs' (More details btn) should be place at the bottom of guide container as mentioned in point 1(1. \"1j6s3jt\" parent container that holds guide, including more details btn)"
+          "With assets/mindfulness.png  for mindfulness tag, assets/ifs.png for ifs tag, assets/meta.png for metta tag, and /assets/visualization.png for visualization tag."
         ]
       },
       "acceptanceCriteria": [
-        "On the Pre‑Meditation page, within the guide parent container '1j6s3jt', the '1dl1fqs' “More details” button renders at the bottom edge of that container (visually below the guide content).",
-        "When the guide content height changes (short vs. long text), the '1dl1fqs' button remains at the bottom of the container and does not float mid-container.",
-        "The button continues to perform its existing navigation behavior (redirect to Knowledge page) without introducing regressions."
+        "In the saved rituals carousel, the meditation type pill no longer shows emoji icons (🧘, 💗, 🌟, 🧩).",
+        "For each ritual, the meditation type pill shows the correct PNG icon for its meditationType using the exact asset paths provided by the user.",
+        "Icons have non-empty alt text and display at a visually balanced size within the existing pill styling without breaking layout in mobile and desktop widths."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Update the Dashboard Begin flow so that when the user selects the dashboard carousel item \"Take Quiz\" (meditation type id \"quiz\") and presses Begin, the app opens the existing 5-question recommendation quiz dialog instead of navigating directly to the pre-meditation page.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2",
+          "msg-4"
+        ],
+        "quotes": [
+          "when user selects from carousel in dashboard \"take quiz\" option, and then he clicks begin, he should be prompted with quiz(5 questions) to determine which meditation suits him",
+          "It was already written in previous drafts I believe, so you can use same ones as previously"
+        ]
+      },
+      "acceptanceCriteria": [
+        "On /dashboard, selecting the carousel item with id \"quiz\" and clicking Begin opens the quiz dialog UI.",
+        "The quiz contains exactly 5 questions and can be completed end-to-end.",
+        "Clicking Cancel in the dialog closes it and returns the user to the dashboard without navigation."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "When the user completes the recommendation quiz from the dashboard, redirect them to the pre-meditation page with the recommended meditation type passed as a URL search parameter in the format /pre-meditation?type=<recommendedType> (e.g., /pre-meditation?type=visualization).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "With that recommended type passed as a parameter in url, like pre-meditation?type=visualization for visualization and so on.."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Completing the quiz and choosing to begin navigates to /pre-meditation with a search param `type` set to the recommended type (mindfulness|metta|visualization|ifs).",
+        "The PreMeditation page loads with the meditation session configured for the recommended type based on the `type` search param.",
+        "If the quiz returns an unexpected type value, the app falls back to a valid meditation type (consistent with existing `validateMeditationType` behavior) rather than crashing."
       ]
     }
   ],
   "constraints": [
-    "Apply changes only to the selected element scope (/html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[3]) for this prompt; do not modify unrelated elements/features."
+    "Frontend immutable paths must not be modified: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui/*.",
+    "Keep backend as single-actor Motoko; do not introduce additional backend services."
   ],
   "nonGoals": [
-    "Do not change the notification element 't4f3jw' styling in this build.",
-    "Do not change the timer canvas waveform behavior for '1iwj49n' in this build.",
-    "Do not change the duration range input 'bpmktq' behavior in this build.",
-    "Do not change the “Begin meditation” button 'cigrx0' padding in this build."
+    "Do not change the meditation content/guides on the PreMeditation page beyond using the recommended type URL parameter for navigation.",
+    "Do not add new authentication providers (Internet Identity only).",
+    "Do not add or redesign the entire dashboard carousel UI beyond the quiz-trigger and icon swap described."
   ],
   "imageRequirements": {
     "required": [],

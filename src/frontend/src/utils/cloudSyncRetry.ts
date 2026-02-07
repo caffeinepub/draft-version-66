@@ -2,12 +2,34 @@
  * Frontend-only utility for cloud operation readiness and retry logic
  */
 
-import { waitForCloudSyncReady, getCloudSyncErrorMessage } from './cloudSync';
+import { getCloudSyncErrorMessage } from './cloudSync';
 
 export interface CloudOperationOptions {
   maxRetries?: number;
   retryDelayMs?: number;
   timeoutMs?: number;
+}
+
+/**
+ * Waits for actor and identity to be ready by polling.
+ * Returns true if ready, false if timeout.
+ */
+async function waitForActorAndIdentity(
+  getActor: () => any,
+  getIdentity: () => any,
+  timeoutMs: number = 5000,
+  intervalMs: number = 200
+): Promise<boolean> {
+  const startTime = Date.now();
+  
+  while (Date.now() - startTime < timeoutMs) {
+    if (getActor() && getIdentity()) {
+      return true;
+    }
+    await new Promise(resolve => setTimeout(resolve, intervalMs));
+  }
+  
+  return false;
 }
 
 /**
@@ -26,7 +48,7 @@ export async function runCloudOperationWithRetry<T>(
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       // Wait for actor and identity to be ready before attempting operation
-      await waitForCloudSyncReady(getActor, getIdentity, timeoutMs);
+      await waitForActorAndIdentity(getActor, getIdentity, timeoutMs);
 
       // Execute the operation
       return await operation();

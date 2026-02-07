@@ -297,7 +297,7 @@ export default function JournalPage() {
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
                           {entry.mood.map((mood) => {
-                            const Icon = moodIconMap[mood];
+                            const { icon: Icon, label } = moodIconMap[mood];
                             return (
                               <TooltipProvider key={mood}>
                                 <Tooltip>
@@ -306,7 +306,7 @@ export default function JournalPage() {
                                       <Icon className="w-4 h-4 text-accent-cyan" />
                                     </div>
                                   </TooltipTrigger>
-                                  <TooltipContent>{mood.charAt(0).toUpperCase() + mood.slice(1)}</TooltipContent>
+                                  <TooltipContent>{label}</TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
                             );
@@ -316,12 +316,12 @@ export default function JournalPage() {
                               <TooltipTrigger asChild>
                                 <div className="p-1.5 rounded-lg bg-accent-cyan/10 border border-accent-cyan/30">
                                   {(() => {
-                                    const Icon = energyIconMap[entry.energy];
+                                    const { icon: Icon, label } = energyIconMap[entry.energy];
                                     return <Icon className="w-4 h-4 text-accent-cyan" />;
                                   })()}
                                 </div>
                               </TooltipTrigger>
-                              <TooltipContent>{entry.energy.charAt(0).toUpperCase() + entry.energy.slice(1)}</TooltipContent>
+                              <TooltipContent>{energyIconMap[entry.energy].label}</TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
                         </div>
@@ -437,7 +437,7 @@ export default function JournalPage() {
             variant="outline"
             size="sm"
             disabled={importData.isPending}
-            className="border-accent-cyan/50 hover:bg-accent-cyan/10 bg-card/90 backdrop-blur-sm shadow-lg cursor-pointer"
+            className="border-accent-cyan/50 hover:bg-accent-cyan/10 bg-card/90 backdrop-blur-sm shadow-lg"
             asChild
           >
             <span>
@@ -445,12 +445,12 @@ export default function JournalPage() {
               Import
             </span>
           </Button>
-          <input 
+          <input
             ref={fileInputRef}
-            type="file" 
-            accept=".json" 
-            onChange={handleImportFileSelect} 
-            className="hidden" 
+            type="file"
+            accept=".json"
+            onChange={handleImportFileSelect}
+            className="hidden"
           />
         </label>
       </div>
@@ -459,7 +459,7 @@ export default function JournalPage() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Journal Entry</AlertDialogTitle>
+            <AlertDialogTitle>Delete Entry?</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete this journal entry? This action cannot be undone.
             </AlertDialogDescription>
@@ -488,9 +488,9 @@ export default function JournalPage() {
       <AlertDialog open={importConfirmOpen} onOpenChange={setImportConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Import Journal Data</AlertDialogTitle>
+            <AlertDialogTitle>Import Journal Data?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will replace all your existing journal entries, progress stats, and session records with the imported data. This action cannot be undone. Are you sure you want to continue?
+              This will overwrite your current journal entries with the imported data. This action cannot be undone. Make sure you have exported your current data if you want to keep it.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -500,7 +500,7 @@ export default function JournalPage() {
             <AlertDialogAction
               onClick={handleConfirmImport}
               disabled={importData.isPending}
-              className="bg-accent-cyan hover:bg-accent-cyan-tinted"
+              className="bg-accent-cyan hover:bg-accent-cyan/90"
             >
               {importData.isPending ? (
                 <>

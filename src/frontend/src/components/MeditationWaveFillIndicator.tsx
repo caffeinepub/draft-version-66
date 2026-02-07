@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTheme } from 'next-themes';
 
 interface MeditationWaveFillIndicatorProps {
@@ -15,14 +15,12 @@ export default function MeditationWaveFillIndicator({
   const animationFrameRef = useRef<number | undefined>(undefined);
   const timeRef = useRef(0);
   
-  // Smoothly interpolate displayed fill level with ease-in-out
-  const [displayedProgress, setDisplayedProgress] = useState(progress);
-  const targetProgressRef = useRef(progress);
-  const currentProgressRef = useRef(progress);
+  // Store progress in ref to avoid triggering animation restart
+  const progressRef = useRef(progress);
 
   useEffect(() => {
-    // Clamp incoming progress to [0, 1]
-    targetProgressRef.current = Math.max(0, Math.min(1, progress));
+    // Clamp incoming progress to [0, 1] and store in ref
+    progressRef.current = Math.max(0, Math.min(1, progress));
   }, [progress]);
 
   useEffect(() => {
@@ -39,28 +37,8 @@ export default function MeditationWaveFillIndicator({
     const animate = () => {
       timeRef.current += 0.015;
 
-      // Smooth ease-in-out interpolation toward target progress
-      const diff = targetProgressRef.current - currentProgressRef.current;
-      const epsilon = 0.001;
-      
-      if (Math.abs(diff) > epsilon) {
-        // Ease-in-out cubic function
-        const easeInOutCubic = (t: number): number => {
-          return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-        };
-        
-        const step = diff * 0.08; // Smooth transition speed
-        const easedStep = step * easeInOutCubic(Math.abs(step) * 10);
-        currentProgressRef.current += easedStep;
-      } else {
-        // Snap to exact target when close enough
-        currentProgressRef.current = targetProgressRef.current;
-      }
-
-      // Clamp current progress to [0, 1] to prevent overshoot/undershoot
-      currentProgressRef.current = Math.max(0, Math.min(1, currentProgressRef.current));
-
-      setDisplayedProgress(currentProgressRef.current);
+      // Use ref value to avoid re-triggering animation
+      const currentProgress = progressRef.current;
 
       // Clear canvas
       ctx.clearRect(0, 0, size, size);
@@ -83,8 +61,8 @@ export default function MeditationWaveFillIndicator({
       ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
       ctx.clip();
 
-      // Calculate fill height (bottom to top)
-      const fillHeight = radius * 2 * currentProgressRef.current;
+      // Calculate fill height (bottom to top) - ensure 100% fill at progress=1
+      const fillHeight = radius * 2 * currentProgress;
       const fillY = centerY + radius - fillHeight;
 
       if (fillHeight > 0) {

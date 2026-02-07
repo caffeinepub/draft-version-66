@@ -1,11 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Improve the in-session meditation experience by adding a clear way to return to setup and replacing the current timer visual with a calm, progress-driven wave fill indicator.
+**Goal:** Make the meditation active-session controls area more compact and visually centered as a single grouped block.
 
 **Planned changes:**
-- Add a visible, accessible back button on the active meditation (in-session) view that navigates to `/pre-meditation` via TanStack Router.
-- Replace the existing ring-style timer visualization on the active meditation view with an animated wave fill indicator that fills from bottom to top based on session progress (empty at start, full at completion).
-- When duration/remaining time is adjusted, animate the fill level to the new target using an ease-in-out transition while keeping the wave motion smoothly looping.
+- Center the selected active-session UI group (canvas + timer + controls container) within the viewport as one block, without changing alignment of other page sections.
+- Reduce the play/pause button *container* size to at least 2× smaller while keeping the icon size the same; ensure the button remains accessible and functional.
+- Slightly reduce the timer display size (modest reduction only) without affecting other text.
+- Moderately reduce vertical spacing within the selected controls container so the time and volume sliders sit closer together, limited to that container.
 
-**User-visible outcome:** During an active meditation session, users can tap a back button to return to the pre-meditation setup screen, and they see a calm wave that rises as time progresses (including smooth transitions if time is adjusted).
+**User-visible outcome:** The active meditation session area appears centered as a cohesive unit, with a smaller play/pause button container, a slightly smaller timer, and more compact spacing between the sliders—without changing other parts of the page.

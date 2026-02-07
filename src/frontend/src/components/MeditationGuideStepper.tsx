@@ -1,47 +1,45 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 
-interface GuideStep {
+interface Step {
   title: string;
   content: string;
 }
 
 interface MeditationGuideStepperProps {
-  steps: GuideStep[];
+  steps: Step[];
 }
 
 export default function MeditationGuideStepper({ steps }: MeditationGuideStepperProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [direction, setDirection] = useState<'next' | 'prev'>('next');
-  const touchStartX = useRef<number | null>(null);
-  const touchEndX = useRef<number | null>(null);
+  const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
+  const contentRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
-      setDirection('next');
+      setDirection('forward');
       setCurrentStep(currentStep + 1);
     }
   };
 
-  const handlePrev = () => {
+  const handlePrevious = () => {
     if (currentStep > 0) {
-      setDirection('prev');
+      setDirection('backward');
       setCurrentStep(currentStep - 1);
     }
   };
 
   const handleDotClick = (index: number) => {
-    if (index !== currentStep) {
-      setDirection(index > currentStep ? 'next' : 'prev');
-      setCurrentStep(index);
-    }
+    setDirection(index > currentStep ? 'forward' : 'backward');
+    setCurrentStep(index);
   };
 
-  // Touch handlers for swipe navigation
+  // Touch swipe handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
-    touchEndX.current = null;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -49,10 +47,8 @@ export default function MeditationGuideStepper({ steps }: MeditationGuideStepper
   };
 
   const handleTouchEnd = () => {
-    if (touchStartX.current === null || touchEndX.current === null) return;
-
     const swipeDistance = touchStartX.current - touchEndX.current;
-    const minSwipeDistance = 50; // Minimum distance for a swipe to register
+    const minSwipeDistance = 50;
 
     if (Math.abs(swipeDistance) > minSwipeDistance) {
       if (swipeDistance > 0) {
@@ -60,150 +56,108 @@ export default function MeditationGuideStepper({ steps }: MeditationGuideStepper
         handleNext();
       } else {
         // Swiped right - go to previous
-        handlePrev();
+        handlePrevious();
       }
     }
 
-    // Reset touch positions
-    touchStartX.current = null;
-    touchEndX.current = null;
+    touchStartX.current = 0;
+    touchEndX.current = 0;
   };
 
-  const isFirstStep = currentStep === 0;
-  const isLastStep = currentStep === steps.length - 1;
-  const step = steps[currentStep];
-
-  // Parse content to separate main content from benefits
-  const parsedContent = (() => {
-    const benefitsMatch = step.content.match(/^([\s\S]*?)\n\nBenefits:\s*([\s\S]*)$/);
-    if (benefitsMatch) {
-      return {
-        main: benefitsMatch[1].trim(),
-        benefits: benefitsMatch[2].trim(),
-      };
+  // Parse content to separate main content from Benefits section
+  const parseContent = (content: string) => {
+    const benefitsIndex = content.indexOf('\n\nBenefits:');
+    if (benefitsIndex === -1) {
+      return { main: content, benefits: null };
     }
-    return { main: step.content, benefits: null };
-  })();
+    return {
+      main: content.substring(0, benefitsIndex),
+      benefits: content.substring(benefitsIndex + 12), // Skip "\n\nBenefits:"
+    };
+  };
+
+  const { main, benefits } = parseContent(steps[currentStep].content);
 
   return (
-    <div className="space-y-6">
-      {/* Step indicator */}
-      <div className="text-center">
-        <p className="text-sm text-muted-foreground">
-          Step {currentStep + 1} of {steps.length}
-        </p>
+    <div className="w-full">
+      {/* Step indicator dots */}
+      <div className="flex justify-center gap-2 mb-6">
+        {steps.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => handleDotClick(index)}
+            className={`h-2 rounded-full transition-all ${
+              index === currentStep
+                ? 'w-8 bg-accent-cyan'
+                : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+            }`}
+            aria-label={`Go to step ${index + 1}`}
+          />
+        ))}
       </div>
 
-      {/* Step content with animation and swipe support - responsive layout */}
-      <div 
-        className="relative min-h-[280px]"
+      {/* Content area with swipe support */}
+      <div
+        ref={contentRef}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        className="relative overflow-hidden"
       >
         <div
           key={currentStep}
-          className={`flex flex-col md:flex-row gap-4 items-start ${
-            direction === 'next' ? 'animate-slide-in-right' : 'animate-slide-in-left'
+          className={`space-y-4 ${
+            direction === 'forward'
+              ? 'animate-in slide-in-from-right duration-300'
+              : 'animate-in slide-in-from-left duration-300'
           }`}
         >
-          {/* Step number - full width on mobile, side-by-side on desktop */}
-          <div 
-            className="shrink-0 w-12 h-12 rounded-full bg-accent-cyan/20 border-2 border-accent-cyan flex items-center justify-center"
-            style={{
-              boxShadow: '0 0 12px oklch(0.7 0.15 195 / 0.4)',
-            }}
-          >
-            <span className="text-accent-cyan font-bold text-lg">{currentStep + 1}</span>
-          </div>
-          
-          {/* Content area - full width on mobile, flexible on desktop */}
-          <div className="flex-1 space-y-3 pt-1 w-full">
-            <h3 className="text-lg sm:text-xl font-semibold text-accent-cyan">{step.title}</h3>
-            
-            {/* Main content */}
-            <p className="text-sm sm:text-base text-selected-element-light dark:text-guide-text leading-relaxed whitespace-pre-line">
-              {parsedContent.main}
-            </p>
-            
-            {/* Benefits section with hierarchy */}
-            {parsedContent.benefits && (
-              <div className="mt-6 pt-4 border-t border-accent-cyan/20">
-                <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="w-5 h-5 text-accent-cyan" />
-                  <h4 className="text-base sm:text-lg font-semibold text-accent-cyan">
-                    Benefits
-                  </h4>
-                </div>
-                <p className="text-sm sm:text-base text-selected-element-light dark:text-guide-text leading-relaxed">
-                  {parsedContent.benefits}
+          <h3 className="text-xl font-semibold text-foreground">
+            {currentStep + 1}. {steps[currentStep].title}
+          </h3>
+          <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+            {main}
+          </p>
+
+          {benefits && (
+            <div className="mt-6 p-4 bg-accent-cyan/10 border border-accent-cyan/20 rounded-lg">
+              <div className="flex items-start gap-2">
+                <Sparkles className="w-5 h-5 text-accent-cyan flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">
+                  {benefits}
                 </p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Navigation controls - responsive layout */}
-      <div className="flex justify-between items-center gap-4 pt-4">
-        {/* Desktop: Full buttons */}
+      {/* Navigation buttons */}
+      <div className="flex items-center justify-between mt-6 gap-4">
         <Button
-          onClick={handlePrev}
-          disabled={isFirstStep}
+          onClick={handlePrevious}
+          disabled={currentStep === 0}
           variant="outline"
-          size="lg"
-          className="hidden sm:flex border-2 border-accent-cyan/50 hover:border-accent-cyan hover:bg-accent-cyan/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300"
+          size="default"
+          className="flex items-center gap-2"
         >
-          <ChevronLeft className="w-5 h-5 mr-1" />
-          Previous
+          <ChevronLeft className="w-4 h-4" />
+          <span className="hidden sm:inline">Previous</span>
         </Button>
 
-        {/* Mobile: Icon-only buttons */}
-        <Button
-          onClick={handlePrev}
-          disabled={isFirstStep}
-          variant="outline"
-          size="icon"
-          className="sm:hidden border-2 border-accent-cyan/50 hover:border-accent-cyan hover:bg-accent-cyan/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </Button>
+        <span className="text-sm text-muted-foreground">
+          Step {currentStep + 1} of {steps.length}
+        </span>
 
-        {/* Clickable step indicator dots - gray for unselected */}
-        <div className="flex gap-2">
-          {steps.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => handleDotClick(index)}
-              className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                index === currentStep
-                  ? 'w-8 bg-accent-cyan hover:bg-accent-cyan'
-                  : 'w-2 bg-muted-foreground/40 hover:bg-muted-foreground/60'
-              }`}
-              aria-label={`Go to step ${index + 1}`}
-            />
-          ))}
-        </div>
-
-        {/* Desktop: Full buttons */}
         <Button
           onClick={handleNext}
-          disabled={isLastStep}
-          size="lg"
-          className="hidden sm:flex bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300"
+          disabled={currentStep === steps.length - 1}
+          variant="outline"
+          size="default"
+          className="flex items-center gap-2"
         >
-          Next
-          <ChevronRight className="w-5 h-5 ml-1" />
-        </Button>
-
-        {/* Mobile: Icon-only buttons */}
-        <Button
-          onClick={handleNext}
-          disabled={isLastStep}
-          size="icon"
-          className="sm:hidden bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300"
-        >
-          <ChevronRight className="w-5 h-5" />
+          <span className="hidden sm:inline">Next</span>
+          <ChevronRight className="w-4 h-4" />
         </Button>
       </div>
     </div>

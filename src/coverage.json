@@ -1,21 +1,22 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T07:00:03.248Z",
+  "generatedAt": "2026-02-07T08:04:05.920Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 4,
+    "implemented": 4,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Add a back button to the active meditation view (the in-session screen) that navigates back to the pre-meditation page route (`/pre-meditation`).",
+        "summary": "On the meditation page, center the entire selected active-session UI block as a single group within the viewport (do not center each element independently). Apply this only to the selected elements identified by these XPaths:\n- Canvas: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/canvas[1]\n- Canvas container: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]\n- Controls container: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]\n- Timer element: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[2]",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx",
+          "frontend/src/components/MeditationWaveFillIndicator.tsx"
         ],
         "matchedFiles": [
           "frontend/src/pages/PreMeditationPage.tsx"
@@ -23,26 +24,35 @@
       },
       {
         "id": "REQ-2",
-        "summary": "Replace the current meditation timer visual on the active meditation view with an animated, calm wave fill indicator that fills from bottom to top as time progresses (start empty at session start; half full at halfway point; fully filled when time remaining reaches 0).",
+        "summary": "Reduce the play/pause button container size to be at least 2× smaller (width/height or padding), while keeping the play/pause icon size unchanged. Apply only to the selected button element:\n- /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/button[1]",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/MeditationWaveFillIndicator.tsx",
           "frontend/src/pages/PreMeditationPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/MeditationWaveFillIndicator.tsx",
           "frontend/src/pages/PreMeditationPage.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "When the meditation duration or remaining time is adjusted (e.g., via seeking/setting controls), animate the fill level to the new target using an ease-in-out transition rather than jumping immediately.",
+        "summary": "Make the timer display slightly smaller (modest reduction only). Apply only to the selected timer element:\n- /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[2]",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/MeditationWaveFillIndicator.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/MeditationWaveFillIndicator.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Moderately reduce vertical spacing/gaps within the selected controls container so the time input range and volume input range are closer together (more compact, but not tightly stacked). Apply only to the selected controls container:\n- /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/PreMeditationPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/PreMeditationPage.tsx"
         ]
       }
     ]
@@ -52,8 +62,6 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/MeditationWaveFillIndicator.tsx",
-    "frontend/src/components/PageBackgroundShell.tsx",
     "frontend/src/pages/PreMeditationPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",

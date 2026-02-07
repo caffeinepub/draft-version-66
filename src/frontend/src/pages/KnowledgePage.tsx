@@ -1,18 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
-import { Moon, Sun, BookOpen, Award, ArrowLeft } from 'lucide-react';
-import { useTheme } from 'next-themes';
-import { useNavigate, useSearch } from '@tanstack/react-router';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import LotusCanvas from '../components/LotusCanvas';
-import SessionIndicator from '../components/SessionIndicator';
-import HamburgerMenu from '../components/HamburgerMenu';
-import KnowledgeQuizDialog from '../components/KnowledgeQuizDialog';
-import MobileBackButton from '../components/MobileBackButton';
+import { useSearch } from '@tanstack/react-router';
+import PageBackgroundShell from '../components/PageBackgroundShell';
+import StandardPageNav from '../components/StandardPageNav';
 import KnowledgeCategoryCarousel from '../components/KnowledgeCategoryCarousel';
 import KnowledgeBookPager from '../components/KnowledgeBookPager';
+import KnowledgeQuizDialog from '../components/KnowledgeQuizDialog';
 import { TECHNIQUE_CONTENT } from '../lib/knowledgeContent';
-import { useQuizScores } from '../utils/knowledgeQuizStorage';
+import { Button } from '@/components/ui/button';
+import { Trophy } from 'lucide-react';
+import { getQuizScores, saveQuizScore } from '../utils/knowledgeQuizStorage';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
 
 interface KnowledgeSearch {
   category?: string;
@@ -20,206 +17,136 @@ interface KnowledgeSearch {
 }
 
 export default function KnowledgePage() {
-  const { theme, setTheme } = useTheme();
-  const navigate = useNavigate();
   const search = useSearch({ from: '/knowledge' }) as KnowledgeSearch;
-  const [mounted, setMounted] = useState(false);
+  const { identity } = useInternetIdentity();
   
-  // Initialize selectedCategory from search param if valid, otherwise use first category
-  const getInitialCategory = () => {
-    if (search.category) {
-      const isValid = TECHNIQUE_CONTENT.some((t) => t.id === search.category);
-      if (isValid) return search.category;
-    }
-    return TECHNIQUE_CONTENT[0].id;
-  };
+  // Initialize category from search param or default to first
+  const initialCategoryId = search.category || TECHNIQUE_CONTENT[0].id;
+  const [selectedCategoryId, setSelectedCategoryId] = useState(initialCategoryId);
   
-  const [selectedCategory, setSelectedCategory] = useState(getInitialCategory());
   const [quizOpen, setQuizOpen] = useState(false);
-  const [quizCategory, setQuizCategory] = useState<string | null>(null);
-  const [categoryTransitioning, setCategoryTransitioning] = useState(false);
-  const { scores, saveScore } = useQuizScores();
-  const contentSectionRef = useRef<HTMLDivElement>(null);
+  const [quizScores, setQuizScores] = useState<Record<string, number>>({});
+  const contentRef = useRef<HTMLDivElement>(null);
   const hasScrolledRef = useRef(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const selectedTechnique = TECHNIQUE_CONTENT.find((t) => t.id === selectedCategoryId) || TECHNIQUE_CONTENT[0];
 
-  // Update selectedCategory when search.category changes (e.g., from navigation)
+  // Load quiz scores on mount and when identity changes
   useEffect(() => {
-    if (search.category) {
-      const isValid = TECHNIQUE_CONTENT.some((t) => t.id === search.category);
-      if (isValid && search.category !== selectedCategory) {
-        setSelectedCategory(search.category);
-      }
-    }
-  }, [search.category]);
+    const principalId = identity?.getPrincipal().toString();
+    const scores = getQuizScores(principalId);
+    const scoreMap: Record<string, number> = {};
+    Object.values(scores).forEach((score) => {
+      scoreMap[score.categoryId] = score.score;
+    });
+    setQuizScores(scoreMap);
+  }, [identity]);
 
   // Handle deep-link scroll from Pre-meditation "More details"
   useEffect(() => {
-    if (mounted && search.scrollToContent && !hasScrolledRef.current && contentSectionRef.current) {
+    if (search.scrollToContent && !hasScrolledRef.current && contentRef.current) {
       hasScrolledRef.current = true;
-      // Small delay to ensure DOM is fully rendered
+      // Small delay to ensure layout is complete
       setTimeout(() => {
-        contentSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        // Clear only scrollToContent param, preserve category
-        navigate({ 
-          to: '/knowledge', 
-          search: search.category ? { category: search.category } : {}, 
-          replace: true 
-        });
+        contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
     }
-  }, [mounted, search.scrollToContent, search.category, navigate]);
+  }, [search.scrollToContent, selectedCategoryId]);
 
-  const selectedContent = TECHNIQUE_CONTENT.find((t) => t.id === selectedCategory) || TECHNIQUE_CONTENT[0];
-  const quizContent = TECHNIQUE_CONTENT.find((t) => t.id === quizCategory);
-
-  const handleCategorySelect = (categoryId: string) => {
-    if (categoryId !== selectedCategory) {
-      setCategoryTransitioning(true);
-      setTimeout(() => {
-        setSelectedCategory(categoryId);
-        setCategoryTransitioning(false);
-      }, 150);
-    }
-  };
-
-  const handleTakeQuiz = (categoryId: string) => {
-    setQuizCategory(categoryId);
-    setQuizOpen(true);
-  };
+  // Reset scroll flag when category changes
+  useEffect(() => {
+    hasScrolledRef.current = false;
+  }, [selectedCategoryId]);
 
   const handleQuizComplete = (score: number, total: number) => {
-    if (quizCategory) {
-      saveScore(quizCategory, score, total);
-    }
+    const principalId = identity?.getPrincipal().toString();
+    saveQuizScore(selectedTechnique.id, score, total, principalId);
+    setQuizScores((prev) => ({
+      ...prev,
+      [selectedTechnique.id]: score,
+    }));
   };
 
-  const categories = TECHNIQUE_CONTENT.map((t) => ({
-    id: t.id,
-    title: t.title,
-    icon: t.icon,
-  }));
-
   return (
-    <div className="relative min-h-screen bg-background dark:bg-gradient-to-br dark:from-[#040f13] dark:to-background">
-      <LotusCanvas variant="enhanced" intensity={0.5} />
+    <PageBackgroundShell variant="default" intensity={0.3}>
+      {/* Standard navigation overlay */}
+      <StandardPageNav />
 
-      {/* Desktop Session Indicator */}
-      {mounted && (
-        <div className="hidden md:block">
-          <SessionIndicator />
-        </div>
-      )}
-
-      {/* Desktop Theme Toggle */}
-      {mounted && (
-        <button
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="hidden md:block fixed top-6 right-6 z-50 rounded-full bg-card/80 backdrop-blur-sm p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-border/50"
-          aria-label="Toggle theme"
-        >
-          {theme === 'dark' ? (
-            <Sun className="h-5 w-5 text-accent-cyan" />
-          ) : (
-            <Moon className="h-5 w-5 text-primary-dark" />
-          )}
-        </button>
-      )}
-
-      {/* Desktop Back Button */}
-      <button
-        onClick={() => navigate({ to: '/dashboard' })}
-        className="hidden md:block fixed top-20 left-6 z-50 rounded-full bg-card/80 backdrop-blur-sm p-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border border-border/50"
-        aria-label="Back to dashboard"
-      >
-        <ArrowLeft className="h-5 w-5 text-accent-cyan" />
-      </button>
-
-      {/* Mobile Back Button */}
-      {mounted && <MobileBackButton show={true} />}
-
-      {/* Mobile Hamburger Menu */}
-      {mounted && <HamburgerMenu />}
-
-      {/* Main Content */}
-      <main className="relative z-10 min-h-screen px-4 sm:px-6 py-8 md:py-12">
-        <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
+      <div className="relative z-10 min-h-screen pb-20">
+        <div className="container mx-auto px-4 pt-24 pb-12">
           {/* Header */}
-          <div className="text-center space-y-3">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-playfair font-bold text-accent-cyan">
-              Knowledge Center
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">
+              Knowledge Library
             </h1>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Explore in-depth guides on meditation techniques
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Explore meditation techniques with in-depth guides and test your understanding
             </p>
           </div>
 
           {/* Category Carousel */}
-          <KnowledgeCategoryCarousel
-            categories={categories}
-            selectedId={selectedCategory}
-            onSelect={handleCategorySelect}
-          />
+          <div className="mb-12">
+            <KnowledgeCategoryCarousel
+              categories={TECHNIQUE_CONTENT}
+              selectedId={selectedCategoryId}
+              onSelect={setSelectedCategoryId}
+            />
+          </div>
 
-          {/* Content Section Anchor for deep-link scroll */}
-          <div ref={contentSectionRef} className="scroll-mt-4" />
-
-          {/* Category Header - No bordered container */}
-          <div
-            className={`transition-opacity duration-150 ${categoryTransitioning ? 'opacity-0' : 'opacity-100'}`}
-          >
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-4">
-              <div className="flex-1 space-y-2">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                  <h2 className="text-2xl font-playfair font-bold text-accent-cyan">
-                    {selectedContent.title}
-                  </h2>
-                  {scores[selectedContent.id] && (
-                    <Badge variant="outline" className="border-accent-cyan/50 text-accent-cyan w-fit">
-                      <Award className="w-3 h-3 mr-1" />
-                      Score: {scores[selectedContent.id].score}/{scores[selectedContent.id].total}
-                    </Badge>
-                  )}
+          {/* Content Section */}
+          <div ref={contentRef} className="max-w-4xl mx-auto">
+            <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-border/50">
+              {/* Technique Header */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-border">
+                <div className="flex items-center gap-4">
+                  <img
+                    src={selectedTechnique.icon}
+                    alt={selectedTechnique.title}
+                    className="w-16 h-16 rounded-lg object-cover"
+                  />
+                  <div>
+                    <h2 className="text-3xl font-bold text-foreground">
+                      {selectedTechnique.title}
+                    </h2>
+                    <p className="text-muted-foreground mt-1">
+                      {selectedTechnique.description}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-base text-muted-foreground">{selectedContent.description}</p>
-              </div>
-              <Button
-                onClick={() => handleTakeQuiz(selectedContent.id)}
-                className="bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark font-semibold w-full sm:w-auto"
-              >
-                <BookOpen className="w-4 h-4 mr-2" />
-                Take Quiz
-              </Button>
-            </div>
 
-            {/* Book Pager - Uses natural page scroll with anchor-based scrolling */}
-            <div className="mt-6">
+                {/* Quiz Button with Score Badge */}
+                <Button
+                  onClick={() => setQuizOpen(true)}
+                  className="bg-accent-cyan hover:bg-accent-cyan/90 text-white relative"
+                >
+                  <Trophy className="w-4 h-4 mr-2" />
+                  Take Quiz
+                  {quizScores[selectedTechnique.id] !== undefined && (
+                    <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                      {quizScores[selectedTechnique.id]}
+                    </span>
+                  )}
+                </Button>
+              </div>
+
+              {/* Book-style Pager */}
               <KnowledgeBookPager 
-                key={selectedContent.id}
-                pages={selectedContent.pages} 
-                categoryTitle={selectedContent.title} 
+                pages={selectedTechnique.pages}
+                categoryTitle={selectedTechnique.title}
               />
             </div>
           </div>
         </div>
-      </main>
+      </div>
 
       {/* Quiz Dialog */}
-      {quizContent && (
-        <KnowledgeQuizDialog
-          open={quizOpen}
-          onClose={() => {
-            setQuizOpen(false);
-            setQuizCategory(null);
-          }}
-          categoryTitle={quizContent.title}
-          questions={quizContent.quiz}
-          onComplete={handleQuizComplete}
-        />
-      )}
-    </div>
+      <KnowledgeQuizDialog
+        open={quizOpen}
+        onClose={() => setQuizOpen(false)}
+        categoryTitle={selectedTechnique.title}
+        questions={selectedTechnique.quiz}
+        onComplete={handleQuizComplete}
+      />
+    </PageBackgroundShell>
   );
 }

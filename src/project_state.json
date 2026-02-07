@@ -1,32 +1,40 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Meditation app with pre-meditation and meditation pages; enhance meditation page navigation and timer visuals.",
+  "summary": "New project",
   "architectural_notes": [],
   "known_issues": [],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-add-a-back-button-to-the-active-meditation-view-the-in-session-screen-that-navigates-back-to-the-pre-meditation-page-route-pre-meditation",
-      "title": "Add a back button to the active meditation view (the in-session screen) that navigates back to the pre-meditation page route (`/pre-meditation`).",
+      "id": "feature-on-the-meditation-page-center-the-entire-selected-active-session-ui-block-as-a-single-group-within-the-viewport-do-not-center-each-element-independently-apply-this-only-to-the-selected-elements-identified-by-these-xpaths-canvas-html-1-body-1-div-1-div-1-div-2-div-1-div-1-div-1-canvas-1-canvas-container-html-1-body-1-div-1-div-1-div-2-div-1-div-1-div-1-div-1-controls-container-html-1-body-1-div-1-div-1-div-2-div-1-div-1-div-2-div-1-timer-element-html-1-body-1-div-1-div-1-div-2-div-1-div-1-div-2-div-2",
+      "title": "On the meditation page, center the entire selected active-session UI block as a single group within the viewport (do not center each element independently). Apply this only to the selected elements identified by these XPaths:\n- Canvas: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/canvas[1]\n- Canvas container: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]\n- Controls container: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]\n- Timer element: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[2]",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-replace-the-current-meditation-timer-visual-on-the-active-meditation-view-with-an-animated-calm-wave-fill-indicator-that-fills-from-bottom-to-top-as-time-progresses-start-empty-at-session-start-half-full-at-halfway-point-fully-filled-when-time-remaining-reaches-0",
-      "title": "Replace the current meditation timer visual on the active meditation view with an animated, calm wave fill indicator that fills from bottom to top as time progresses (start empty at session start; half full at halfway point; fully filled when time remaining reaches 0).",
+      "id": "feature-reduce-the-play-pause-button-container-size-to-be-at-least-2-smaller-width-height-or-padding-while-keeping-the-play-pause-icon-size-unchanged-apply-only-to-the-selected-button-element-html-1-body-1-div-1-div-1-div-2-div-1-div-1-div-2-button-1",
+      "title": "Reduce the play/pause button container size to be at least 2× smaller (width/height or padding), while keeping the play/pause icon size unchanged. Apply only to the selected button element:\n- /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/button[1]",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-when-the-meditation-duration-or-remaining-time-is-adjusted-e-g-via-seeking-setting-controls-animate-the-fill-level-to-the-new-target-using-an-ease-in-out-transition-rather-than-jumping-immediately",
-      "title": "When the meditation duration or remaining time is adjusted (e.g., via seeking/setting controls), animate the fill level to the new target using an ease-in-out transition rather than jumping immediately.",
+      "id": "feature-make-the-timer-display-slightly-smaller-modest-reduction-only-apply-only-to-the-selected-timer-element-html-1-body-1-div-1-div-1-div-2-div-1-div-1-div-2-div-2",
+      "title": "Make the timer display slightly smaller (modest reduction only). Apply only to the selected timer element:\n- /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[2]",
       "reqIds": [
         "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-moderately-reduce-vertical-spacing-gaps-within-the-selected-controls-container-so-the-time-input-range-and-volume-input-range-are-closer-together-more-compact-but-not-tightly-stacked-apply-only-to-the-selected-controls-container-html-1-body-1-div-1-div-1-div-2-div-1-div-1-div-2-div-1",
+      "title": "Moderately reduce vertical spacing/gaps within the selected controls container so the time input range and volume input range are closer together (more compact, but not tightly stacked). Apply only to the selected controls container:\n- /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]",
+      "reqIds": [
+        "REQ-4"
       ],
       "version": 1
     }
@@ -34,18 +42,12 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Add a back button on the meditation page that navigates back to the pre-meditation page.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Replace the meditation timer with an animated wave-style fill indicator that fills bottom-to-top smoothly based on elapsed meditation time (starts empty; 0 min left = fully filled) with ease-in-out when duration is adjusted.",
+      "summary": "Adjust Meditation page UI to be more compact: reduce gaps (especially between time and volume range inputs), make play/pause button container at least 2x smaller while keeping icon size, make timer slightly smaller, and center the entire UI block as a group.",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Add back button on meditation view and replace timer with bottom-to-top wave fill indicator",
+  "projectName": "Make meditation active controls more compact and centered (play/pause, timer, sliders)",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

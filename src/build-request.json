@@ -1,76 +1,90 @@
 {
   "kind": "build_request",
-  "title": "Add back button on meditation view and replace timer with bottom-to-top wave fill indicator",
+  "title": "Make meditation active controls more compact and centered (play/pause, timer, sliders)",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Add a back button to the active meditation view (the in-session screen) that navigates back to the pre-meditation page route (`/pre-meditation`).",
+      "text": "On the meditation page, center the entire selected active-session UI block as a single group within the viewport (do not center each element independently). Apply this only to the selected elements identified by these XPaths:\n- Canvas: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/canvas[1]\n- Canvas container: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]\n- Controls container: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]\n- Timer element: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[2]",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6",
-          "msg-8"
+          "msg-6"
         ],
         "quotes": [
-          "I want you to add back button also in meditation page.",
-          "1. pre-meditation page yes"
+          "1. As a whole group",
+          "...position elements to the center of screen."
         ]
       },
       "acceptanceCriteria": [
-        "When the user is in the active meditation view, a visible back button is present.",
-        "Clicking/tapping the back button navigates to `/pre-meditation` using TanStack Router navigation.",
-        "The back button has an accessible label in English (e.g., \"Back to setup\")."
+        "When viewing the meditation active-session area, the selected canvas + timer + sliders + play/pause controls appear visually centered as one grouped block (not individually centered within separate columns).",
+        "No other non-selected page sections change alignment/position as a side effect."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Replace the current meditation timer visual on the active meditation view with an animated, calm wave fill indicator that fills from bottom to top as time progresses (start empty at session start; half full at halfway point; fully filled when time remaining reaches 0).",
+      "text": "Reduce the play/pause button container size to be at least 2× smaller (width/height or padding), while keeping the play/pause icon size unchanged. Apply only to the selected button element:\n- /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/button[1]",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6",
-          "msg-8"
+          "msg-6"
         ],
         "quotes": [
-          "change timer, to be animated/filled from bottom to top with wave pattern that animates with loop smoothly and gets filled relative to total minutes left of meditation. 0 = fully filled",
-          "Fill up as time progressed. let's say user has picked 15 minutes meditation. It will start empty, 7.5min left, would be half full,  0min left would be full."
+          "The pause/play button should be at least 2x smaller, but the icon inside the play/pause button can stay the same, it is just the container that is too big."
         ]
       },
       "acceptanceCriteria": [
-        "The indicator fill level is driven by the meditation session progress (0.0 at start, 1.0 at completion / 0 seconds remaining).",
-        "The wave surface animates in a smooth, continuous loop (calm motion; no jitter or stutter under normal use).",
-        "At 15 minutes chosen: session start renders empty; at 7:30 remaining renders ~50% filled; at 0:00 remaining renders 100% filled.",
-        "The old ring-style timer visualization is no longer shown on the active meditation view."
+        "The clickable container of the play/pause button is visibly at least 2× smaller than before (e.g., reduced padding and/or fixed dimensions), but the icon glyph renders at the same size as before.",
+        "The button remains fully functional and accessible (still clickable/tappable; focus styles remain visible).",
+        "Only the selected play/pause button element is resized; other buttons/icons elsewhere are unaffected."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "When the meditation duration or remaining time is adjusted (e.g., via seeking/setting controls), animate the fill level to the new target using an ease-in-out transition rather than jumping immediately.",
+      "text": "Make the timer display slightly smaller (modest reduction only). Apply only to the selected timer element:\n- /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[2]",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-8"
+          "msg-6"
         ],
         "quotes": [
-          "just calm wave that fills based on time with ease-in-out if user adjusts the time"
+          "and timer should be  a bit smaller only."
         ]
       },
       "acceptanceCriteria": [
-        "If the user adjusts the time (seek), the fill level transitions smoothly to the new level using an ease-in-out feel.",
-        "The wave animation continues seamlessly during and after the fill-level transition."
+        "The timer text/visual is reduced slightly (not dramatically) compared to the current UI, maintaining readability and hierarchy.",
+        "No other text elements outside the selected timer element change size."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Moderately reduce vertical spacing/gaps within the selected controls container so the time input range and volume input range are closer together (more compact, but not tightly stacked). Apply only to the selected controls container:\n- /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4",
+          "msg-6"
+        ],
+        "quotes": [
+          "...with less gaps, especially between the time input range and volume input range, they are too far apart...",
+          "3. moderately reduced"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The vertical gap between the time slider area and the volume slider area inside the selected controls container is reduced to a moderate, visually compact spacing (clearly smaller than before, but not cramped).",
+        "Spacing reductions are limited to the selected controls container; spacing elsewhere on the page is unchanged."
       ]
     }
   ],
   "constraints": [
-    "Do not modify files under `frontend/src/components/ui` (compose existing UI components instead).",
-    "Do not edit immutable hook files listed in SYSTEM_CONTEXT (e.g., `frontend/src/hooks/useInternetIdentity.ts(x)`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`).",
-    "Keep all backend logic unchanged; this change is visual/navigation-only on the frontend."
+    "Apply the requested UI changes ONLY to the elements identified by the provided XPaths; do not refactor unrelated layout or styling.",
+    "Do not change the play/pause icon size—only reduce the container sizing around it.",
+    "Do not edit files under frontend/src/components/ui or other paths listed as immutable by the system."
   ],
   "nonGoals": [
-    "Do not add new authentication methods or change Internet Identity behavior.",
-    "Do not change meditation timer business logic (countdown/completion rules) beyond what is needed to drive the new visualization.",
-    "Do not add new pages or routes beyond using the existing `/pre-meditation` route."
+    "No changes to meditation timer logic, audio behavior, or session recording.",
+    "No redesign of the setup or reflection sections beyond the selected elements.",
+    "No new features, routes, or backend changes."
   ],
   "imageRequirements": {
     "required": [],

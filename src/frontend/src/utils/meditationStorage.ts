@@ -1,10 +1,6 @@
-import type { JournalEntry, MeditationSession, ProgressStats } from '../backend';
+// Guest-only localStorage utility for meditation data
+// This file should ONLY be used when the user is NOT authenticated
 
-const GUEST_JOURNAL_KEY = 'guestJournalEntries';
-const GUEST_PROGRESS_KEY = 'guest-meditationProgress';
-const GUEST_RITUALS_KEY = 'guestRituals';
-
-// Guest journal entry type (stored as strings)
 interface GuestJournalEntry {
   id: string;
   meditationType: string;
@@ -16,7 +12,6 @@ interface GuestJournalEntry {
   isFavorite: boolean;
 }
 
-// Guest progress data type
 interface GuestProgressData {
   totalMinutes: number;
   currentStreak: number;
@@ -25,7 +20,6 @@ interface GuestProgressData {
   sessions: Array<{ minutes: number; timestamp: string }>;
 }
 
-// Guest ritual type
 interface GuestRitual {
   meditationType: string;
   duration: number;
@@ -34,86 +28,95 @@ interface GuestRitual {
   timestamp: string;
 }
 
+const GUEST_JOURNAL_KEY = 'guest-journalEntries';
+const GUEST_PROGRESS_KEY = 'guest-meditationProgress';
+const GUEST_RITUALS_KEY = 'guest-rituals';
+
+// Legacy keys for migration
+const LEGACY_JOURNAL_KEY = 'journalEntries';
+const LEGACY_PROGRESS_KEY = 'meditationProgress';
+
+// Migrate legacy data to guest-prefixed keys (one-time migration)
+function migrateLegacyData() {
+  if (!localStorage.getItem(GUEST_JOURNAL_KEY) && localStorage.getItem(LEGACY_JOURNAL_KEY)) {
+    const legacyJournal = localStorage.getItem(LEGACY_JOURNAL_KEY);
+    if (legacyJournal) {
+      localStorage.setItem(GUEST_JOURNAL_KEY, legacyJournal);
+    }
+  }
+
+  if (!localStorage.getItem(GUEST_PROGRESS_KEY) && localStorage.getItem(LEGACY_PROGRESS_KEY)) {
+    const legacyProgress = localStorage.getItem(LEGACY_PROGRESS_KEY);
+    if (legacyProgress) {
+      localStorage.setItem(GUEST_PROGRESS_KEY, legacyProgress);
+    }
+  }
+}
+
+// Initialize migration on module load
+migrateLegacyData();
+
 export function getGuestJournalEntries(): GuestJournalEntry[] {
   try {
-    const stored = localStorage.getItem(GUEST_JOURNAL_KEY);
-    if (!stored) return [];
-    const entries = JSON.parse(stored);
-    
-    // Validate and sanitize entries
-    return entries
-      .filter((entry: any) => {
-        return entry.id !== undefined && 
-               entry.mood && 
-               Array.isArray(entry.mood);
-      })
-      .map((entry: any) => ({
-        ...entry,
-        // Ensure mood is an array of valid strings
-        mood: Array.isArray(entry.mood) 
-          ? entry.mood.filter((m: any) => typeof m === 'string' && m.length > 0)
-          : []
-      }));
+    const data = localStorage.getItem(GUEST_JOURNAL_KEY);
+    return data ? JSON.parse(data) : [];
   } catch (error) {
-    console.error('Error loading guest journal entries:', error);
+    console.error('Error reading guest journal entries:', error);
     return [];
   }
 }
 
-export function saveGuestJournalEntries(entries: GuestJournalEntry[]): void {
+export function setGuestJournalEntries(entries: GuestJournalEntry[]): void {
   try {
-    // Sanitize entries before saving
-    const sanitized = entries.map(entry => ({
-      ...entry,
-      mood: Array.isArray(entry.mood) 
-        ? entry.mood.filter((m: any) => typeof m === 'string' && m.length > 0)
-        : []
-    }));
-    localStorage.setItem(GUEST_JOURNAL_KEY, JSON.stringify(sanitized));
+    localStorage.setItem(GUEST_JOURNAL_KEY, JSON.stringify(entries));
   } catch (error) {
     console.error('Error saving guest journal entries:', error);
   }
 }
 
-export function setGuestJournalEntries(entries: GuestJournalEntry[]): void {
-  saveGuestJournalEntries(entries);
-}
-
-export function addGuestJournalEntry(entry: GuestJournalEntry): void {
-  const entries = getGuestJournalEntries();
-  entries.push(entry);
-  saveGuestJournalEntries(entries);
-}
-
-export function updateGuestJournalEntry(entryId: string, updates: Partial<GuestJournalEntry>): void {
-  const entries = getGuestJournalEntries();
-  const index = entries.findIndex((e) => e.id === entryId);
-  if (index !== -1) {
-    entries[index] = { ...entries[index], ...updates };
-    saveGuestJournalEntries(entries);
+export function updateGuestJournalEntry(
+  entryId: string,
+  updates: { reflection?: string; isFavorite?: boolean }
+): void {
+  try {
+    const entries = getGuestJournalEntries();
+    const updatedEntries = entries.map(entry => {
+      if (entry.id === entryId) {
+        return {
+          ...entry,
+          ...(updates.reflection !== undefined && { reflection: updates.reflection }),
+          ...(updates.isFavorite !== undefined && { isFavorite: updates.isFavorite }),
+        };
+      }
+      return entry;
+    });
+    setGuestJournalEntries(updatedEntries);
+  } catch (error) {
+    console.error('Error updating guest journal entry:', error);
   }
 }
 
 export function deleteGuestJournalEntry(entryId: string): void {
-  const entries = getGuestJournalEntries();
-  const filtered = entries.filter((e) => e.id !== entryId);
-  saveGuestJournalEntries(filtered);
+  try {
+    const entries = getGuestJournalEntries();
+    const filtered = entries.filter(entry => entry.id !== entryId);
+    setGuestJournalEntries(filtered);
+  } catch (error) {
+    console.error('Error deleting guest journal entry:', error);
+  }
 }
 
 export function getGuestProgressData(): GuestProgressData {
   try {
-    const stored = localStorage.getItem(GUEST_PROGRESS_KEY);
-    if (!stored) {
-      return {
-        totalMinutes: 0,
-        currentStreak: 0,
-        monthlyMinutes: 0,
-        sessions: [],
-      };
-    }
-    return JSON.parse(stored);
+    const data = localStorage.getItem(GUEST_PROGRESS_KEY);
+    return data ? JSON.parse(data) : {
+      totalMinutes: 0,
+      currentStreak: 0,
+      monthlyMinutes: 0,
+      sessions: [],
+    };
   } catch (error) {
-    console.error('Error loading guest progress data:', error);
+    console.error('Error reading guest progress data:', error);
     return {
       totalMinutes: 0,
       currentStreak: 0,
@@ -123,88 +126,73 @@ export function getGuestProgressData(): GuestProgressData {
   }
 }
 
-export function getGuestProgressStats(): ProgressStats {
-  const data = getGuestProgressData();
-  return {
-    totalMinutes: BigInt(data.totalMinutes || 0),
-    currentStreak: BigInt(data.currentStreak || 0),
-    monthlyMinutes: BigInt(data.monthlyMinutes || 0),
-    rank: 'Beginner',
-  };
-}
-
-export function saveGuestProgressData(data: GuestProgressData): void {
+export function setGuestProgressData(progress: GuestProgressData): void {
   try {
-    localStorage.setItem(GUEST_PROGRESS_KEY, JSON.stringify(data));
+    localStorage.setItem(GUEST_PROGRESS_KEY, JSON.stringify(progress));
   } catch (error) {
     console.error('Error saving guest progress data:', error);
   }
 }
 
+export function clearGuestData(): void {
+  try {
+    localStorage.removeItem(GUEST_JOURNAL_KEY);
+    localStorage.removeItem(GUEST_PROGRESS_KEY);
+  } catch (error) {
+    console.error('Error clearing guest data:', error);
+  }
+}
+
+// Helper to update guest progress after a session
 export function updateGuestProgress(minutes: number): GuestProgressData {
-  const data = getGuestProgressData();
-  const now = new Date().toISOString();
-  
-  data.totalMinutes += minutes;
-  data.monthlyMinutes += minutes;
-  data.sessions.push({ minutes, timestamp: now });
-  
-  // Update streak logic
-  const today = new Date().toDateString();
-  const lastDate = data.lastSessionDate ? new Date(data.lastSessionDate).toDateString() : null;
-  
-  if (lastDate === today) {
-    // Same day, no change to streak
-  } else if (lastDate) {
-    const yesterday = new Date();
+  const progress = getGuestProgressData();
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
+
+  progress.sessions.push({
+    minutes,
+    timestamp: now.toISOString(),
+  });
+
+  progress.totalMinutes += minutes;
+
+  if (progress.lastSessionDate) {
+    const lastDate = new Date(progress.lastSessionDate);
+    const lastDateStr = lastDate.toISOString().split('T')[0];
+    const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
-    if (lastDate === yesterday.toDateString()) {
-      data.currentStreak += 1;
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    if (lastDateStr === today) {
+      // Same day, no change to streak
+    } else if (lastDateStr === yesterdayStr) {
+      progress.currentStreak += 1;
     } else {
-      data.currentStreak = 1;
+      progress.currentStreak = 1;
     }
   } else {
-    data.currentStreak = 1;
+    progress.currentStreak = 1;
   }
-  
-  data.lastSessionDate = now;
-  saveGuestProgressData(data);
-  return data;
+
+  progress.lastSessionDate = now.toISOString();
+
+  const thirtyDaysAgo = new Date(now);
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  progress.monthlyMinutes = progress.sessions
+    .filter((session) => new Date(session.timestamp) >= thirtyDaysAgo)
+    .reduce((sum, session) => sum + session.minutes, 0);
+
+  setGuestProgressData(progress);
+  return progress;
 }
 
-export function getGuestSessionRecords(): MeditationSession[] {
-  const data = getGuestProgressData();
-  return data.sessions.map((s) => ({
-    minutes: BigInt(s.minutes || 0),
-    timestamp: BigInt(new Date(s.timestamp).getTime() * 1_000_000),
-  }));
-}
-
-export function saveGuestSessionRecords(sessions: MeditationSession[]): void {
-  const data = getGuestProgressData();
-  data.sessions = sessions.map((s) => ({
-    minutes: Number(s.minutes),
-    timestamp: new Date(Number(s.timestamp) / 1_000_000).toISOString(),
-  }));
-  saveGuestProgressData(data);
-}
-
-export function addGuestSessionRecord(session: MeditationSession): void {
-  const data = getGuestProgressData();
-  data.sessions.push({
-    minutes: Number(session.minutes),
-    timestamp: new Date(Number(session.timestamp) / 1_000_000).toISOString(),
-  });
-  saveGuestProgressData(data);
-}
-
+// Guest ritual storage utilities
 export function getGuestRituals(): GuestRitual[] {
   try {
-    const stored = localStorage.getItem(GUEST_RITUALS_KEY);
-    if (!stored) return [];
-    return JSON.parse(stored);
+    const data = localStorage.getItem(GUEST_RITUALS_KEY);
+    return data ? JSON.parse(data) : [];
   } catch (error) {
-    console.error('Error loading guest rituals:', error);
+    console.error('Error reading guest rituals:', error);
     return [];
   }
 }
@@ -217,12 +205,10 @@ export function setGuestRituals(rituals: GuestRitual[]): void {
   }
 }
 
-export function clearGuestData(): void {
+export function clearGuestRituals(): void {
   try {
-    localStorage.removeItem(GUEST_JOURNAL_KEY);
-    localStorage.removeItem(GUEST_PROGRESS_KEY);
     localStorage.removeItem(GUEST_RITUALS_KEY);
   } catch (error) {
-    console.error('Error clearing guest data:', error);
+    console.error('Error clearing guest rituals:', error);
   }
 }

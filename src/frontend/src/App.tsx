@@ -84,15 +84,7 @@ function App() {
     <AppErrorBoundary>
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
         <RouterProvider router={router} />
-        <Toaster 
-          toastOptions={{
-            classNames: {
-              toast: 'toast-with-background',
-              success: 'toast-success',
-              error: 'toast-error',
-            },
-          }}
-        />
+        <Toaster />
       </ThemeProvider>
     </AppErrorBoundary>
   );

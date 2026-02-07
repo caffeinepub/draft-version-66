@@ -1,18 +1,18 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T19:01:33.873Z",
+  "generatedAt": "2026-02-07T07:00:03.248Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 5,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "On the Pre-Meditation page, remove the meditation type carousel UI from the setup flow so users are not presented with the carousel-based meditation-type selector.",
+        "summary": "Add a back button to the active meditation view (the in-session screen) that navigates back to the pre-meditation page route (`/pre-meditation`).",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/pages/PreMeditationPage.tsx"
@@ -23,50 +23,26 @@
       },
       {
         "id": "REQ-2",
-        "summary": "Re-introduce the step-by-step meditation guide UI in the Pre-Meditation setup flow, and add a clearly placed \"More details\" control that reveals additional guide content in an appropriate way (e.g., opening an in-page expanded view/dialog/drawer) without re-adding the meditation type carousel.",
+        "summary": "Replace the current meditation timer visual on the active meditation view with an animated, calm wave fill indicator that fills from bottom to top as time progresses (start empty at session start; half full at halfway point; fully filled when time remaining reaches 0).",
         "status": "implemented",
         "plannedFiles": [
+          "frontend/src/components/MeditationWaveFillIndicator.tsx",
           "frontend/src/pages/PreMeditationPage.tsx"
         ],
         "matchedFiles": [
+          "frontend/src/components/MeditationWaveFillIndicator.tsx",
           "frontend/src/pages/PreMeditationPage.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Standardize the Back button and Light/Dark theme toggle on the following pages by removing any page-specific back/theme controls (including DashboardBackButton and inline Moon/Sun buttons) and replacing them with the same navigation UI used on the Book and Knowledge pages (StandardPageNav): PreMeditationPage (setup/active/reflection views), Journal page (\"journey\"), and Progress page.",
+        "summary": "When the meditation duration or remaining time is adjusted (e.g., via seeking/setting controls), animate the fill level to the new target using an ease-in-out transition rather than jumping immediately.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx",
-          "frontend/src/pages/JournalPage.tsx",
-          "frontend/src/pages/ProgressPage.tsx"
+          "frontend/src/components/MeditationWaveFillIndicator.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx",
-          "frontend/src/pages/JournalPage.tsx",
-          "frontend/src/pages/ProgressPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Update the active meditation experience so the meditation timer is circular rather than square by replacing the current square timer UI with the existing circular timer component (MeditationTimerRing) during the active meditation view.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-5",
-        "summary": "Change the post-meditation reflection flow so prompts are incremental and sequential: (1) prompt the user to select mood/icon state, then (2) prompt the user to select energy state icon, then (3) prompt the user to optionally write a note, optionally mark the session as favorite, and then save. Ensure validation only blocks progression where required (mood and energy required; note optional).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
+          "frontend/src/components/MeditationWaveFillIndicator.tsx"
         ]
       }
     ]
@@ -76,9 +52,9 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/pages/JournalPage.tsx",
+    "frontend/src/components/MeditationWaveFillIndicator.tsx",
+    "frontend/src/components/PageBackgroundShell.tsx",
     "frontend/src/pages/PreMeditationPage.tsx",
-    "frontend/src/pages/ProgressPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

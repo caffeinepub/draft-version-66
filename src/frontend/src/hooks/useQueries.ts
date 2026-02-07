@@ -25,19 +25,22 @@ interface MeditationTypeInfo {
   guide: string;
 }
 
-// Local fallback quotes for when backend is unavailable or returns empty
-const FALLBACK_QUOTES = [
-  "The science of enlightenment is not only about understanding the mind; it's about liberating it.",
-  "Hardcore teachings of the Buddha remind us to embrace both the joys and challenges of meditation.",
-  "Music has the power to soothe the mind and elevate the spirit in meditation.",
-  "Journal entries are a reflection of our inner growth and evolving mindfulness.",
-  "Progress is not measured by perfection, but by the persistence to continue the journey.",
-  "Balance in meditation brings harmony to both the mind and body.",
-  "Achievement in meditation is found in the stillness of the present moment.",
-  "Growth is a natural outcome of consistent practice and self-reflection.",
-  "Calmness is not the absence of turmoil, but the mastery of one's reaction to it.",
-  "Mindfulness transforms everyday moments into opportunities for awareness and growth.",
-];
+interface LocalProgressData {
+  totalMinutes: number;
+  currentStreak: number;
+  monthlyMinutes: number;
+  lastSessionDate?: string;
+  sessions: Array<{ minutes: number; timestamp: string }>;
+}
+
+// Local ritual type for guest storage
+interface LocalRitual {
+  meditationType: string;
+  duration: number;
+  ambientSound: string;
+  ambientSoundVolume: number;
+  timestamp: string;
+}
 
 // Mock data for meditation types since backend doesn't have this yet
 const mockMeditationTypes: MeditationTypeInfo[] = [
@@ -61,6 +64,20 @@ const mockMeditationTypes: MeditationTypeInfo[] = [
     description: 'Internal Family Systems meditation',
     guide: 'Connect with different parts of yourself with compassion.',
   },
+];
+
+// Local fallback quotes for when backend is unavailable or returns empty
+const FALLBACK_QUOTES = [
+  "The science of enlightenment is not only about understanding the mind; it's about liberating it.",
+  "Hardcore teachings of the Buddha remind us to embrace both the joys and challenges of meditation.",
+  "Music has the power to soothe the mind and elevate the spirit in meditation.",
+  "Journal entries are a reflection of our inner growth and evolving mindfulness.",
+  "Progress is not measured by perfection, but by the persistence to continue the journey.",
+  "Balance in meditation brings harmony to both the mind and body.",
+  "Achievement in meditation is found in the stillness of the present moment.",
+  "Growth is a natural outcome of consistent practice and self-reflection.",
+  "Calmness is not the absence of turmoil, but the mastery of one's reaction to it.",
+  "Mindfulness transforms everyday moments into opportunities for awareness and growth.",
 ];
 
 export function useMeditationTypes() {
@@ -193,6 +210,7 @@ export function useCreateJournalEntry() {
           throw new Error(getCloudSyncErrorMessage(error));
         }
       } else {
+        const entries = getGuestJournalEntries();
         const newEntry = {
           id: Date.now().toString(),
           meditationType: entry.meditationType,
@@ -203,7 +221,6 @@ export function useCreateJournalEntry() {
           timestamp: entry.timestamp.toString(),
           isFavorite: entry.isFavorite,
         };
-        const entries = getGuestJournalEntries();
         setGuestJournalEntries([...entries, newEntry]);
         return newEntry;
       }
@@ -424,7 +441,7 @@ export function useSessionRecords() {
         const progressData = getGuestProgressData();
         return progressData.sessions.map(s => ({
           minutes: BigInt(s.minutes),
-          timestamp: BigInt(new Date(s.timestamp).getTime() * 1_000_000),
+          timestamp: BigInt(s.timestamp),
         }));
       }
     },
@@ -530,6 +547,7 @@ export function useImportData() {
             ambientSoundVolume: parseInt(r.ambientSoundVolume),
             timestamp: r.timestamp,
           }));
+
           if (overwrite) {
             setGuestRituals(rituals);
           } else {
@@ -563,8 +581,8 @@ export function useExportData() {
         try {
           const exportData = await actor.getCurrentUserExportData();
           const rituals = await actor.listCallerRituals();
-          
-          const serialized = serializeExportData(
+
+          const fileData = serializeExportData(
             exportData.journalEntries,
             exportData.sessionRecords,
             exportData.progressStats,
@@ -572,7 +590,7 @@ export function useExportData() {
             rituals
           );
 
-          const blob = new Blob([JSON.stringify(serialized, null, 2)], { type: 'application/json' });
+          const blob = new Blob([JSON.stringify(fileData, null, 2)], { type: 'application/json' });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
@@ -590,10 +608,13 @@ export function useExportData() {
         const progressData = getGuestProgressData();
         const rituals = getGuestRituals();
 
-        const exportData = {
+        const fileData: ExportFileFormat = {
           version: '1.0',
           exportDate: new Date().toISOString(),
-          journalEntries: entries,
+          journalEntries: entries.map(entry => ({
+            ...entry,
+            user: 'guest',
+          })),
           sessionRecords: progressData.sessions.map(s => ({
             minutes: s.minutes.toString(),
             timestamp: s.timestamp,
@@ -613,7 +634,7 @@ export function useExportData() {
           })),
         };
 
-        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const blob = new Blob([JSON.stringify(fileData, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -655,21 +676,9 @@ export function useSaveRitual() {
           ambientSoundVolume: Number(ritual.ambientSoundVolume),
           timestamp: new Date().toISOString(),
         };
-        
-        // Check for duplicates
-        const isDuplicate = rituals.some(r =>
-          r.meditationType === newRitual.meditationType &&
-          r.duration === newRitual.duration &&
-          r.ambientSound === newRitual.ambientSound &&
-          r.ambientSoundVolume === newRitual.ambientSoundVolume
-        );
-
-        if (isDuplicate) {
-          throw new Error('DuplicateSoundscape: An identical soundscape already exists in your rituals collection.');
-        }
 
         if (rituals.length >= 5) {
-          throw new Error('RitualLimitExceeded: You can only save up to 5 ritual soundscapes.');
+          throw new Error('You can only save up to 5 ritual soundscapes. Please delete one before saving a new one.');
         }
 
         setGuestRituals([...rituals, newRitual]);
@@ -712,7 +721,7 @@ export function useRituals() {
           duration: BigInt(r.duration),
           ambientSound: r.ambientSound,
           ambientSoundVolume: BigInt(r.ambientSoundVolume),
-          timestamp: BigInt(new Date(r.timestamp).getTime() * 1_000_000),
+          timestamp: BigInt(new Date(r.timestamp).getTime() * 1000000),
         }));
       }
     },
@@ -742,11 +751,14 @@ export function useDeleteRitual() {
         }
       } else {
         const rituals = getGuestRituals();
-        const filtered = rituals.filter(r =>
-          !(r.meditationType === ritual.meditationType &&
-            r.duration === Number(ritual.duration) &&
-            r.ambientSound === ritual.ambientSound &&
-            r.ambientSoundVolume === Number(ritual.ambientSoundVolume))
+        const filtered = rituals.filter(
+          r =>
+            !(
+              r.meditationType === ritual.meditationType &&
+              r.duration === Number(ritual.duration) &&
+              r.ambientSound === ritual.ambientSound &&
+              r.ambientSoundVolume === Number(ritual.ambientSoundVolume)
+            )
         );
         setGuestRituals(filtered);
       }

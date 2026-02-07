@@ -210,28 +210,9 @@
     scrollbar-color: oklch(var(--accent-cyan)) oklch(var(--muted));
   }
 
-  /* Toast styling overrides for opaque backgrounds and borders */
-  .toast-with-background {
-    background: oklch(var(--card)) !important;
-    border: 1px solid oklch(var(--border)) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  }
-
-  .toast-success {
-    background: oklch(var(--card)) !important;
-    border: 1px solid oklch(var(--accent-cyan) / 0.5) !important;
-    box-shadow: 0 4px 12px oklch(var(--accent-cyan) / 0.2) !important;
-  }
-
-  .toast-error {
-    background: oklch(var(--card)) !important;
-    border: 1px solid oklch(var(--destructive) / 0.5) !important;
-    box-shadow: 0 4px 12px oklch(var(--destructive) / 0.2) !important;
-  }
-
-  .dark .toast-with-background,
-  .dark .toast-success,
-  .dark .toast-error {
-    background: oklch(var(--card)) !important;
+  /* Pre-meditation back button - ensure visibility and stacking */
+  .premed-back-button {
+    position: relative;
+    z-index: 60;
   }
 }

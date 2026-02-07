@@ -1,98 +1,58 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Meditation setup/active/reflection UX updates and standardized page navigation",
+  "title": "Active meditation back navigation + bottom-to-top wave fill timer indicator",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Remove the meditation type carousel selector from the Pre-Meditation setup flow while keeping setup usable.",
+      "summary": "Add an accessible back button on the in-session (active) meditation view that navigates to /pre-meditation via TanStack Router.",
       "acceptanceCriteria": [
-        "PreMeditationPage no longer renders the MeditationCarousel component in the setup UI.",
-        "Meditation setup remains usable (user can still proceed into a meditation session without the type carousel being shown)."
+        "When the user is in the active meditation view, a visible back button is present.",
+        "Clicking/tapping the back button navigates to `/pre-meditation` using TanStack Router navigation.",
+        "The back button has an accessible label in English (e.g., \"Back to setup\")."
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Remove MeditationCarousel import and any rendering/selection UI that uses the carousel in the setup view, keeping the rest of the setup flow functional (duration, ambient sound, ritual selection, and begin-meditation action remain accessible)."
+          "description": "In the active (in-session) UI branch, add a visible back button that calls TanStack Router navigate({ to: '/pre-meditation', ... }) and resets the local in-page state back to the setup view (so the user actually returns to the pre-meditation setup screen). Ensure the button has an English aria-label such as \"Back to setup\"."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Restore step-by-step meditation guide in Pre-Meditation setup and add a dismissible \"More details\" expanded guide view.",
+      "summary": "Replace the active meditation ring timer visualization with a calm animated wave fill indicator that fills bottom-to-top based on session progress.",
       "acceptanceCriteria": [
-        "PreMeditationPage setup includes a step guide UI (using the existing MeditationGuideStepper) for the currently selected meditation type.",
-        "A \"More details\" button is present near the step guide and, when activated, shows expanded guide information (not just a tooltip) and is dismissible.",
-        "The step guide and \"More details\" feature work on both mobile and desktop layouts."
+        "The indicator fill level is driven by the meditation session progress (0.0 at start, 1.0 at completion / 0 seconds remaining).",
+        "The wave surface animates in a smooth, continuous loop (calm motion; no jitter or stutter under normal use).",
+        "At 15 minutes chosen: session start renders empty; at 7:30 remaining renders ~50% filled; at 0:00 remaining renders 100% filled.",
+        "The old ring-style timer visualization is no longer shown on the active meditation view."
       ],
       "file_operations": [
         {
+          "path": "frontend/src/components/MeditationWaveFillIndicator.tsx",
+          "operation": "create",
+          "description": "Create a new visualization component that renders a bottom-to-top fill container with a smoothly looping wave surface. The component should accept session progress (0..1) and draw a calm animated wave at the current fill height (e.g., via canvas or SVG), starting empty and becoming fully filled at progress=1."
+        },
+        {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Ensure the setup view renders the existing MeditationGuideStepper for the currently selected meditation type, and add a clearly placed \"More details\" control that opens an expanded, dismissible view (e.g., a shadcn/ui Dialog or Drawer). Use shadcn-ui components to provide the expanded view and dismissal behavior; verify the component's usage instructions before implementing."
+          "description": "Update the active (in-session) meditation view to use the new MeditationWaveFillIndicator driven by the timer's progress, and remove/hide the MeditationTimerRing from the active view so the ring visualization is no longer shown during the session."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Standardize Back button and theme toggle across specified pages by replacing page-specific controls with StandardPageNav.",
+      "summary": "Animate wave fill level changes with an ease-in-out transition when remaining time/duration is adjusted (seeking), without interrupting the wave loop animation.",
       "acceptanceCriteria": [
-        "PreMeditationPage uses StandardPageNav and does not render DashboardBackButton or its own theme toggle button.",
-        "JournalPage uses StandardPageNav and does not render DashboardBackButton or its own theme toggle button.",
-        "ProgressPage uses StandardPageNav and does not render DashboardBackButton or its own theme toggle button.",
-        "Back navigation goes to /dashboard (matching StandardPageNav behavior) and theme toggle behavior matches StandardPageNav.",
-        "No duplicate back/theme controls appear on any of the affected pages in either mobile or desktop breakpoints."
+        "If the user adjusts the time (seek), the fill level transitions smoothly to the new level using an ease-in-out feel.",
+        "The wave animation continues seamlessly during and after the fill-level transition."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/PreMeditationPage.tsx",
+          "path": "frontend/src/components/MeditationWaveFillIndicator.tsx",
           "operation": "modify",
-          "description": "Remove page-specific back/theme/session controls (including DashboardBackButton and any inline Moon/Sun, SessionIndicator, HamburgerMenu usage) and render StandardPageNav instead so setup/active/reflection views share the same nav behavior as Book/Knowledge pages."
-        },
-        {
-          "path": "frontend/src/pages/JournalPage.tsx",
-          "operation": "modify",
-          "description": "Replace DashboardBackButton and the page-specific theme toggle/session/hamburger UI with StandardPageNav, ensuring only one set of back/theme controls is rendered at all breakpoints."
-        },
-        {
-          "path": "frontend/src/pages/ProgressPage.tsx",
-          "operation": "modify",
-          "description": "Replace DashboardBackButton and the page-specific theme toggle/session/hamburger UI with StandardPageNav, ensuring only one set of back/theme controls is rendered at all breakpoints."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Use the existing circular timer ring during active meditation instead of the square/wave-fill timer.",
-      "acceptanceCriteria": [
-        "During active meditation, the timer display is circular (ring) rather than square/wave-fill.",
-        "The timer continues to reflect the countdown correctly (time remaining and progress) and responds to pause/resume as before."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/PreMeditationPage.tsx",
-          "operation": "modify",
-          "description": "In the active meditation view, replace the current MeditationTimerWaveFill-based timer UI with the existing MeditationTimerRing component, keeping time remaining text/progress/pause-resume behavior consistent with the existing timer state from useMeditationTimer."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Convert post-meditation reflection into a sequential, step-based flow (mood → energy → note/favorite/save) with required-step validation.",
-      "acceptanceCriteria": [
-        "After the meditation completes, the UI shows a step-based reflection flow where mood selection is shown first, energy selection second, and note/favorite/save last.",
-        "User cannot advance past mood selection without selecting at least one mood.",
-        "User cannot advance past energy selection without selecting an energy level.",
-        "The note field is optional and can be left empty while still allowing save.",
-        "Favorite can be toggled during the final step before saving.",
-        "Saving creates the journal entry using the existing create flow and navigates to /dashboard on success (maintaining existing behavior), with errors surfaced via existing toast/error handling."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/PreMeditationPage.tsx",
-          "operation": "modify",
-          "description": "Refactor the reflection view UI into three sequential steps: (1) mood selection (required), (2) energy selection (required), (3) optional note + favorite toggle + save. Add step navigation (next/back) and step-level validation that only blocks advancing when mood/energy are missing, while reusing the existing createJournalEntry save behavior, toasts, and /dashboard navigation."
+          "description": "Implement a displayed fill level that eases toward the incoming target progress (from props) using an ease-in-out transition over a short duration, while keeping the wave surface animation running continuously (e.g., separate wave phase time from fill interpolation). Ensure this handles both normal ticking and sudden seek jumps smoothly."
         }
       ]
     }

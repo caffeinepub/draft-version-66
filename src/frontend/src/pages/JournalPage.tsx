@@ -1,33 +1,24 @@
-import { useState, useEffect } from 'react';
-import { Search, Heart, Trash2, Edit2, X, Check, Star, Calendar, Clock } from 'lucide-react';
+import { useState } from 'react';
+import { Search, Download, Upload, Heart, Trash2, Edit2, X, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import CloudSyncErrorBanner from '../components/CloudSyncErrorBanner';
 import PageBackgroundShell from '../components/PageBackgroundShell';
 import StandardPageNav from '../components/StandardPageNav';
-import ExportImportControls from '../components/ExportImportControls';
 import { useJournalEntries, useUpdateJournalEntry, useDeleteJournalEntry, useToggleFavorite, useImportData, useExportData } from '../hooks/useQueries';
 import type { JournalEntry, MoodState, EnergyState } from '../backend';
 import { toast } from 'sonner';
 import { getCloudSyncErrorMessage } from '../utils/cloudSync';
 import { moodIconMap, energyIconMap } from './PreMeditationPage';
-import { format } from 'date-fns';
 
 export default function JournalPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMood, setFilterMood] = useState<MoodState | 'all'>('all');
   const [filterEnergy, setFilterEnergy] = useState<EnergyState | 'all'>('all');
-  const [filterFavorites, setFilterFavorites] = useState(false);
-  const [filterDate, setFilterDate] = useState<Date | undefined>(undefined);
-  const [filterTimeRange, setFilterTimeRange] = useState<string>('all');
   const [editingId, setEditingId] = useState<bigint | null>(null);
   const [editedReflection, setEditedReflection] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -104,7 +95,7 @@ export default function JournalPage() {
   const handleExport = async () => {
     try {
       await exportData.mutateAsync();
-      toast.success('Data has been exported successfully');
+      toast.success('Journal exported successfully');
     } catch (error: any) {
       const message = getCloudSyncErrorMessage(error);
       toast.error(message);
@@ -117,7 +108,7 @@ export default function JournalPage() {
 
     try {
       await importData.mutateAsync({ file, overwrite: false });
-      toast.success('Data has been imported successfully');
+      toast.success('Journal imported successfully');
     } catch (error: any) {
       const message = getCloudSyncErrorMessage(error);
       toast.error(message);
@@ -130,50 +121,10 @@ export default function JournalPage() {
     const matchesSearch = entry.reflection.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesMood = filterMood === 'all' || entry.mood.includes(filterMood);
     const matchesEnergy = filterEnergy === 'all' || entry.energy === filterEnergy;
-    const matchesFavorites = !filterFavorites || entry.isFavorite;
-    
-    // Date filter
-    let matchesDate = true;
-    if (filterDate) {
-      const entryDate = new Date(Number(entry.timestamp) / 1_000_000);
-      const filterDateStart = new Date(filterDate);
-      filterDateStart.setHours(0, 0, 0, 0);
-      const filterDateEnd = new Date(filterDate);
-      filterDateEnd.setHours(23, 59, 59, 999);
-      matchesDate = entryDate >= filterDateStart && entryDate <= filterDateEnd;
-    }
-    
-    // Time range filter
-    let matchesTime = true;
-    if (filterTimeRange !== 'all') {
-      const entryDate = new Date(Number(entry.timestamp) / 1_000_000);
-      const hours = entryDate.getHours();
-      
-      switch (filterTimeRange) {
-        case 'morning': // 5am - 12pm
-          matchesTime = hours >= 5 && hours < 12;
-          break;
-        case 'afternoon': // 12pm - 5pm
-          matchesTime = hours >= 12 && hours < 17;
-          break;
-        case 'evening': // 5pm - 9pm
-          matchesTime = hours >= 17 && hours < 21;
-          break;
-        case 'night': // 9pm - 5am
-          matchesTime = hours >= 21 || hours < 5;
-          break;
-      }
-    }
-    
-    return matchesSearch && matchesMood && matchesEnergy && matchesFavorites && matchesDate && matchesTime;
+    return matchesSearch && matchesMood && matchesEnergy;
   });
 
   const sortedEntries = [...filteredEntries].sort((a, b) => Number(b.timestamp - a.timestamp));
-
-  const getMoodLabel = (mood: MoodState): string => {
-    if (!mood || typeof mood !== 'string') return 'Unknown';
-    return mood.charAt(0).toUpperCase() + mood.slice(1);
-  };
 
   return (
     <PageBackgroundShell>
@@ -216,69 +167,6 @@ export default function JournalPage() {
           {/* Icon-based filters */}
           <div className="bg-card/70 backdrop-blur-sm rounded-xl p-4 border border-accent-cyan/20">
             <div className="space-y-4">
-              {/* Favorites, Date, and Time filters */}
-              <div>
-                <p className="text-sm font-medium text-foreground mb-3">Quick Filters</p>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    onClick={() => setFilterFavorites(!filterFavorites)}
-                    variant={filterFavorites ? "default" : "outline"}
-                    size="sm"
-                    className={filterFavorites ? "bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark" : "border-accent-cyan/50 hover:border-accent-cyan"}
-                  >
-                    <Star className={`w-4 h-4 mr-2 ${filterFavorites ? 'fill-current' : ''}`} />
-                    Favorites
-                  </Button>
-
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={filterDate ? "default" : "outline"}
-                        size="sm"
-                        className={filterDate ? "bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark" : "border-accent-cyan/50 hover:border-accent-cyan"}
-                      >
-                        <Calendar className="w-4 h-4 mr-2" />
-                        {filterDate ? format(filterDate, 'MMM d, yyyy') : 'Date'}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        mode="single"
-                        selected={filterDate}
-                        onSelect={setFilterDate}
-                        initialFocus
-                      />
-                      {filterDate && (
-                        <div className="p-3 border-t">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setFilterDate(undefined)}
-                            className="w-full"
-                          >
-                            Clear Date
-                          </Button>
-                        </div>
-                      )}
-                    </PopoverContent>
-                  </Popover>
-
-                  <Select value={filterTimeRange} onValueChange={setFilterTimeRange}>
-                    <SelectTrigger className={`w-[140px] ${filterTimeRange !== 'all' ? 'bg-accent-cyan text-primary-dark border-accent-cyan' : 'border-accent-cyan/50'}`}>
-                      <Clock className="w-4 h-4 mr-2" />
-                      <SelectValue placeholder="Time" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Times</SelectItem>
-                      <SelectItem value="morning">Morning (5am-12pm)</SelectItem>
-                      <SelectItem value="afternoon">Afternoon (12pm-5pm)</SelectItem>
-                      <SelectItem value="evening">Evening (5pm-9pm)</SelectItem>
-                      <SelectItem value="night">Night (9pm-5am)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
               <div>
                 <p className="text-sm font-medium text-foreground mb-3">Filter by Mood</p>
                 <TooltipProvider>
@@ -317,7 +205,7 @@ export default function JournalPage() {
                               <Icon className={`w-5 h-5 ${isSelected ? 'text-accent-cyan' : 'text-muted-foreground'}`} />
                             </button>
                           </TooltipTrigger>
-                          <TooltipContent>{getMoodLabel(mood)}</TooltipContent>
+                          <TooltipContent>{mood.charAt(0).toUpperCase() + mood.slice(1)}</TooltipContent>
                         </Tooltip>
                       );
                     })}
@@ -373,174 +261,201 @@ export default function JournalPage() {
             </div>
           </div>
 
-          {/* Journal entries list */}
-          <div className="space-y-4">
-            {isLoading ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">Loading your journal entries...</p>
-              </div>
-            ) : sortedEntries.length === 0 ? (
-              <div className="text-center py-12 bg-card/50 backdrop-blur-sm rounded-xl border border-accent-cyan/20">
-                <p className="text-muted-foreground">
-                  {entries && entries.length > 0
-                    ? 'No entries match your current filters'
-                    : 'No journal entries yet. Complete a meditation session to create your first entry.'}
-                </p>
-              </div>
-            ) : (
-              sortedEntries.map((entry) => {
+          {isLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-accent-cyan" />
+            </div>
+          ) : sortedEntries.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground text-lg">
+                {searchQuery || filterMood !== 'all' || filterEnergy !== 'all'
+                  ? 'No entries match your filters'
+                  : 'No journal entries yet. Complete a meditation to create your first entry.'}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {sortedEntries.map((entry) => {
                 const isEditing = editingId === entry.id;
-                const entryDate = new Date(Number(entry.timestamp) / 1_000_000);
+                const date = new Date(Number(entry.timestamp) / 1000000);
 
                 return (
-                  <Card key={entry.id.toString()} className="bg-card/70 backdrop-blur-sm border-accent-cyan/30 hover:border-accent-cyan/50 transition-all">
-                    <CardContent className="p-6 space-y-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 space-y-3">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <Badge variant="outline" className="border-accent-cyan/50 text-accent-cyan">
-                              {entry.meditationType}
-                            </Badge>
-                            <Badge variant="outline" className="border-accent-cyan/50">
-                              {Number(entry.duration)} min
-                            </Badge>
-                            <span className="text-sm text-muted-foreground">
-                              {format(entryDate, 'MMM d, yyyy • h:mm a')}
-                            </span>
-                          </div>
-
-                          <div className="flex flex-wrap gap-2">
-                            {entry.mood.map((mood) => {
-                              const Icon = moodIconMap[mood];
-                              return (
-                                <TooltipProvider key={mood}>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-accent-cyan/10 border border-accent-cyan/30">
-                                        <Icon className="w-4 h-4 text-accent-cyan" />
-                                        <span className="text-xs text-accent-cyan">{getMoodLabel(mood)}</span>
-                                      </div>
-                                    </TooltipTrigger>
-                                    <TooltipContent>{getMoodLabel(mood)}</TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              );
-                            })}
-                            {entry.energy && (
-                              <TooltipProvider>
+                  <div
+                    key={entry.id.toString()}
+                    className="bg-card/70 backdrop-blur-sm rounded-xl p-6 border border-accent-cyan/20 shadow-lg hover:shadow-glow transition-all"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <Badge className="bg-accent-cyan/20 text-accent-cyan border-accent-cyan/30">
+                            {entry.meditationType}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">
+                            {entry.duration.toString()} min
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            {date.toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {entry.mood.map((mood) => {
+                            const Icon = moodIconMap[mood];
+                            return (
+                              <TooltipProvider key={mood}>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-accent-cyan/10 border border-accent-cyan/30">
-                                      {(() => {
-                                        const Icon = energyIconMap[entry.energy];
-                                        return <Icon className="w-4 h-4 text-accent-cyan" />;
-                                      })()}
-                                      <span className="text-xs text-accent-cyan">
-                                        {entry.energy.charAt(0).toUpperCase() + entry.energy.slice(1)}
-                                      </span>
+                                    <div className="p-1.5 rounded-lg bg-accent-cyan/10 border border-accent-cyan/30">
+                                      <Icon className="w-4 h-4 text-accent-cyan" />
                                     </div>
                                   </TooltipTrigger>
-                                  <TooltipContent>{entry.energy.charAt(0).toUpperCase() + entry.energy.slice(1)}</TooltipContent>
+                                  <TooltipContent>{mood.charAt(0).toUpperCase() + mood.slice(1)}</TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
-                            )}
-                          </div>
-
-                          {isEditing ? (
-                            <Textarea
-                              value={editedReflection}
-                              onChange={(e) => setEditedReflection(e.target.value)}
-                              rows={4}
-                              className="bg-background/50 border-accent-cyan/30 focus:border-accent-cyan"
-                            />
-                          ) : (
-                            <p className="text-foreground leading-relaxed whitespace-pre-wrap">
-                              {entry.reflection || <span className="text-muted-foreground italic">No reflection added</span>}
-                            </p>
-                          )}
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                          <Button
-                            onClick={() => handleToggleFavorite(entry)}
-                            variant="ghost"
-                            size="icon"
-                            className={`${entry.isFavorite ? 'text-red-500' : 'text-muted-foreground'}`}
-                          >
-                            <Heart className={`w-5 h-5 ${entry.isFavorite ? 'fill-current' : ''}`} />
-                          </Button>
-
-                          {isEditing ? (
-                            <>
-                              <Button
-                                onClick={() => handleSaveEdit(entry)}
-                                variant="ghost"
-                                size="icon"
-                                className="text-green-500"
-                                disabled={updateEntry.isPending}
-                              >
-                                <Check className="w-5 h-5" />
-                              </Button>
-                              <Button
-                                onClick={handleCancelEdit}
-                                variant="ghost"
-                                size="icon"
-                                className="text-muted-foreground"
-                              >
-                                <X className="w-5 h-5" />
-                              </Button>
-                            </>
-                          ) : (
-                            <>
-                              <Button
-                                onClick={() => handleStartEdit(entry)}
-                                variant="ghost"
-                                size="icon"
-                                className="text-muted-foreground hover:text-accent-cyan"
-                              >
-                                <Edit2 className="w-5 h-5" />
-                              </Button>
-                              <Button
-                                onClick={() => handleDeleteClick(entry.id)}
-                                variant="ghost"
-                                size="icon"
-                                className="text-muted-foreground hover:text-destructive"
-                              >
-                                <Trash2 className="w-5 h-5" />
-                              </Button>
-                            </>
-                          )}
+                            );
+                          })}
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="p-1.5 rounded-lg bg-accent-cyan/10 border border-accent-cyan/30">
+                                  {(() => {
+                                    const Icon = energyIconMap[entry.energy];
+                                    return <Icon className="w-4 h-4 text-accent-cyan" />;
+                                  })()}
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent>{entry.energy.charAt(0).toUpperCase() + entry.energy.slice(1)}</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleToggleFavorite(entry)}
+                          disabled={toggleFavorite.isPending}
+                          className="hover:bg-accent-cyan/10"
+                        >
+                          <Heart
+                            className={`w-5 h-5 ${
+                              entry.isFavorite ? 'fill-accent-cyan text-accent-cyan' : 'text-muted-foreground'
+                            }`}
+                          />
+                        </Button>
+                        {!isEditing && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleStartEdit(entry)}
+                              className="hover:bg-accent-cyan/10"
+                            >
+                              <Edit2 className="w-4 h-4 text-accent-cyan" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteClick(entry.id)}
+                              className="hover:bg-red-500/10"
+                            >
+                              <Trash2 className="w-4 h-4 text-red-500" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {isEditing ? (
+                      <div className="space-y-3">
+                        <Textarea
+                          value={editedReflection}
+                          onChange={(e) => setEditedReflection(e.target.value)}
+                          className="min-h-[100px] bg-background/50 border-accent-cyan/30 focus:border-accent-cyan"
+                        />
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => handleSaveEdit(entry)}
+                            disabled={updateEntry.isPending}
+                            size="sm"
+                            className="bg-accent-cyan hover:bg-accent-cyan-tinted"
+                          >
+                            {updateEntry.isPending ? (
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                              <Check className="w-4 h-4 mr-2" />
+                            )}
+                            Save
+                          </Button>
+                          <Button
+                            onClick={handleCancelEdit}
+                            variant="outline"
+                            size="sm"
+                            className="border-border hover:bg-muted"
+                          >
+                            <X className="w-4 h-4 mr-2" />
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+                        {entry.reflection || 'No reflection notes'}
+                      </p>
+                    )}
+                  </div>
                 );
-              })
-            )}
-          </div>
+              })}
+            </div>
+          )}
         </div>
       </main>
 
-      <ExportImportControls
-        onExport={handleExport}
-        onImport={handleImport}
-        isExporting={exportData.isPending}
-        isImporting={importData.isPending}
-      />
+      {/* Import/Export controls - fixed bottom-right */}
+      <div className="fixed bottom-6 right-6 z-40 flex gap-3">
+        <Button
+          onClick={handleExport}
+          disabled={exportData.isPending}
+          className="rounded-full w-14 h-14 bg-accent-cyan hover:bg-accent-cyan-tinted shadow-glow"
+          aria-label="Export journal"
+        >
+          {exportData.isPending ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <Download className="w-5 h-5" />
+          )}
+        </Button>
+        <label className="cursor-pointer">
+          <input
+            type="file"
+            accept=".json"
+            onChange={handleImport}
+            className="hidden"
+            disabled={importData.isPending}
+          />
+          <div className="rounded-full w-14 h-14 bg-accent-cyan hover:bg-accent-cyan-tinted shadow-glow flex items-center justify-center transition-all hover:scale-110">
+            {importData.isPending ? (
+              <Loader2 className="w-5 h-5 animate-spin text-white" />
+            ) : (
+              <Upload className="w-5 h-5 text-white" />
+            )}
+          </div>
+        </label>
+      </div>
 
+      {/* Delete confirmation dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-card border-accent-cyan/20">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Journal Entry</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-foreground">Delete Journal Entry</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
               Are you sure you want to delete this journal entry? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="border-border hover:bg-muted">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
-              className="bg-destructive hover:bg-destructive/90"
+              className="bg-red-500 hover:bg-red-600 text-white"
             >
               Delete
             </AlertDialogAction>

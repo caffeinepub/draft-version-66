@@ -52,16 +52,19 @@ export default function MeditationGuideStepper({ steps }: MeditationGuideStepper
     if (touchStartX.current === null || touchEndX.current === null) return;
 
     const swipeDistance = touchStartX.current - touchEndX.current;
-    const minSwipeDistance = 50;
+    const minSwipeDistance = 50; // Minimum distance for a swipe to register
 
     if (Math.abs(swipeDistance) > minSwipeDistance) {
       if (swipeDistance > 0) {
+        // Swiped left - go to next
         handleNext();
       } else {
+        // Swiped right - go to previous
         handlePrev();
       }
     }
 
+    // Reset touch positions
     touchStartX.current = null;
     touchEndX.current = null;
   };
@@ -166,7 +169,7 @@ export default function MeditationGuideStepper({ steps }: MeditationGuideStepper
           <ChevronLeft className="w-5 h-5" />
         </Button>
 
-        {/* Clickable step indicator dots */}
+        {/* Clickable step indicator dots - gray for unselected */}
         <div className="flex gap-2">
           {steps.map((_, index) => (
             <button

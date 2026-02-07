@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-on-the-pre-meditation-page-remove-the-meditation-type-carousel-ui-from-the-setup-flow-so-users-are-not-presented-with-the-carousel-based-meditation-type-selector",
-      "featureTitle": "On the Pre-Meditation page, remove the meditation type carousel UI from the setup flow so users are not presented with the carousel-based meditation-type selector.",
+      "featureId": "feature-add-a-back-button-to-the-active-meditation-view-the-in-session-screen-that-navigates-back-to-the-pre-meditation-page-route-pre-meditation",
+      "featureTitle": "Add a back button to the active meditation view (the in-session screen) that navigates back to the pre-meditation page route (`/pre-meditation`).",
       "files": [
         "frontend/src/pages/PreMeditationPage.tsx"
       ],
@@ -22,9 +22,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-re-introduce-the-step-by-step-meditation-guide-ui-in-the-pre-meditation-setup-flow-and-add-a-clearly-placed-more-details-control-that-reveals-additional-guide-content-in-an-appropriate-way-e-g-opening-an-in-page-expanded-view-dialog-drawer-without-re-adding-the-meditation-type-carousel",
-      "featureTitle": "Re-introduce the step-by-step meditation guide UI in the Pre-Meditation setup flow, and add a clearly placed \"More details\" control that reveals additional guide content in an appropriate way (e.g., opening an in-page expanded view/dialog/drawer) without re-adding the meditation type carousel.",
+      "featureId": "feature-replace-the-current-meditation-timer-visual-on-the-active-meditation-view-with-an-animated-calm-wave-fill-indicator-that-fills-from-bottom-to-top-as-time-progresses-start-empty-at-session-start-half-full-at-halfway-point-fully-filled-when-time-remaining-reaches-0",
+      "featureTitle": "Replace the current meditation timer visual on the active meditation view with an animated, calm wave fill indicator that fills from bottom to top as time progresses (start empty at session start; half full at halfway point; fully filled when time remaining reaches 0).",
       "files": [
+        "frontend/src/components/MeditationWaveFillIndicator.tsx",
         "frontend/src/pages/PreMeditationPage.tsx"
       ],
       "components": [
@@ -42,12 +43,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-standardize-the-back-button-and-light-dark-theme-toggle-on-the-following-pages-by-removing-any-page-specific-back-theme-controls-including-dashboardbackbutton-and-inline-moon-sun-buttons-and-replacing-them-with-the-same-navigation-ui-used-on-the-book-and-knowledge-pages-standardpagenav-premeditationpage-setup-active-reflection-views-journal-page-journey-and-progress-page",
-      "featureTitle": "Standardize the Back button and Light/Dark theme toggle on the following pages by removing any page-specific back/theme controls (including DashboardBackButton and inline Moon/Sun buttons) and replacing them with the same navigation UI used on the Book and Knowledge pages (StandardPageNav): PreMeditationPage (setup/active/reflection views), Journal page (\"journey\"), and Progress page.",
+      "featureId": "feature-when-the-meditation-duration-or-remaining-time-is-adjusted-e-g-via-seeking-setting-controls-animate-the-fill-level-to-the-new-target-using-an-ease-in-out-transition-rather-than-jumping-immediately",
+      "featureTitle": "When the meditation duration or remaining time is adjusted (e.g., via seeking/setting controls), animate the fill level to the new target using an ease-in-out transition rather than jumping immediately.",
       "files": [
-        "frontend/src/pages/JournalPage.tsx",
-        "frontend/src/pages/PreMeditationPage.tsx",
-        "frontend/src/pages/ProgressPage.tsx"
+        "frontend/src/components/MeditationWaveFillIndicator.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -60,46 +59,6 @@
       ],
       "testIds": [
         "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-active-meditation-experience-so-the-meditation-timer-is-circular-rather-than-square-by-replacing-the-current-square-timer-ui-with-the-existing-circular-timer-component-meditationtimerring-during-the-active-meditation-view",
-      "featureTitle": "Update the active meditation experience so the meditation timer is circular rather than square by replacing the current square timer UI with the existing circular timer component (MeditationTimerRing) during the active meditation view.",
-      "files": [
-        "frontend/src/pages/PreMeditationPage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "authorization@4.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-4"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-change-the-post-meditation-reflection-flow-so-prompts-are-incremental-and-sequential-1-prompt-the-user-to-select-mood-icon-state-then-2-prompt-the-user-to-select-energy-state-icon-then-3-prompt-the-user-to-optionally-write-a-note-optionally-mark-the-session-as-favorite-and-then-save-ensure-validation-only-blocks-progression-where-required-mood-and-energy-required-note-optional",
-      "featureTitle": "Change the post-meditation reflection flow so prompts are incremental and sequential: (1) prompt the user to select mood/icon state, then (2) prompt the user to select energy state icon, then (3) prompt the user to optionally write a note, optionally mark the session as favorite, and then save. Ensure validation only blocks progression where required (mood and energy required; note optional).",
-      "files": [
-        "frontend/src/pages/PreMeditationPage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "authorization@4.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-5"
       ],
       "confidence": "high"
     }

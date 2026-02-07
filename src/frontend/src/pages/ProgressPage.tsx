@@ -1,27 +1,31 @@
-import { useState } from 'react';
-import { TrendingUp, Calendar, Award, Flame } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { useState, useEffect } from 'react';
+import { Trophy, TrendingUp, Calendar, Flame, Download, Upload, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useTheme } from 'next-themes';
+import CloudSyncErrorBanner from '../components/CloudSyncErrorBanner';
 import PageBackgroundShell from '../components/PageBackgroundShell';
 import StandardPageNav from '../components/StandardPageNav';
 import ProgressBowl from '../components/ProgressBowl';
-import ExportImportControls from '../components/ExportImportControls';
-import CloudSyncErrorBanner from '../components/CloudSyncErrorBanner';
 import { useProgressStats, useImportData, useExportData } from '../hooks/useQueries';
+import { getCurrentRank, getNextRank, getMinutesUntilNextRank } from '../utils/progressRanks';
 import { toast } from 'sonner';
 import { getCloudSyncErrorMessage } from '../utils/cloudSync';
-import { useTheme } from 'next-themes';
 
 export default function ProgressPage() {
-  const { data: stats, isLoading, isError, refetch } = useProgressStats();
+  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  const { data: progressStats, isLoading, isError, error, refetch } = useProgressStats();
   const importData = useImportData();
   const exportData = useExportData();
-  const { theme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleExport = async () => {
     try {
       await exportData.mutateAsync();
-      toast.success('Data has been exported successfully');
     } catch (error: any) {
       const message = getCloudSyncErrorMessage(error);
       toast.error(message);
@@ -34,7 +38,7 @@ export default function ProgressPage() {
 
     try {
       await importData.mutateAsync({ file, overwrite: false });
-      toast.success('Data has been imported successfully');
+      toast.success('Progress data imported successfully');
     } catch (error: any) {
       const message = getCloudSyncErrorMessage(error);
       toast.error(message);
@@ -43,16 +47,19 @@ export default function ProgressPage() {
     event.target.value = '';
   };
 
-  const totalMinutes = stats ? Number(stats.totalMinutes) : 0;
-  const currentStreak = stats ? Number(stats.currentStreak) : 0;
-  const monthlyMinutes = stats ? Number(stats.monthlyMinutes) : 0;
-  const rank = stats?.rank || 'Beginner';
+  const totalMinutes = progressStats ? Number(progressStats.totalMinutes) : 0;
+  const currentStreak = progressStats ? Number(progressStats.currentStreak) : 0;
+  const monthlyMinutes = progressStats ? Number(progressStats.monthlyMinutes) : 0;
+  
+  const currentRank = getCurrentRank(totalMinutes);
+  const nextRank = getNextRank(totalMinutes);
+  const minutesUntilNext = getMinutesUntilNextRank(totalMinutes);
 
   return (
     <PageBackgroundShell>
       <StandardPageNav />
 
-      <main className="relative z-10 min-h-screen px-3 sm:px-4 py-8 sm:py-12 pb-24">
+      <main className="relative z-10 min-h-screen px-3 sm:px-4 py-8 sm:py-12">
         <div className="max-w-5xl mx-auto w-full space-y-6 sm:space-y-8 animate-fade-in mt-16">
           <div className="text-center space-y-4">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-accent-cyan-tinted animate-breathe-gentle">
@@ -73,87 +80,99 @@ export default function ProgressPage() {
             />
           )}
 
-          {/* Bowl Visualization */}
-          <div className="flex justify-center">
-            <ProgressBowl totalMinutes={totalMinutes} theme={theme || 'dark'} />
+          {/* Bowl Visualization - Centered */}
+          <div className="flex items-center justify-center w-full">
+            <div className="relative w-full max-w-md mx-auto flex items-center justify-center" style={{ height: '300px' }}>
+              {mounted && <ProgressBowl totalMinutes={totalMinutes} theme={theme || 'light'} />}
+            </div>
           </div>
 
-          {/* Stats Card */}
-          <Card className="bg-card/70 backdrop-blur-sm border-accent-cyan/30">
-            <CardContent className="p-6">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-                <div className="text-center space-y-2">
-                  <div className="flex justify-center">
-                    <TrendingUp className="w-8 h-8 text-accent-cyan" />
+          {/* Consolidated Stats Card - Single Column */}
+          <div className="bg-card/70 backdrop-blur-md border-2 border-accent-cyan/30 rounded-3xl p-6 sm:p-8 space-y-6">
+            <h2 className="text-2xl font-bold text-accent-cyan text-center mb-4">Your Statistics</h2>
+            
+            <div className="space-y-4">
+              {/* Rank */}
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-accent-cyan/5 border border-accent-cyan/20">
+                <div className="flex items-center gap-3">
+                  <Trophy className="w-8 h-8 text-accent-cyan" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Current Rank</p>
+                    <p className="text-2xl font-bold text-accent-cyan">{currentRank.name}</p>
+                    {nextRank && minutesUntilNext !== null && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {minutesUntilNext} min to {nextRank.name}
+                      </p>
+                    )}
                   </div>
-                  <div className="text-3xl font-bold text-accent-cyan-tinted">{totalMinutes}</div>
-                  <div className="text-sm text-muted-foreground">Total Minutes</div>
-                </div>
-
-                <div className="text-center space-y-2">
-                  <div className="flex justify-center">
-                    <Flame className="w-8 h-8 text-accent-cyan" />
-                  </div>
-                  <div className="text-3xl font-bold text-accent-cyan-tinted">{currentStreak}</div>
-                  <div className="text-sm text-muted-foreground">Day Streak</div>
-                </div>
-
-                <div className="text-center space-y-2">
-                  <div className="flex justify-center">
-                    <Calendar className="w-8 h-8 text-accent-cyan" />
-                  </div>
-                  <div className="text-3xl font-bold text-accent-cyan-tinted">{monthlyMinutes}</div>
-                  <div className="text-sm text-muted-foreground">This Month</div>
-                </div>
-
-                <div className="text-center space-y-2">
-                  <div className="flex justify-center">
-                    <Award className="w-8 h-8 text-accent-cyan" />
-                  </div>
-                  <div className="text-3xl font-bold text-accent-cyan-tinted">{rank}</div>
-                  <div className="text-sm text-muted-foreground">Current Rank</div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Rank Progress */}
-          <Card className="bg-card/70 backdrop-blur-sm border-accent-cyan/30">
-            <CardContent className="p-6 space-y-4">
-              <h3 className="text-xl font-semibold text-foreground">Rank Progression</h3>
-              <div className="flex flex-wrap gap-2">
-                {['Beginner', 'Intermediate', 'Advanced', 'Expert', 'Master'].map((rankName) => (
-                  <Badge
-                    key={rankName}
-                    variant={rank === rankName ? 'default' : 'outline'}
-                    className={
-                      rank === rankName
-                        ? 'bg-accent-cyan text-primary-dark'
-                        : 'border-accent-cyan/30 text-muted-foreground'
-                    }
-                  >
-                    {rankName}
-                  </Badge>
-                ))}
+              {/* Total Minutes */}
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-accent-cyan/5 border border-accent-cyan/20">
+                <div className="flex items-center gap-3">
+                  <TrendingUp className="w-8 h-8 text-accent-cyan" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Minutes</p>
+                    <p className="text-2xl font-bold text-accent-cyan">{totalMinutes}</p>
+                  </div>
+                </div>
               </div>
-              <div className="text-sm text-muted-foreground">
-                <p>• Beginner: 0-49 minutes</p>
-                <p>• Intermediate: 50-199 minutes</p>
-                <p>• Advanced: 200-499 minutes</p>
-                <p>• Expert: 500-999 minutes</p>
-                <p>• Master: 1000+ minutes</p>
+
+              {/* Streak */}
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-accent-cyan/5 border border-accent-cyan/20">
+                <div className="flex items-center gap-3">
+                  <Flame className="w-8 h-8 text-accent-cyan" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Day Streak</p>
+                    <p className="text-2xl font-bold text-accent-cyan">{currentStreak}</p>
+                  </div>
+                </div>
               </div>
-            </CardContent>
-          </Card>
+
+              {/* Monthly Minutes */}
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-accent-cyan/5 border border-accent-cyan/20">
+                <div className="flex items-center gap-3">
+                  <Calendar className="w-8 h-8 text-accent-cyan" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">This Month</p>
+                    <p className="text-2xl font-bold text-accent-cyan">{monthlyMinutes}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
 
-      <ExportImportControls
-        onExport={handleExport}
-        onImport={handleImport}
-        isExporting={exportData.isPending}
-        isImporting={importData.isPending}
-      />
+      {/* Import/Export Controls - Bottom Right */}
+      <div className="fixed bottom-6 right-6 z-40 flex gap-2">
+        <Button
+          onClick={handleExport}
+          variant="outline"
+          size="sm"
+          disabled={exportData.isPending}
+          className="border-accent-cyan/50 hover:bg-accent-cyan/10 bg-card/90 backdrop-blur-sm shadow-lg"
+        >
+          {exportData.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+          Export
+        </Button>
+        <label>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={importData.isPending}
+            className="border-accent-cyan/50 hover:bg-accent-cyan/10 bg-card/90 backdrop-blur-sm shadow-lg cursor-pointer"
+            asChild
+          >
+            <span>
+              {importData.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+              Import
+            </span>
+          </Button>
+          <input type="file" accept=".json" onChange={handleImport} className="hidden" />
+        </label>
+      </div>
     </PageBackgroundShell>
   );
 }

@@ -1,13 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Simplify the pre-meditation setup, standardize navigation controls across key pages, and improve the active and post-meditation UX.
+**Goal:** Improve the in-session meditation experience by adding a clear way to return to setup and replacing the current timer visual with a calm, progress-driven wave fill indicator.
 
 **Planned changes:**
-- Remove the meditation type carousel from the Pre-Meditation setup flow while keeping setup usable.
-- Re-introduce the step-by-step meditation guide (MeditationGuideStepper) in Pre-Meditation, with a clearly placed “More details” control that opens expanded, dismissible guide content (without bringing back the carousel).
-- Replace page-specific back buttons and theme toggles on PreMeditationPage (setup/active/reflection), Journal (“journey”), and Progress with the shared StandardPageNav used on Book/Knowledge pages (no duplicate controls; back goes to `/dashboard`).
-- Update the active meditation timer UI to use the circular MeditationTimerRing instead of the current square timer, preserving pause/resume and countdown accuracy.
-- Change post-meditation reflection to a sequential, step-based flow: mood selection (required) → energy selection (required) → optional note + favorite toggle + save, using existing save behavior and navigation to `/dashboard` on success.
+- Add a visible, accessible back button on the active meditation (in-session) view that navigates to `/pre-meditation` via TanStack Router.
+- Replace the existing ring-style timer visualization on the active meditation view with an animated wave fill indicator that fills from bottom to top based on session progress (empty at start, full at completion).
+- When duration/remaining time is adjusted, animate the fill level to the new target using an ease-in-out transition while keeping the wave motion smoothly looping.
 
-**User-visible outcome:** Users can start meditations without a type carousel, see a step guide with expandable details, navigate consistently with the same back/theme controls as Book/Knowledge, use a circular in-session timer, and complete reflections through a clearer step-by-step prompt sequence before saving.
+**User-visible outcome:** During an active meditation session, users can tap a back button to return to the pre-meditation setup screen, and they see a calm wave that rises as time progresses (including smooth transitions if time is adjusted).

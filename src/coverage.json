@@ -1,52 +1,44 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T08:04:05.920Z",
+  "generatedAt": "2026-02-07T09:03:00.281Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 4,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "On the meditation page, center the entire selected active-session UI block as a single group within the viewport (do not center each element independently). Apply this only to the selected elements identified by these XPaths:\n- Canvas: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/canvas[1]\n- Canvas container: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]\n- Controls container: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]\n- Timer element: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[2]",
+        "summary": "On the Meditation page (the pre-meditation flow at route \"/pre-meditation\"), replace the unexpected timer control buttons with a time range input UI (as it previously existed) so the user can set the session duration via input fields instead of those buttons.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/DurationRangeInput.tsx",
+          "frontend/src/pages/PreMeditationPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/DurationRangeInput.tsx",
+          "frontend/src/pages/PreMeditationPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Center-align the meditation timer display on the Meditation page so the timer (ring + time text) is visually centered horizontally (and not slightly left) across common viewport sizes.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/pages/PreMeditationPage.tsx",
           "frontend/src/components/MeditationWaveFillIndicator.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Reduce the play/pause button container size to be at least 2× smaller (width/height or padding), while keeping the play/pause icon size unchanged. Apply only to the selected button element:\n- /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/button[1]",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx",
+          "frontend/src/components/MeditationWaveFillIndicator.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Make the timer display slightly smaller (modest reduction only). Apply only to the selected timer element:\n- /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[2]",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Moderately reduce vertical spacing/gaps within the selected controls container so the time input range and volume input range are closer together (more compact, but not tightly stacked). Apply only to the selected controls container:\n- /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]",
+        "summary": "Limit changes to only what is necessary to restore the Meditation page’s previous duration input behavior and fix timer centering; avoid unrelated UI/behavior changes elsewhere in the app.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/pages/PreMeditationPage.tsx"
@@ -58,10 +50,13 @@
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/components/DurationRangeInput.tsx",
+    "frontend/src/components/MeditationWaveFillIndicator.tsx",
     "frontend/src/pages/PreMeditationPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",

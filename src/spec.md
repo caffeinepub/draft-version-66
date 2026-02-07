@@ -1,12 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Make the meditation active-session controls area more compact and visually centered as a single grouped block.
+**Goal:** Restore the Meditation page’s previous session-duration input UI and fix the timer centering regression on `/pre-meditation`.
 
 **Planned changes:**
-- Center the selected active-session UI group (canvas + timer + controls container) within the viewport as one block, without changing alignment of other page sections.
-- Reduce the play/pause button *container* size to at least 2× smaller while keeping the icon size the same; ensure the button remains accessible and functional.
-- Slightly reduce the timer display size (modest reduction only) without affecting other text.
-- Moderately reduce vertical spacing within the selected controls container so the time and volume sliders sit closer together, limited to that container.
+- Replace the unexpected timer control buttons on `/pre-meditation` with the prior time range input UI for setting session duration (range selector or equivalent start/end inputs).
+- Remove any extra/unintended controls shown where the time range input is expected on the pre-meditation flow.
+- Adjust layout/styles so the active meditation timer display (ring + time text) is horizontally centered across mobile and desktop breakpoints.
+- Keep changes limited to the Meditation page while ensuring the existing session flow (start, pause/resume, completion -> reflection/save) continues to work.
 
-**User-visible outcome:** The active meditation session area appears centered as a cohesive unit, with a smaller play/pause button container, a slightly smaller timer, and more compact spacing between the sliders—without changing other parts of the page.
+**User-visible outcome:** On the Meditation page, users set duration via the expected time range inputs (not buttons), and the timer display appears properly centered on screen.

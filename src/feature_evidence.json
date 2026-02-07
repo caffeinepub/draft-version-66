@@ -2,9 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-on-the-meditation-page-center-the-entire-selected-active-session-ui-block-as-a-single-group-within-the-viewport-do-not-center-each-element-independently-apply-this-only-to-the-selected-elements-identified-by-these-xpaths-canvas-html-1-body-1-div-1-div-1-div-2-div-1-div-1-div-1-canvas-1-canvas-container-html-1-body-1-div-1-div-1-div-2-div-1-div-1-div-1-div-1-controls-container-html-1-body-1-div-1-div-1-div-2-div-1-div-1-div-2-div-1-timer-element-html-1-body-1-div-1-div-1-div-2-div-1-div-1-div-2-div-2",
-      "featureTitle": "On the meditation page, center the entire selected active-session UI block as a single group within the viewport (do not center each element independently). Apply this only to the selected elements identified by these XPaths:\n- Canvas: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/canvas[1]\n- Canvas container: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]\n- Controls container: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]\n- Timer element: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[2]",
+      "featureId": "feature-on-the-meditation-page-the-pre-meditation-flow-at-route-pre-meditation-replace-the-unexpected-timer-control-buttons-with-a-time-range-input-ui-as-it-previously-existed-so-the-user-can-set-the-session-duration-via-input-fields-instead-of-those-buttons",
+      "featureTitle": "On the Meditation page (the pre-meditation flow at route \"/pre-meditation\"), replace the unexpected timer control buttons with a time range input UI (as it previously existed) so the user can set the session duration via input fields instead of those buttons.",
       "files": [
+        "frontend/src/components/DurationRangeInput.tsx",
         "frontend/src/pages/PreMeditationPage.tsx"
       ],
       "components": [
@@ -22,9 +23,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-reduce-the-play-pause-button-container-size-to-be-at-least-2-smaller-width-height-or-padding-while-keeping-the-play-pause-icon-size-unchanged-apply-only-to-the-selected-button-element-html-1-body-1-div-1-div-1-div-2-div-1-div-1-div-2-button-1",
-      "featureTitle": "Reduce the play/pause button container size to be at least 2× smaller (width/height or padding), while keeping the play/pause icon size unchanged. Apply only to the selected button element:\n- /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/button[1]",
+      "featureId": "feature-center-align-the-meditation-timer-display-on-the-meditation-page-so-the-timer-ring-time-text-is-visually-centered-horizontally-and-not-slightly-left-across-common-viewport-sizes",
+      "featureTitle": "Center-align the meditation timer display on the Meditation page so the timer (ring + time text) is visually centered horizontally (and not slightly left) across common viewport sizes.",
       "files": [
+        "frontend/src/components/MeditationWaveFillIndicator.tsx",
         "frontend/src/pages/PreMeditationPage.tsx"
       ],
       "components": [
@@ -42,8 +44,8 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-make-the-timer-display-slightly-smaller-modest-reduction-only-apply-only-to-the-selected-timer-element-html-1-body-1-div-1-div-1-div-2-div-1-div-1-div-2-div-2",
-      "featureTitle": "Make the timer display slightly smaller (modest reduction only). Apply only to the selected timer element:\n- /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[2]",
+      "featureId": "feature-limit-changes-to-only-what-is-necessary-to-restore-the-meditation-page-s-previous-duration-input-behavior-and-fix-timer-centering-avoid-unrelated-ui-behavior-changes-elsewhere-in-the-app",
+      "featureTitle": "Limit changes to only what is necessary to restore the Meditation page’s previous duration input behavior and fix timer centering; avoid unrelated UI/behavior changes elsewhere in the app.",
       "files": [
         "frontend/src/pages/PreMeditationPage.tsx"
       ],
@@ -58,26 +60,6 @@
       ],
       "testIds": [
         "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-moderately-reduce-vertical-spacing-gaps-within-the-selected-controls-container-so-the-time-input-range-and-volume-input-range-are-closer-together-more-compact-but-not-tightly-stacked-apply-only-to-the-selected-controls-container-html-1-body-1-div-1-div-1-div-2-div-1-div-1-div-2-div-1",
-      "featureTitle": "Moderately reduce vertical spacing/gaps within the selected controls container so the time input range and volume input range are closer together (more compact, but not tightly stacked). Apply only to the selected controls container:\n- /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]",
-      "files": [
-        "frontend/src/pages/PreMeditationPage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "authorization@4.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-4"
       ],
       "confidence": "high"
     }

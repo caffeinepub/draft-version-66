@@ -1,90 +1,67 @@
 {
   "kind": "build_request",
-  "title": "Make meditation active controls more compact and centered (play/pause, timer, sliders)",
+  "title": "Fix Meditation page timer controls and alignment regression",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "On the meditation page, center the entire selected active-session UI block as a single group within the viewport (do not center each element independently). Apply this only to the selected elements identified by these XPaths:\n- Canvas: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/canvas[1]\n- Canvas container: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]\n- Controls container: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]\n- Timer element: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[2]",
+      "text": "On the Meditation page (the pre-meditation flow at route \"/pre-meditation\"), replace the unexpected timer control buttons with a time range input UI (as it previously existed) so the user can set the session duration via input fields instead of those buttons.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "1. As a whole group",
-          "...position elements to the center of screen."
+          "In meditation page, they should be replaced with input time range. Like previously it was."
         ]
       },
       "acceptanceCriteria": [
-        "When viewing the meditation active-session area, the selected canvas + timer + sliders + play/pause controls appear visually centered as one grouped block (not individually centered within separate columns).",
-        "No other non-selected page sections change alignment/position as a side effect."
+        "In the \"/pre-meditation\" page, the timer duration can be set using a time range input UI (two inputs for start/end or equivalent range selector), not via the current unexpected buttons.",
+        "No extra/unintended control buttons are shown where the time range input is expected."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Reduce the play/pause button container size to be at least 2× smaller (width/height or padding), while keeping the play/pause icon size unchanged. Apply only to the selected button element:\n- /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/button[1]",
+      "text": "Center-align the meditation timer display on the Meditation page so the timer (ring + time text) is visually centered horizontally (and not slightly left) across common viewport sizes.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "The pause/play button should be at least 2x smaller, but the icon inside the play/pause button can stay the same, it is just the container that is too big."
+          "Adjust timer to be in center position, because it is slightly to the left in meditation page."
         ]
       },
       "acceptanceCriteria": [
-        "The clickable container of the play/pause button is visibly at least 2× smaller than before (e.g., reduced padding and/or fixed dimensions), but the icon glyph renders at the same size as before.",
-        "The button remains fully functional and accessible (still clickable/tappable; focus styles remain visible).",
-        "Only the selected play/pause button element is resized; other buttons/icons elsewhere are unaffected."
+        "On the active meditation view in \"/pre-meditation\", the timer ring and time readout are centered within the page container (visually aligned with the page’s horizontal center).",
+        "Center alignment remains correct on mobile and desktop breakpoints."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Make the timer display slightly smaller (modest reduction only). Apply only to the selected timer element:\n- /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[2]",
-      "target": "frontend",
+      "text": "Limit changes to only what is necessary to restore the Meditation page’s previous duration input behavior and fix timer centering; avoid unrelated UI/behavior changes elsewhere in the app.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "and timer should be  a bit smaller only."
+          "I don't understand why you keep changing things I didn't request?"
         ]
       },
       "acceptanceCriteria": [
-        "The timer text/visual is reduced slightly (not dramatically) compared to the current UI, maintaining readability and hierarchy.",
-        "No other text elements outside the selected timer element change size."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Moderately reduce vertical spacing/gaps within the selected controls container so the time input range and volume input range are closer together (more compact, but not tightly stacked). Apply only to the selected controls container:\n- /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4",
-          "msg-6"
-        ],
-        "quotes": [
-          "...with less gaps, especially between the time input range and volume input range, they are too far apart...",
-          "3. moderately reduced"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The vertical gap between the time slider area and the volume slider area inside the selected controls container is reduced to a moderate, visually compact spacing (clearly smaller than before, but not cramped).",
-        "Spacing reductions are limited to the selected controls container; spacing elsewhere on the page is unchanged."
+        "No unrelated UI changes are introduced outside the Meditation page as part of this fix.",
+        "Existing meditation session flow (start, pause/resume, completion -> reflection/save) continues to work after the UI regression fix."
       ]
     }
   ],
   "constraints": [
-    "Apply the requested UI changes ONLY to the elements identified by the provided XPaths; do not refactor unrelated layout or styling.",
-    "Do not change the play/pause icon size—only reduce the container sizing around it.",
-    "Do not edit files under frontend/src/components/ui or other paths listed as immutable by the system."
+    "Do not edit any files under frontend/src/components/ui or any other paths listed as immutable in SYSTEM_CONTEXT.",
+    "Keep backend architecture as a single Motoko actor; do not introduce new backend services."
   ],
   "nonGoals": [
-    "No changes to meditation timer logic, audio behavior, or session recording.",
-    "No redesign of the setup or reflection sections beyond the selected elements.",
-    "No new features, routes, or backend changes."
+    "Redesigning the overall Meditation experience beyond restoring the time range input and fixing centering.",
+    "Adding new meditation types, new audio content, or new backend persistence features."
   ],
   "imageRequirements": {
     "required": [],

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { useInternetIdentity } from './useInternetIdentity';
+import { useCloudOperation } from './useCloudOperation';
 import type { ProgressStats, JournalEntry, MeditationType, MoodState, EnergyState, Book, ImportData, Ritual, JournalEntryInput } from '../backend';
 import { formatRankDisplay } from '../utils/progressRanks';
 import {
@@ -13,7 +14,7 @@ import {
   updateGuestJournalEntry,
   deleteGuestJournalEntry,
 } from '../utils/meditationStorage';
-import { getCloudSyncErrorMessage, isCloudSyncReady } from '../utils/cloudSync';
+import { getCloudSyncErrorMessage, classifyCloudSyncError } from '../utils/cloudSync';
 import { serializeExportData, deserializeImportData, parseImportFile, type ExportFileFormat } from '../utils/exportImport';
 import { toast } from 'sonner';
 import { Principal } from '@dfinity/principal';
@@ -123,6 +124,7 @@ export function useDailyQuotes() {
 export function useRecordSession() {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
+  const { runCloudWriteWithRetry } = useCloudOperation();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -138,24 +140,21 @@ export function useRecordSession() {
       const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
 
       if (isAuthenticated) {
-        if (!actor) throw new Error('Actor not available');
+        return await runCloudWriteWithRetry(async () => {
+          if (!actor) throw new Error('Actor not available');
 
-        const session = {
-          minutes: BigInt(minutes),
-          timestamp: BigInt(Date.now() * 1_000_000),
-        };
+          const session = {
+            minutes: BigInt(minutes),
+            timestamp: BigInt(Date.now() * 1_000_000),
+          };
 
-        try {
           const result = await actor.recordMeditationSession(
             session,
             BigInt(monthlyMinutes),
             BigInt(currentStreak)
           );
           return result;
-        } catch (error: any) {
-          console.error('Error recording session:', error);
-          throw new Error(getCloudSyncErrorMessage(error));
-        }
+        });
       } else {
         const updatedProgress = updateGuestProgress(minutes);
         return {
@@ -170,6 +169,10 @@ export function useRecordSession() {
       queryClient.invalidateQueries({ queryKey: ['progressStats'] });
       queryClient.invalidateQueries({ queryKey: ['sessionRecords'] });
     },
+    onError: (error: any) => {
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message);
+    },
   });
 }
 
@@ -177,6 +180,7 @@ export function useRecordSession() {
 export function useCreateJournalEntry() {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
+  const { runCloudWriteWithRetry } = useCloudOperation();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -192,9 +196,9 @@ export function useCreateJournalEntry() {
       const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
 
       if (isAuthenticated) {
-        if (!actor) throw new Error('Actor not available');
+        return await runCloudWriteWithRetry(async () => {
+          if (!actor) throw new Error('Actor not available');
 
-        try {
           const result = await actor.createJournalEntry({
             meditationType: entry.meditationType,
             duration: entry.duration,
@@ -205,10 +209,7 @@ export function useCreateJournalEntry() {
             timestamp: entry.timestamp,
           });
           return result;
-        } catch (error: any) {
-          console.error('Error creating journal entry:', error);
-          throw new Error(getCloudSyncErrorMessage(error));
-        }
+        });
       } else {
         const entries = getGuestJournalEntries();
         const newEntry = {
@@ -228,6 +229,10 @@ export function useCreateJournalEntry() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
     },
+    onError: (error: any) => {
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message);
+    },
   });
 }
 
@@ -235,6 +240,7 @@ export function useCreateJournalEntry() {
 export function useUpdateJournalEntry() {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
+  const { runCloudWriteWithRetry } = useCloudOperation();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -242,15 +248,12 @@ export function useUpdateJournalEntry() {
       const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
 
       if (isAuthenticated) {
-        if (!actor) throw new Error('Actor not available');
+        return await runCloudWriteWithRetry(async () => {
+          if (!actor) throw new Error('Actor not available');
 
-        try {
           const result = await actor.updateJournalEntry(entryId, entry);
           return result;
-        } catch (error: any) {
-          console.error('Error updating journal entry:', error);
-          throw new Error(getCloudSyncErrorMessage(error));
-        }
+        });
       } else {
         updateGuestJournalEntry(entryId.toString(), {
           reflection: entry.reflection,
@@ -261,6 +264,10 @@ export function useUpdateJournalEntry() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
     },
+    onError: (error: any) => {
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message);
+    },
   });
 }
 
@@ -268,6 +275,7 @@ export function useUpdateJournalEntry() {
 export function useDeleteJournalEntry() {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
+  const { runCloudWriteWithRetry } = useCloudOperation();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -275,20 +283,20 @@ export function useDeleteJournalEntry() {
       const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
 
       if (isAuthenticated) {
-        if (!actor) throw new Error('Actor not available');
-
-        try {
+        return await runCloudWriteWithRetry(async () => {
+          if (!actor) throw new Error('Actor not available');
           await actor.deleteJournalEntry(entryId);
-        } catch (error: any) {
-          console.error('Error deleting journal entry:', error);
-          throw new Error(getCloudSyncErrorMessage(error));
-        }
+        });
       } else {
         deleteGuestJournalEntry(entryId.toString());
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
+    },
+    onError: (error: any) => {
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message);
     },
   });
 }
@@ -297,6 +305,7 @@ export function useDeleteJournalEntry() {
 export function useToggleFavorite() {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
+  const { runCloudWriteWithRetry } = useCloudOperation();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -304,14 +313,10 @@ export function useToggleFavorite() {
       const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
 
       if (isAuthenticated) {
-        if (!actor) throw new Error('Actor not available');
-
-        try {
+        return await runCloudWriteWithRetry(async () => {
+          if (!actor) throw new Error('Actor not available');
           await actor.toggleFavoriteEntry(entryId);
-        } catch (error: any) {
-          console.error('Error toggling favorite:', error);
-          throw new Error(getCloudSyncErrorMessage(error));
-        }
+        });
       } else {
         const entries = getGuestJournalEntries();
         const entry = entries.find(e => e.id === entryId.toString());
@@ -324,6 +329,10 @@ export function useToggleFavorite() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] });
+    },
+    onError: (error: any) => {
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message);
     },
   });
 }
@@ -413,15 +422,96 @@ export function useProgressStats() {
   });
 }
 
-// Hook for fetching session records - branches by auth state
-export function useSessionRecords() {
+// Hook for fetching books
+export function useBooks() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Book[]>({
+    queryKey: ['books'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getBooks();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// Hook for saving ritual
+export function useSaveRitual() {
+  const { actor, isFetching } = useActor();
+  const { identity } = useInternetIdentity();
+  const { runCloudWriteWithRetry } = useCloudOperation();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (ritual: {
+      meditationType: MeditationType;
+      duration: number;
+      ambientSound: string;
+      ambientSoundVolume: number;
+    }) => {
+      const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
+
+      if (isAuthenticated) {
+        return await runCloudWriteWithRetry(async () => {
+          if (!actor) throw new Error('Actor not available');
+
+          await actor.saveRitual({
+            meditationType: ritual.meditationType,
+            duration: BigInt(ritual.duration),
+            ambientSound: ritual.ambientSound,
+            ambientSoundVolume: BigInt(ritual.ambientSoundVolume),
+            timestamp: BigInt(Date.now() * 1_000_000),
+          });
+        });
+      } else {
+        const rituals = getGuestRituals();
+        const newRitual: LocalRitual = {
+          meditationType: ritual.meditationType,
+          duration: ritual.duration,
+          ambientSound: ritual.ambientSound,
+          ambientSoundVolume: ritual.ambientSoundVolume,
+          timestamp: new Date().toISOString(),
+        };
+
+        const isDuplicate = rituals.some(
+          r =>
+            r.meditationType === newRitual.meditationType &&
+            r.duration === newRitual.duration &&
+            r.ambientSound === newRitual.ambientSound &&
+            r.ambientSoundVolume === newRitual.ambientSoundVolume
+        );
+
+        if (isDuplicate) {
+          throw new Error('DuplicateSoundscape: An identical soundscape already exists in your rituals collection.');
+        }
+
+        if (rituals.length >= 5) {
+          throw new Error('RitualLimitExceeded: You can only save up to 5 ritual soundscapes.');
+        }
+
+        setGuestRituals([...rituals, newRitual]);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['rituals'] });
+    },
+    onError: (error: any) => {
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message);
+    },
+  });
+}
+
+// Hook for fetching rituals
+export function useRituals() {
   const { actor, isFetching: actorFetching } = useActor();
   const { identity } = useInternetIdentity();
 
   const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
 
-  return useQuery({
-    queryKey: ['sessionRecords', identity?.getPrincipal().toString() || 'guest'],
+  return useQuery<Ritual[]>({
+    queryKey: ['rituals', identity?.getPrincipal().toString() || 'guest'],
     queryFn: async () => {
       if (isAuthenticated) {
         if (!actor) {
@@ -432,16 +522,20 @@ export function useSessionRecords() {
         }
 
         try {
-          return await actor.getCallerSessionRecords();
+          const rituals = await actor.listCallerRituals();
+          return rituals;
         } catch (error: any) {
-          console.error('Error fetching session records:', error);
+          console.error('Error fetching rituals:', error);
           throw new Error(getCloudSyncErrorMessage(error));
         }
       } else {
-        const progressData = getGuestProgressData();
-        return progressData.sessions.map(s => ({
-          minutes: BigInt(s.minutes),
-          timestamp: BigInt(s.timestamp),
+        const guestRituals = getGuestRituals();
+        return guestRituals.map(ritual => ({
+          meditationType: ritual.meditationType as MeditationType,
+          duration: BigInt(ritual.duration),
+          ambientSound: ritual.ambientSound,
+          ambientSoundVolume: BigInt(ritual.ambientSoundVolume),
+          timestamp: BigInt(new Date(ritual.timestamp).getTime() * 1_000_000),
         }));
       }
     },
@@ -450,17 +544,43 @@ export function useSessionRecords() {
   });
 }
 
-// Hook for fetching books
-export function useBooks() {
+// Hook for deleting ritual
+export function useDeleteRitual() {
   const { actor, isFetching } = useActor();
+  const { identity } = useInternetIdentity();
+  const { runCloudWriteWithRetry } = useCloudOperation();
+  const queryClient = useQueryClient();
 
-  return useQuery<Book[]>({
-    queryKey: ['books'],
-    queryFn: async () => {
-      if (!actor) return [];
-      return actor.getBooks();
+  return useMutation({
+    mutationFn: async (ritual: Ritual) => {
+      const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
+
+      if (isAuthenticated) {
+        return await runCloudWriteWithRetry(async () => {
+          if (!actor) throw new Error('Actor not available');
+          await actor.deleteRitual(ritual);
+        });
+      } else {
+        const rituals = getGuestRituals();
+        const filtered = rituals.filter(
+          r =>
+            !(
+              r.meditationType === ritual.meditationType &&
+              r.duration === Number(ritual.duration) &&
+              r.ambientSound === ritual.ambientSound &&
+              r.ambientSoundVolume === Number(ritual.ambientSoundVolume)
+            )
+        );
+        setGuestRituals(filtered);
+      }
     },
-    enabled: !!actor && !isFetching,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['rituals'] });
+    },
+    onError: (error: any) => {
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message);
+    },
   });
 }
 
@@ -468,92 +588,59 @@ export function useBooks() {
 export function useImportData() {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
+  const { runCloudWriteWithRetry } = useCloudOperation();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ file, overwrite }: { file: File; overwrite: boolean }) => {
       const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
 
+      // Read file content
       const fileContent = await file.text();
-      const fileData = parseImportFile(fileContent);
 
       if (isAuthenticated) {
-        if (!actor) throw new Error('Actor not available');
+        return await runCloudWriteWithRetry(async () => {
+          if (!actor) throw new Error('Actor not available');
+          if (!identity) throw new Error('Identity not available');
 
-        const importData = deserializeImportData(fileData, identity!.getPrincipal().toString());
+          const fileData = parseImportFile(fileContent);
+          const callerPrincipal = identity.getPrincipal().toString();
+          const importData = deserializeImportData(fileData, callerPrincipal);
 
-        try {
           await actor.importData(importData, overwrite);
-
-          // Import rituals if present
-          if (fileData.rituals && fileData.rituals.length > 0) {
-            for (const ritual of fileData.rituals) {
-              try {
-                await actor.saveRitual({
-                  meditationType: ritual.meditationType as MeditationType,
-                  duration: BigInt(ritual.duration),
-                  ambientSound: ritual.ambientSound,
-                  ambientSoundVolume: BigInt(ritual.ambientSoundVolume),
-                  timestamp: BigInt(ritual.timestamp),
-                });
-              } catch (error) {
-                console.warn('Failed to import ritual:', error);
-              }
-            }
-          }
-        } catch (error: any) {
-          console.error('Error importing data:', error);
-          throw new Error(getCloudSyncErrorMessage(error));
-        }
+        });
       } else {
-        const entries = fileData.journalEntries.map(entry => ({
-          id: entry.id,
-          meditationType: entry.meditationType,
-          duration: entry.duration,
-          mood: entry.mood,
-          energy: entry.energy,
-          reflection: entry.reflection,
-          timestamp: entry.timestamp,
-          isFavorite: entry.isFavorite,
-        }));
+        const fileData = parseImportFile(fileContent);
+        const importData = deserializeImportData(fileData, 'guest');
 
         if (overwrite) {
-          setGuestJournalEntries(entries);
+          setGuestJournalEntries(
+            importData.journalEntries.map(e => ({
+              id: e.id.toString(),
+              meditationType: e.meditationType,
+              duration: e.duration.toString(),
+              mood: e.mood,
+              energy: e.energy,
+              reflection: e.reflection,
+              timestamp: e.timestamp.toString(),
+              isFavorite: e.isFavorite,
+            }))
+          );
         } else {
           const existing = getGuestJournalEntries();
-          setGuestJournalEntries([...existing, ...entries]);
-        }
-
-        const progressData = {
-          totalMinutes: parseInt(fileData.progressStats.totalMinutes),
-          currentStreak: parseInt(fileData.progressStats.currentStreak),
-          monthlyMinutes: parseInt(fileData.progressStats.monthlyMinutes),
-          sessions: fileData.sessionRecords.map(s => ({
-            minutes: parseInt(s.minutes),
-            timestamp: s.timestamp,
-          })),
-        };
-
-        if (overwrite) {
-          localStorage.setItem('guest-meditationProgress', JSON.stringify(progressData));
-        }
-
-        // Import rituals if present
-        if (fileData.rituals && fileData.rituals.length > 0) {
-          const rituals = fileData.rituals.map(r => ({
-            meditationType: r.meditationType,
-            duration: parseInt(r.duration),
-            ambientSound: r.ambientSound,
-            ambientSoundVolume: parseInt(r.ambientSoundVolume),
-            timestamp: r.timestamp,
-          }));
-
-          if (overwrite) {
-            setGuestRituals(rituals);
-          } else {
-            const existing = getGuestRituals();
-            setGuestRituals([...existing, ...rituals]);
-          }
+          setGuestJournalEntries([
+            ...existing,
+            ...importData.journalEntries.map(e => ({
+              id: Date.now().toString() + Math.random(),
+              meditationType: e.meditationType,
+              duration: e.duration.toString(),
+              mood: e.mood,
+              energy: e.energy,
+              reflection: e.reflection,
+              timestamp: e.timestamp.toString(),
+              isFavorite: e.isFavorite,
+            })),
+          ]);
         }
       }
     },
@@ -562,6 +649,10 @@ export function useImportData() {
       queryClient.invalidateQueries({ queryKey: ['progressStats'] });
       queryClient.invalidateQueries({ queryKey: ['sessionRecords'] });
       queryClient.invalidateQueries({ queryKey: ['rituals'] });
+    },
+    onError: (error: any) => {
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message);
     },
   });
 }
@@ -578,42 +669,42 @@ export function useExportData() {
       if (isAuthenticated) {
         if (!actor) throw new Error('Actor not available');
 
-        try {
-          const exportData = await actor.getCurrentUserExportData();
-          const rituals = await actor.listCallerRituals();
+        const exportData = await actor.getCurrentUserExportData();
+        const serialized = serializeExportData(
+          exportData.journalEntries,
+          exportData.sessionRecords,
+          exportData.progressStats,
+          exportData.userProfile,
+          []
+        );
 
-          const fileData = serializeExportData(
-            exportData.journalEntries,
-            exportData.sessionRecords,
-            exportData.progressStats,
-            exportData.userProfile,
-            rituals
-          );
-
-          const blob = new Blob([JSON.stringify(fileData, null, 2)], { type: 'application/json' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `meditation-data-${new Date().toISOString().split('T')[0]}.json`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        } catch (error: any) {
-          console.error('Error exporting data:', error);
-          throw new Error(getCloudSyncErrorMessage(error));
-        }
+        const blob = new Blob([JSON.stringify(serialized, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `meditation-journal-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
       } else {
         const entries = getGuestJournalEntries();
         const progressData = getGuestProgressData();
         const rituals = getGuestRituals();
 
-        const fileData: ExportFileFormat = {
+        const exportData: ExportFileFormat = {
           version: '1.0',
           exportDate: new Date().toISOString(),
-          journalEntries: entries.map(entry => ({
-            ...entry,
+          journalEntries: entries.map(e => ({
+            id: e.id,
             user: 'guest',
+            meditationType: e.meditationType,
+            duration: e.duration,
+            mood: e.mood,
+            energy: e.energy,
+            reflection: e.reflection,
+            timestamp: e.timestamp,
+            isFavorite: e.isFavorite,
           })),
           sessionRecords: progressData.sessions.map(s => ({
             minutes: s.minutes.toString(),
@@ -634,137 +725,20 @@ export function useExportData() {
           })),
         };
 
-        const blob = new Blob([JSON.stringify(fileData, null, 2)], { type: 'application/json' });
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `meditation-data-guest-${new Date().toISOString().split('T')[0]}.json`;
+        a.download = `meditation-journal-guest-${new Date().toISOString().split('T')[0]}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }
     },
-  });
-}
-
-// Hook for saving ritual
-export function useSaveRitual() {
-  const { actor, isFetching } = useActor();
-  const { identity } = useInternetIdentity();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (ritual: Ritual) => {
-      const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
-
-      if (isAuthenticated) {
-        if (!actor) throw new Error('Actor not available');
-
-        try {
-          await actor.saveRitual(ritual);
-        } catch (error: any) {
-          console.error('Error saving ritual:', error);
-          throw new Error(getCloudSyncErrorMessage(error));
-        }
-      } else {
-        const rituals = getGuestRituals();
-        const newRitual = {
-          meditationType: ritual.meditationType,
-          duration: Number(ritual.duration),
-          ambientSound: ritual.ambientSound,
-          ambientSoundVolume: Number(ritual.ambientSoundVolume),
-          timestamp: new Date().toISOString(),
-        };
-
-        if (rituals.length >= 5) {
-          throw new Error('You can only save up to 5 ritual soundscapes. Please delete one before saving a new one.');
-        }
-
-        setGuestRituals([...rituals, newRitual]);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['rituals'] });
-    },
-  });
-}
-
-// Hook for listing rituals
-export function useRituals() {
-  const { actor, isFetching: actorFetching } = useActor();
-  const { identity } = useInternetIdentity();
-
-  const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
-
-  return useQuery<Ritual[]>({
-    queryKey: ['rituals', identity?.getPrincipal().toString() || 'guest'],
-    queryFn: async () => {
-      if (isAuthenticated) {
-        if (!actor) {
-          throw new Error('Actor not available');
-        }
-        if (!identity) {
-          throw new Error('Identity not available');
-        }
-
-        try {
-          return await actor.listCallerRituals();
-        } catch (error: any) {
-          console.error('Error fetching rituals:', error);
-          throw new Error(getCloudSyncErrorMessage(error));
-        }
-      } else {
-        const rituals = getGuestRituals();
-        return rituals.map(r => ({
-          meditationType: r.meditationType as MeditationType,
-          duration: BigInt(r.duration),
-          ambientSound: r.ambientSound,
-          ambientSoundVolume: BigInt(r.ambientSoundVolume),
-          timestamp: BigInt(new Date(r.timestamp).getTime() * 1000000),
-        }));
-      }
-    },
-    enabled: (isAuthenticated ? !!actor && !!identity && !actorFetching : true),
-    retry: false,
-  });
-}
-
-// Hook for deleting ritual
-export function useDeleteRitual() {
-  const { actor, isFetching } = useActor();
-  const { identity } = useInternetIdentity();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (ritual: Ritual) => {
-      const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
-
-      if (isAuthenticated) {
-        if (!actor) throw new Error('Actor not available');
-
-        try {
-          await actor.deleteRitual(ritual);
-        } catch (error: any) {
-          console.error('Error deleting ritual:', error);
-          throw new Error(getCloudSyncErrorMessage(error));
-        }
-      } else {
-        const rituals = getGuestRituals();
-        const filtered = rituals.filter(
-          r =>
-            !(
-              r.meditationType === ritual.meditationType &&
-              r.duration === Number(ritual.duration) &&
-              r.ambientSound === ritual.ambientSound &&
-              r.ambientSoundVolume === Number(ritual.ambientSoundVolume)
-            )
-        );
-        setGuestRituals(filtered);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['rituals'] });
+    onError: (error: any) => {
+      const message = getCloudSyncErrorMessage(error);
+      toast.error(message);
     },
   });
 }

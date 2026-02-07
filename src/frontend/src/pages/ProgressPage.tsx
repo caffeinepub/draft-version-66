@@ -1,34 +1,28 @@
-import { useState, useEffect } from 'react';
-import { Trophy, TrendingUp, Calendar, Flame, Download, Upload, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { Download, Upload, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from 'next-themes';
-import CloudSyncErrorBanner from '../components/CloudSyncErrorBanner';
 import PageBackgroundShell from '../components/PageBackgroundShell';
 import StandardPageNav from '../components/StandardPageNav';
 import ProgressBowl from '../components/ProgressBowl';
+import CloudSyncErrorBanner from '../components/CloudSyncErrorBanner';
 import { useProgressStats, useImportData, useExportData } from '../hooks/useQueries';
-import { getCurrentRank, getNextRank, getMinutesUntilNextRank } from '../utils/progressRanks';
 import { toast } from 'sonner';
-import { getCloudSyncErrorMessage } from '../utils/cloudSync';
+import { classifyCloudSyncError } from '../utils/cloudSync';
+import { formatRankDisplay } from '../utils/progressRanks';
 
 export default function ProgressPage() {
   const { theme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  const { data: progressStats, isLoading, isError, error, refetch } = useProgressStats();
+  const { data: stats, isLoading, isError, error, refetch } = useProgressStats();
   const importData = useImportData();
   const exportData = useExportData();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const handleExport = async () => {
     try {
       await exportData.mutateAsync();
+      toast.success('Progress data exported successfully');
     } catch (error: any) {
-      const message = getCloudSyncErrorMessage(error);
-      toast.error(message);
+      // Error already handled by mutation onError
     }
   };
 
@@ -40,27 +34,26 @@ export default function ProgressPage() {
       await importData.mutateAsync({ file, overwrite: false });
       toast.success('Progress data imported successfully');
     } catch (error: any) {
-      const message = getCloudSyncErrorMessage(error);
-      toast.error(message);
+      // Error already handled by mutation onError
     }
 
     event.target.value = '';
   };
 
-  const totalMinutes = progressStats ? Number(progressStats.totalMinutes) : 0;
-  const currentStreak = progressStats ? Number(progressStats.currentStreak) : 0;
-  const monthlyMinutes = progressStats ? Number(progressStats.monthlyMinutes) : 0;
-  
-  const currentRank = getCurrentRank(totalMinutes);
-  const nextRank = getNextRank(totalMinutes);
-  const minutesUntilNext = getMinutesUntilNextRank(totalMinutes);
+  const totalMinutes = stats ? Number(stats.totalMinutes) : 0;
+  const currentStreak = stats ? Number(stats.currentStreak) : 0;
+  const monthlyMinutes = stats ? Number(stats.monthlyMinutes) : 0;
+  const rank = stats ? stats.rank : 'Beginner';
+
+  // Classify error type for better messaging
+  const errorType = isError && error ? classifyCloudSyncError(error) : 'other';
 
   return (
     <PageBackgroundShell>
       <StandardPageNav />
 
-      <main className="relative z-10 min-h-screen px-3 sm:px-4 py-8 sm:py-12">
-        <div className="max-w-5xl mx-auto w-full space-y-6 sm:space-y-8 animate-fade-in mt-16">
+      <main className="relative z-10 min-h-screen px-3 sm:px-4 py-8 sm:py-12 pb-24">
+        <div className="max-w-4xl mx-auto w-full space-y-8 animate-fade-in mt-16">
           <div className="text-center space-y-4">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-accent-cyan-tinted animate-breathe-gentle">
               Your Progress
@@ -75,73 +68,55 @@ export default function ProgressPage() {
             <CloudSyncErrorBanner 
               onRetry={refetch} 
               isRetrying={isLoading}
-              title="Failed to Load Progress"
-              description="We couldn't load your progress data. Please check your connection and try again."
+              errorType={errorType}
             />
           )}
 
-          {/* Bowl Visualization - Centered */}
-          <div className="flex items-center justify-center w-full">
-            <div className="relative w-full max-w-md mx-auto flex items-center justify-center" style={{ height: '300px' }}>
-              {mounted && <ProgressBowl totalMinutes={totalMinutes} theme={theme || 'light'} />}
+          {isLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-accent-cyan" />
             </div>
-          </div>
+          ) : (
+            <>
+              {/* Bowl Visualization */}
+              <div className="flex justify-center">
+                <ProgressBowl totalMinutes={totalMinutes} theme={theme || 'dark'} />
+              </div>
 
-          {/* Consolidated Stats Card - Single Column */}
-          <div className="bg-card/70 backdrop-blur-md border-2 border-accent-cyan/30 rounded-3xl p-6 sm:p-8 space-y-6">
-            <h2 className="text-2xl font-bold text-accent-cyan text-center mb-4">Your Statistics</h2>
-            
-            <div className="space-y-4">
-              {/* Rank */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-accent-cyan/5 border border-accent-cyan/20">
-                <div className="flex items-center gap-3">
-                  <Trophy className="w-8 h-8 text-accent-cyan" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Current Rank</p>
-                    <p className="text-2xl font-bold text-accent-cyan">{currentRank.name}</p>
-                    {nextRank && minutesUntilNext !== null && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {minutesUntilNext} min to {nextRank.name}
-                      </p>
-                    )}
+              {/* Stats Card */}
+              <div className="bg-card/70 backdrop-blur-sm rounded-2xl p-8 border border-accent-cyan/20 shadow-glow max-w-md mx-auto">
+                <div className="space-y-6">
+                  <div className="text-center pb-4 border-b border-accent-cyan/20">
+                    <div className="text-5xl font-bold text-accent-cyan mb-2">
+                      {formatRankDisplay(totalMinutes)}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Current Rank</div>
+                  </div>
+
+                  <div className="text-center pb-4 border-b border-accent-cyan/20">
+                    <div className="text-4xl font-bold text-foreground mb-2">
+                      {totalMinutes.toLocaleString()}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Total Minutes</div>
+                  </div>
+
+                  <div className="text-center pb-4 border-b border-accent-cyan/20">
+                    <div className="text-4xl font-bold text-foreground mb-2">
+                      {currentStreak}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Day Streak</div>
+                  </div>
+
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-foreground mb-2">
+                      {monthlyMinutes}
+                    </div>
+                    <div className="text-sm text-muted-foreground">This Month</div>
                   </div>
                 </div>
               </div>
-
-              {/* Total Minutes */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-accent-cyan/5 border border-accent-cyan/20">
-                <div className="flex items-center gap-3">
-                  <TrendingUp className="w-8 h-8 text-accent-cyan" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Minutes</p>
-                    <p className="text-2xl font-bold text-accent-cyan">{totalMinutes}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Streak */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-accent-cyan/5 border border-accent-cyan/20">
-                <div className="flex items-center gap-3">
-                  <Flame className="w-8 h-8 text-accent-cyan" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Day Streak</p>
-                    <p className="text-2xl font-bold text-accent-cyan">{currentStreak}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Monthly Minutes */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-accent-cyan/5 border border-accent-cyan/20">
-                <div className="flex items-center gap-3">
-                  <Calendar className="w-8 h-8 text-accent-cyan" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">This Month</p>
-                    <p className="text-2xl font-bold text-accent-cyan">{monthlyMinutes}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </main>
 

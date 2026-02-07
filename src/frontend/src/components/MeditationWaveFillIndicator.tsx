@@ -165,7 +165,7 @@ export default function MeditationWaveFillIndicator({
       ref={canvasRef}
       width={size}
       height={size}
-      className="drop-shadow-lg"
+      className="block mx-auto drop-shadow-lg"
       style={{ borderRadius: '50%' }}
     />
   );

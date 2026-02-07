@@ -1,12 +1,13 @@
+import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, RefreshCw } from 'lucide-react';
 
 interface CloudSyncErrorBannerProps {
   onRetry: () => void;
   isRetrying?: boolean;
   title?: string;
   description?: string;
+  errorType?: 'authorization' | 'readiness' | 'network' | 'other';
 }
 
 export default function CloudSyncErrorBanner({
@@ -14,28 +15,49 @@ export default function CloudSyncErrorBanner({
   isRetrying = false,
   title = 'Failed to Load Data',
   description = 'We couldn\'t load your data. Please check your connection and try again.',
+  errorType = 'other',
 }: CloudSyncErrorBannerProps) {
+  // Customize message based on error type
+  let displayTitle = title;
+  let displayDescription = description;
+
+  if (errorType === 'authorization') {
+    displayTitle = 'Authentication Required';
+    displayDescription = 'Please log in to access this feature.';
+  } else if (errorType === 'readiness') {
+    displayTitle = 'Connecting...';
+    displayDescription = 'Establishing connection to the server. This should only take a moment.';
+  } else if (errorType === 'network') {
+    displayTitle = 'Network Error';
+    displayDescription = 'Please check your internet connection and try again.';
+  }
+
   return (
-    <Alert variant="destructive" className="max-w-2xl mx-auto">
+    <Alert variant="destructive" className="border-red-500/50 bg-red-500/10">
       <AlertCircle className="h-4 w-4" />
-      <AlertTitle>{title}</AlertTitle>
-      <AlertDescription className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <span>{description}</span>
+      <AlertTitle>{displayTitle}</AlertTitle>
+      <AlertDescription className="flex items-center justify-between gap-4">
+        <span>{displayDescription}</span>
         <Button
           onClick={onRetry}
-          disabled={isRetrying}
-          size="sm"
+          disabled={isRetrying || errorType === 'readiness'}
           variant="outline"
-          className="border-destructive/50 hover:bg-destructive/10 shrink-0"
+          size="sm"
+          className="shrink-0 border-red-500/50 hover:bg-red-500/20"
         >
           {isRetrying ? (
             <>
-              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
               Retrying...
+            </>
+          ) : errorType === 'readiness' ? (
+            <>
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+              Connecting...
             </>
           ) : (
             <>
-              <RefreshCw className="w-4 h-4 mr-2" />
+              <RefreshCw className="mr-2 h-4 w-4" />
               Retry
             </>
           )}

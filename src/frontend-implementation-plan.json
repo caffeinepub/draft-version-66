@@ -1,71 +1,60 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Compact, centered active-session controls on meditation page",
+  "title": "Restore pre-meditation duration range inputs and fix timer centering",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Center the active-session UI (canvas + timer + controls) as one grouped block within the viewport, limited to the specified elements.",
+      "summary": "Replace unexpected timer control buttons with a duration time range input UI on /pre-meditation.",
       "acceptanceCriteria": [
-        "When viewing the meditation active-session area, the selected canvas + timer + sliders + play/pause controls appear visually centered as one grouped block (not individually centered within separate columns).",
-        "No other non-selected page sections change alignment/position as a side effect."
+        "In the \"/pre-meditation\" page, the timer duration can be set using a time range input UI (two inputs for start/end or equivalent range selector), not via the current unexpected buttons.",
+        "No extra/unintended control buttons are shown where the time range input is expected."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/PreMeditationPage.tsx",
-          "operation": "modify",
-          "description": "Adjust layout classes/styles ONLY on the existing canvas container, controls container, and timer element that correspond to the provided XPaths so that the active-session UI is visually centered as a single grouped block (e.g., ensuring the two sub-blocks don’t space out into separate columns and the group’s overall width is constrained and centered). Avoid changing unrelated sections (setup/reflection) and do not refactor surrounding layout structure."
+          "path": "frontend/src/components/DurationRangeInput.tsx",
+          "operation": "create",
+          "description": "Create a small, self-contained duration range input component (two inputs representing a range, e.g., start/end in minutes) that validates/clamps values and emits the computed session duration back to the parent without relying on any files under frontend/src/components/ui. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/MeditationWaveFillIndicator.tsx",
+          "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Add optional styling hooks (e.g., optional className / style props) to allow PreMeditationPage to apply centering-related tweaks specifically to the rendered canvas and its immediate container context without affecting other usages. Ensure any adjustments can be scoped so only the canvas used in the active-session area is impacted."
+          "description": "Update the /pre-meditation setup UI to use the new DurationRangeInput for setting session duration (two-input range UI) and remove the currently shown unexpected timer control buttons from the duration-setting area so only the intended range inputs are presented. Keep the existing session start and save/ritual logic intact. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Reduce the play/pause button container size by at least 2× while keeping the icon size unchanged, limited to the specified button.",
+      "summary": "Center-align the active meditation timer ring + time readout on /pre-meditation across breakpoints.",
       "acceptanceCriteria": [
-        "The clickable container of the play/pause button is visibly at least 2× smaller than before (e.g., reduced padding and/or fixed dimensions), but the icon glyph renders at the same size as before.",
-        "The button remains fully functional and accessible (still clickable/tappable; focus styles remain visible).",
-        "Only the selected play/pause button element is resized; other buttons/icons elsewhere are unaffected."
+        "On the active meditation view in \"/pre-meditation\", the timer ring and time readout are centered within the page container (visually aligned with the page’s horizontal center).",
+        "Center alignment remains correct on mobile and desktop breakpoints."
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Update ONLY the active-session play/pause button element (matching the provided XPath) to reduce its container sizing by at least 2× (e.g., smaller padding and/or fixed width/height) while leaving the Play/Pause icon component sizing classes unchanged. Preserve accessible focus styling and click/tap behavior; do not change other buttons."
+          "description": "Adjust the active phase layout wrappers around the timer visualization so the timer container is horizontally centered (e.g., ensure full-width centering with flex/grid and consistent max-width + auto margins) and the overlay time text remains centered over the ring. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/MeditationWaveFillIndicator.tsx",
+          "operation": "modify",
+          "description": "Ensure the canvas element is rendered in a way that centers reliably within its parent (e.g., make it a block-level element and allow auto horizontal margins via className) so the ring is not visually shifted left. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Make the active-session timer display slightly smaller, limited to the specified timer element.",
+      "summary": "Constrain the fix to the Meditation page only and preserve the existing meditation session flow behavior.",
       "acceptanceCriteria": [
-        "The timer text/visual is reduced slightly (not dramatically) compared to the current UI, maintaining readability and hierarchy.",
-        "No other text elements outside the selected timer element change size."
+        "No unrelated UI changes are introduced outside the Meditation page as part of this fix.",
+        "Existing meditation session flow (start, pause/resume, completion -> reflection/save) continues to work after the UI regression fix."
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Adjust ONLY the timer display element (matching the provided XPath) to reduce its font size modestly (and related line-height if needed) while keeping readability. Ensure the change is scoped so no other text elements on the page are affected."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Moderately reduce vertical spacing within the active-session controls container so time and volume sliders are closer, limited to the specified controls container.",
-      "acceptanceCriteria": [
-        "The vertical gap between the time slider area and the volume slider area inside the selected controls container is reduced to a moderate, visually compact spacing (clearly smaller than before, but not cramped).",
-        "Spacing reductions are limited to the selected controls container; spacing elsewhere on the page is unchanged."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/PreMeditationPage.tsx",
-          "operation": "modify",
-          "description": "Reduce vertical spacing ONLY inside the active-session controls container (matching the provided XPath) by adjusting its internal gap/spacing utilities (e.g., lowering space-y/gap values) so the time and volume slider sections sit closer together without becoming cramped. Ensure no other page spacing/layout is impacted."
+          "description": "Audit changes to ensure they are limited to restoring the previous duration-input behavior and fixing centering: keep existing state transitions (setup -> active -> reflection), timer start/pause/resume behavior via useMeditationTimer, and completion handling unchanged aside from wiring the new duration input values. Verify the component's usage instructions before implementing."
         }
       ]
     }

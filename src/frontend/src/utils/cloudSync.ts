@@ -12,12 +12,12 @@ export const CLOUD_SYNC_ERRORS = {
   ACTOR_NOT_READY: {
     code: 'ACTOR_NOT_READY',
     message: 'Backend actor not initialized',
-    userMessage: 'Connection not ready. Please wait a moment and try again.',
+    userMessage: 'Connecting to server... Please wait a moment.',
   },
   IDENTITY_NOT_READY: {
     code: 'IDENTITY_NOT_READY',
     message: 'User identity not available',
-    userMessage: 'Authentication not ready. Please log in and try again.',
+    userMessage: 'Authenticating... Please wait a moment.',
   },
   UNAUTHORIZED: {
     code: 'UNAUTHORIZED',
@@ -58,6 +58,7 @@ export const CLOUD_SYNC_ERRORS = {
 
 /**
  * Map backend error messages to user-friendly messages
+ * Enhanced to better classify authorization vs readiness errors
  */
 export function getCloudSyncErrorMessage(error: any): string {
   if (!error) {
@@ -66,11 +67,19 @@ export function getCloudSyncErrorMessage(error: any): string {
 
   const errorMessage = error.message || error.toString();
 
-  // Check for specific backend trap messages
-  if (errorMessage.includes('Unauthorized') || errorMessage.includes('Authentication required')) {
+  // Check for authorization errors first (these should NOT show "Connection not ready")
+  if (
+    errorMessage.includes('Unauthorized') ||
+    errorMessage.includes('Authentication required') ||
+    errorMessage.includes('not authorized') ||
+    errorMessage.includes('permission denied') ||
+    errorMessage.includes('access denied') ||
+    errorMessage.includes('Runtime.trap')
+  ) {
     return CLOUD_SYNC_ERRORS.UNAUTHORIZED.userMessage;
   }
 
+  // Check for specific backend trap messages
   if (errorMessage.includes('DuplicateSoundscape') || errorMessage.includes('identical soundscape')) {
     return CLOUD_SYNC_ERRORS.DUPLICATE_RITUAL.userMessage;
   }
@@ -109,6 +118,43 @@ export function getCloudSyncErrorMessage(error: any): string {
 
   // Default to backend error
   return CLOUD_SYNC_ERRORS.BACKEND_ERROR.userMessage;
+}
+
+/**
+ * Classify error type for UI handling
+ */
+export function classifyCloudSyncError(error: any): 'authorization' | 'readiness' | 'network' | 'other' {
+  if (!error) return 'other';
+
+  const errorMessage = error.message || error.toString();
+
+  // Authorization errors
+  if (
+    errorMessage.includes('Unauthorized') ||
+    errorMessage.includes('Authentication required') ||
+    errorMessage.includes('not authorized') ||
+    errorMessage.includes('permission') ||
+    errorMessage.includes('Runtime.trap')
+  ) {
+    return 'authorization';
+  }
+
+  // Readiness errors
+  if (
+    errorMessage.includes('Actor not available') ||
+    errorMessage.includes('Identity not available') ||
+    errorMessage.includes('actor not initialized') ||
+    errorMessage.includes('not ready')
+  ) {
+    return 'readiness';
+  }
+
+  // Network errors
+  if (errorMessage.includes('fetch') || errorMessage.includes('network') || errorMessage.includes('NetworkError')) {
+    return 'network';
+  }
+
+  return 'other';
 }
 
 /**

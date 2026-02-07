@@ -2,47 +2,18 @@
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
   "summary": "New project",
-  "architectural_notes": [
-    "Audio playback should be managed as a single global instance and must be stopped/paused on navigation away from meditation sessions (e.g., back button).",
-    "Knowledge page routing for “More details” should be driven by the category selected on the pre-meditation screen (category-to-category mapping like Meta -> Meta)."
-  ],
+  "architectural_notes": [],
   "known_issues": [
-    "Ambient audio continues playing after leaving a meditation session via back navigation.",
-    "Pre-meditation screen is incorrectly displayed in two columns instead of a single column.",
-    "Guide “More details” button is missing from the pre-meditation guide container.",
-    "Meditation timer display is not centered and shows overflow/precision issues (needs .toFixed(2))."
+    "'bpmktq' custom time range slider responds visually in reverse direction (thumb appears opposite to drag).",
+    "'1iwj49n' timer waveform fill reaches only ~85% at 0:00 instead of 100%."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-ensure-ambient-audio-fully-stops-when-the-user-leaves-an-active-meditation-session-via-any-back-navigation-e-g-standardpagenav-mobile-back-button-routing-to-dashboard-this-must-stop-the-single-global-ambient-audio-instance-pause-reset-currenttime-and-release-the-audio-source-if-applicable-so-no-sound-continues-after-leaving-the-meditation-screen",
-      "title": "Ensure ambient audio fully stops when the user leaves an active meditation session via any back navigation (e.g., StandardPageNav/Mobile back button routing to /dashboard). This must stop the single global ambient audio instance (pause, reset currentTime, and release the audio source if applicable) so no sound continues after leaving the meditation screen.",
+      "id": "feature-update-the-pre-meditation-page-layout-so-the-more-details-button-with-id-1dl1fqs-is-positioned-at-the-bottom-of-the-guide-container-within-the-parent-container-1j6s3jt-the-selected-element-at-xpath-html-1-body-1-div-1-div-1-main-1-div-1-div-3-the-button-should-remain-at-the-bottom-of-that-container-regardless-of-guide-content-height-i-e-guide-content-above-button-pinned-to-the-bottom",
+      "title": "Update the Pre‑Meditation page layout so the “More details” button with id '1dl1fqs' is positioned at the bottom of the guide container within the parent container '1j6s3jt' (the selected element at XPath `/html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[3]`). The button should remain at the bottom of that container regardless of guide content height (i.e., guide content above, button pinned to the bottom).",
       "reqIds": [
         "REQ-1"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-premeditationpage-setup-ui-to-use-a-single-column-layout-no-side-by-side-two-column-split-all-existing-setup-elements-must-stack-vertically-in-the-current-order-shown-in-the-ui-as-previously",
-      "title": "Update the PreMeditationPage setup UI to use a single-column layout (no side-by-side/two-column split). All existing setup elements must stack vertically in the current order shown in the UI (as previously).",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-re-add-a-more-details-button-inside-the-premeditationpage-guide-container-that-navigates-to-the-knowledge-page-preselecting-the-category-that-was-selected-in-pre-meditation-e-g-metta-metta-via-the-knowledge-route-search-parameter-the-navigation-should-deep-link-to-the-content-area-use-the-knowledgepage-deep-link-mechanism",
-      "title": "Re-add a “More details” button inside the PreMeditationPage guide container that navigates to the Knowledge page, preselecting the category that was selected in pre-meditation (e.g., metta -> metta) via the /knowledge route search parameter. The navigation should deep-link to the content area (use the KnowledgePage deep-link mechanism).",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-fix-the-active-meditation-timer-display-so-the-time-text-is-visually-centered-inside-the-circular-timer-indicator-and-the-displayed-time-value-is-formatted-with-two-decimal-places-using-tofixed-2-to-prevent-overflow-precision-display-issues",
-      "title": "Fix the active meditation timer display so the time text is visually centered inside the circular timer indicator and the displayed time value is formatted with two decimal places using .toFixed(2) to prevent overflow/precision display issues.",
-      "reqIds": [
-        "REQ-4"
       ],
       "version": 1
     }
@@ -50,30 +21,47 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Stop/fully pause ambient audio when leaving a meditation session via the back button (ensure only one global audio instance is stopped).",
-      "reqIds": [],
+      "summary": "Place '1dl1fqs' (More details button) at the bottom of the guide container within parent '1j6s3jt'",
+      "reqIds": [
+        "1dl1fqs",
+        "1j6s3jt"
+      ],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Change pre-meditation page layout to a single-column stacked layout in the current (previous) order.",
-      "reqIds": [],
+      "summary": "Add py-3 padding to 'cigrx0' (Begin meditation button)",
+      "reqIds": [
+        "cigrx0"
+      ],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Re-add the Guide container “More details” button that routes to the corresponding meditation knowledge page based on the selected pre-meditation category (e.g., Meta -> Meta).",
-      "reqIds": [],
+      "summary": "Fix 'bpmktq' (custom input time range) thumb/visual response so dragging direction matches user input (not reversed)",
+      "reqIds": [
+        "bpmktq"
+      ],
       "status": "pending"
     },
     {
       "id": "AR-4",
-      "summary": "Meditation page: center the timer inside the circle and format the displayed time with .toFixed(2) to prevent number overflow display issues.",
-      "reqIds": [],
+      "summary": "Update 't4f3jw' (notification element) to use theme-fitting background (e.g., --background), accent-cyan text, and an accent-cyan close (X) button positioned top-right",
+      "reqIds": [
+        "t4f3jw"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Adjust '1iwj49n' (timer canvas waveform) to smoothly fill the circle to 100% at 0:00 (bottom=max time left to top=min time left)",
+      "reqIds": [
+        "1iwj49n"
+      ],
       "status": "pending"
     }
   ],
-  "projectName": "Polish meditation flow: stop ambient audio on back, single-column pre-meditation layout, restore guide “More details” deep-link, and fix timer centering/formatting",
+  "projectName": "Place “More details” button at bottom of the guide container on Pre‑Meditation page",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -1,92 +1,35 @@
 {
   "kind": "build_request",
-  "title": "Polish meditation flow: stop ambient audio on back, single-column pre-meditation layout, restore guide “More details” deep-link, and fix timer centering/formatting",
+  "title": "Place “More details” button at bottom of the guide container on Pre‑Meditation page",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Ensure ambient audio fully stops when the user leaves an active meditation session via any back navigation (e.g., StandardPageNav/Mobile back button routing to /dashboard). This must stop the single global ambient audio instance (pause, reset currentTime, and release the audio source if applicable) so no sound continues after leaving the meditation screen.",
+      "text": "Update the Pre‑Meditation page layout so the “More details” button with id '1dl1fqs' is positioned at the bottom of the guide container within the parent container '1j6s3jt' (the selected element at XPath `/html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[3]`). The button should remain at the bottom of that container regardless of guide content height (i.e., guide content above, button pinned to the bottom).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-4",
-          "recent-messages-6"
+          "msg-5"
         ],
         "quotes": [
-          "I noticed when I am in a meditation session, and click back button, it still plays ambient sound like it did in meditation session. It should completely pause that.",
-          "Technically, there should be only one instance, so yes, all and one."
+          "'1dl1fqs' (More details btn) should be place at the bottom of guide container as mentioned in point 1(1. \"1j6s3jt\" parent container that holds guide, including more details btn)"
         ]
       },
       "acceptanceCriteria": [
-        "From an active meditation session, clicking the back button results in no ambient audio continuing to play after navigation completes.",
-        "Audio is paused and reset (e.g., currentTime set back to 0) when leaving the active meditation UI.",
-        "No duplicate ambient audio instances can remain playing after repeated start/back cycles."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Update the PreMeditationPage setup UI to use a single-column layout (no side-by-side/two-column split). All existing setup elements must stack vertically in the current order shown in the UI (as previously).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "recent-messages-4",
-          "recent-messages-6"
-        ],
-        "quotes": [
-          "Also, pre meditation page content, should be in a single column. Now I see two columns, one for guide, other for saving ritual, starting meditation, and selecting ambient sound. So make it single column content page.",
-          "Yes in the current order(as previously it was)"
-        ]
-      },
-      "acceptanceCriteria": [
-        "On the pre-meditation setup screen, guide, ritual save, start controls, and ambient sound selection are rendered in one vertical column (no multi-column/grid split at common breakpoints).",
-        "The order of elements matches the current order (no reordering)."
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Re-add a “More details” button inside the PreMeditationPage guide container that navigates to the Knowledge page, preselecting the category that was selected in pre-meditation (e.g., metta -> metta) via the /knowledge route search parameter. The navigation should deep-link to the content area (use the KnowledgePage deep-link mechanism).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "recent-messages-4",
-          "recent-messages-6"
-        ],
-        "quotes": [
-          "And re-add the more details button in the guide container, that redirects to coresponding meditation knowledge page to learn about it as previously it was.",
-          "More details just redirects to knowledge page with a category that was selected in pre-meditation. Meta = Meta etc."
-        ]
-      },
-      "acceptanceCriteria": [
-        "A visible “More details” button appears within the guide container on the pre-meditation setup screen.",
-        "Clicking “More details” navigates to /knowledge with the selected pre-meditation category passed as the search param (category=<selectedType>).",
-        "After navigation, the Knowledge page shows the matching category selected and auto-scrolls to the content section."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Fix the active meditation timer display so the time text is visually centered inside the circular timer indicator and the displayed time value is formatted with two decimal places using .toFixed(2) to prevent overflow/precision display issues.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "recent-messages-4"
-        ],
-        "quotes": [
-          "Lastly, in meditation page, the timer should be centered inside the circle, and the time should be .toFixed(2), because there are some number overflow that is happening for some reason, cheers!"
-        ]
-      },
-      "acceptanceCriteria": [
-        "In the active meditation UI, the timer text is centered within the circle at common screen sizes.",
-        "The displayed time uses two decimal places (via .toFixed(2)) and does not render overflowing/unstable digits."
+        "On the Pre‑Meditation page, within the guide parent container '1j6s3jt', the '1dl1fqs' “More details” button renders at the bottom edge of that container (visually below the guide content).",
+        "When the guide content height changes (short vs. long text), the '1dl1fqs' button remains at the bottom of the container and does not float mid-container.",
+        "The button continues to perform its existing navigation behavior (redirect to Knowledge page) without introducing regressions."
       ]
     }
   ],
   "constraints": [
-    "Frontend immutable paths must not be modified: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui."
+    "Apply changes only to the selected element scope (/html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[3]) for this prompt; do not modify unrelated elements/features."
   ],
   "nonGoals": [
-    "Do not introduce new authentication providers (Internet Identity only).",
-    "Do not add new backend APIs or modify backend schema for these UI/audio/layout fixes.",
-    "Do not change the order of pre-meditation setup elements beyond converting the layout to a single column."
+    "Do not change the notification element 't4f3jw' styling in this build.",
+    "Do not change the timer canvas waveform behavior for '1iwj49n' in this build.",
+    "Do not change the duration range input 'bpmktq' behavior in this build.",
+    "Do not change the “Begin meditation” button 'cigrx0' padding in this build."
   ],
   "imageRequirements": {
     "required": [],

@@ -1,12 +1,10 @@
 # Specification
 
 ## Summary
-**Goal:** Polish the meditation flow by ensuring ambient audio stops on exit, simplifying the pre-meditation setup layout, restoring the guide “More details” deep-link to Knowledge, and fixing timer centering/formatting.
+**Goal:** Pin the “More details” button to the bottom of the guide container on the Pre‑Meditation page.
 
 **Planned changes:**
-- Stop and fully reset the single global ambient audio instance when leaving an active meditation session via any back navigation (pause, reset time to 0, and release source if applicable) to prevent lingering/duplicate playback.
-- Update the PreMeditationPage setup UI to a single-column layout while keeping all existing elements stacked vertically in the current order.
-- Re-add a “More details” button inside the PreMeditationPage guide container that navigates to `/knowledge` with the selected category passed via search param and deep-links to the Knowledge content section.
-- Fix the active meditation timer display so the time text is centered within the circular indicator and the displayed time is formatted with two decimal places using `.toFixed(2)`.
+- Update the Pre‑Meditation page layout within the selected parent container `1j6s3jt` so the “More details” button (`1dl1fqs`) renders at the bottom edge of the guide container.
+- Ensure the guide content occupies the space above the button so the button stays pinned to the bottom regardless of guide content height, while preserving the button’s existing navigation to the Knowledge page.
 
-**User-visible outcome:** Leaving a meditation session fully stops ambient sound, the pre-meditation setup screen shows a single vertical column, “More details” opens the matching Knowledge category and scrolls to content, and the timer is centered and consistently formatted.
+**User-visible outcome:** On the Pre‑Meditation page, the “More details” button consistently appears at the bottom of the guide container (below the guide text), even when the guide content length changes, and it still navigates to the Knowledge page when clicked.

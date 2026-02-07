@@ -2,14 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-ensure-ambient-audio-fully-stops-when-the-user-leaves-an-active-meditation-session-via-any-back-navigation-e-g-standardpagenav-mobile-back-button-routing-to-dashboard-this-must-stop-the-single-global-ambient-audio-instance-pause-reset-currenttime-and-release-the-audio-source-if-applicable-so-no-sound-continues-after-leaving-the-meditation-screen",
-      "featureTitle": "Ensure ambient audio fully stops when the user leaves an active meditation session via any back navigation (e.g., StandardPageNav/Mobile back button routing to /dashboard). This must stop the single global ambient audio instance (pause, reset currentTime, and release the audio source if applicable) so no sound continues after leaving the meditation screen.",
+      "featureId": "feature-update-the-pre-meditation-page-layout-so-the-more-details-button-with-id-1dl1fqs-is-positioned-at-the-bottom-of-the-guide-container-within-the-parent-container-1j6s3jt-the-selected-element-at-xpath-html-1-body-1-div-1-div-1-main-1-div-1-div-3-the-button-should-remain-at-the-bottom-of-that-container-regardless-of-guide-content-height-i-e-guide-content-above-button-pinned-to-the-bottom",
+      "featureTitle": "Update the Pre‑Meditation page layout so the “More details” button with id '1dl1fqs' is positioned at the bottom of the guide container within the parent container '1j6s3jt' (the selected element at XPath `/html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[3]`). The button should remain at the bottom of that container regardless of guide content height (i.e., guide content above, button pinned to the bottom).",
       "files": [
-        "frontend/src/components/AmbientMusicCarousel.tsx",
-        "frontend/src/components/MobileBackButton.tsx",
-        "frontend/src/components/StandardPageNav.tsx",
-        "frontend/src/pages/PreMeditationPage.tsx",
-        "frontend/src/utils/ambientAudioManager.ts"
+        "frontend/src/pages/PreMeditationPage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -22,66 +18,6 @@
       ],
       "testIds": [
         "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-premeditationpage-setup-ui-to-use-a-single-column-layout-no-side-by-side-two-column-split-all-existing-setup-elements-must-stack-vertically-in-the-current-order-shown-in-the-ui-as-previously",
-      "featureTitle": "Update the PreMeditationPage setup UI to use a single-column layout (no side-by-side/two-column split). All existing setup elements must stack vertically in the current order shown in the UI (as previously).",
-      "files": [
-        "frontend/src/pages/PreMeditationPage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "authorization@4.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-re-add-a-more-details-button-inside-the-premeditationpage-guide-container-that-navigates-to-the-knowledge-page-preselecting-the-category-that-was-selected-in-pre-meditation-e-g-metta-metta-via-the-knowledge-route-search-parameter-the-navigation-should-deep-link-to-the-content-area-use-the-knowledgepage-deep-link-mechanism",
-      "featureTitle": "Re-add a “More details” button inside the PreMeditationPage guide container that navigates to the Knowledge page, preselecting the category that was selected in pre-meditation (e.g., metta -> metta) via the /knowledge route search parameter. The navigation should deep-link to the content area (use the KnowledgePage deep-link mechanism).",
-      "files": [
-        "frontend/src/pages/PreMeditationPage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "authorization@4.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-fix-the-active-meditation-timer-display-so-the-time-text-is-visually-centered-inside-the-circular-timer-indicator-and-the-displayed-time-value-is-formatted-with-two-decimal-places-using-tofixed-2-to-prevent-overflow-precision-display-issues",
-      "featureTitle": "Fix the active meditation timer display so the time text is visually centered inside the circular timer indicator and the displayed time value is formatted with two decimal places using .toFixed(2) to prevent overflow/precision display issues.",
-      "files": [
-        "frontend/src/pages/PreMeditationPage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "authorization@4.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-4"
       ],
       "confidence": "high"
     }

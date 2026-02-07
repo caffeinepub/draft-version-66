@@ -105,7 +105,8 @@ export function useMeditationTimer({
   }, [totalSeconds, clearTimer]);
 
   const seekTime = useCallback((seconds: number) => {
-    const clampedSeconds = Math.max(0, Math.min(totalSeconds, seconds));
+    // Round to integer to prevent floating point artifacts
+    const clampedSeconds = Math.round(Math.max(0, Math.min(totalSeconds, seconds)));
     setTimeRemaining(clampedSeconds);
     hasCompletedRef.current = false;
   }, [totalSeconds]);
@@ -118,8 +119,10 @@ export function useMeditationTimer({
   }, []);
 
   const formatTime = useCallback((seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
+    // Round to integer to prevent floating point display
+    const roundedSeconds = Math.round(seconds);
+    const mins = Math.floor(roundedSeconds / 60);
+    const secs = roundedSeconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }, []);
 

@@ -158,7 +158,7 @@ export default function BookRecommendationsPage() {
           <ArrowLeft className="h-5 w-5 text-accent-cyan" />
         </button>
 
-        {mounted && <MobileBackButton />}
+        {mounted && <MobileBackButton show={true} />}
         {mounted && <HamburgerMenu />}
 
         <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-3 sm:px-4 py-8 sm:py-12">
@@ -212,7 +212,7 @@ export default function BookRecommendationsPage() {
       </button>
 
       {/* Mobile Back Button */}
-      {mounted && <MobileBackButton />}
+      {mounted && <MobileBackButton show={true} />}
 
       {/* Mobile Hamburger Menu */}
       {mounted && <HamburgerMenu />}

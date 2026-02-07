@@ -3,6 +3,7 @@ import { MeditationType } from '../backend';
 /**
  * Validates and coerces a string to a supported MeditationType.
  * Falls back to mindfulness if invalid.
+ * Handles 'meta' as an alias for 'metta'.
  */
 export function validateMeditationType(type: string | undefined): MeditationType {
   if (!type) return MeditationType.mindfulness;
@@ -13,6 +14,7 @@ export function validateMeditationType(type: string | undefined): MeditationType
     case 'mindfulness':
       return MeditationType.mindfulness;
     case 'metta':
+    case 'meta': // Handle 'meta' as alias for 'metta'
       return MeditationType.metta;
     case 'visualization':
       return MeditationType.visualization;

@@ -1,4 +1,65 @@
 {
   "kind": "feature_evidence_report",
-  "features": []
+  "features": [
+    {
+      "featureId": "feature-fix-the-ritual-deletion-flow-that-occurs-after-the-user-clicks-the-modal-confirmation-button-alertdialogaction-delete-in-savedritualscarousel-so-that-when-authenticated-the-confirm-handler-triggers-a-valid-delete-request-and-only-closes-the-confirmation-dialog-after-the-delete-request-completes-successfully",
+      "featureTitle": "Fix the ritual deletion flow that occurs after the user clicks the modal confirmation button (AlertDialogAction \"Delete\" in SavedRitualsCarousel) so that, when authenticated, the confirm handler triggers a valid delete request and only closes the confirmation dialog after the delete request completes successfully.",
+      "files": [
+        "frontend/src/components/SavedRitualsCarousel.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-the-frontend-sends-a-delete-payload-to-the-backend-that-matches-what-the-backend-expects-for-authenticated-deletion-meditationtype-duration-ambientsound-and-ambientsoundvolume-must-be-present-and-correctly-typed-encoded-when-calling-actor-deleteritual-this-normalization-must-occur-in-the-authenticated-path-e-g-in-dashboardpage-s-ondelete-handler-and-or-the-usedeleteritual-mutation-without-changing-visual-design",
+      "featureTitle": "Ensure the frontend sends a delete payload to the backend that matches what the backend expects for authenticated deletion: meditationType, duration, ambientSound, and ambientSoundVolume must be present and correctly typed/encoded when calling actor.deleteRitual(...). This normalization must occur in the authenticated path (e.g., in DashboardPage’s onDelete handler and/or the useDeleteRitual mutation) without changing visual design.",
+      "files": [
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-after-a-successful-authenticated-ritual-deletion-ensure-the-frontend-data-layer-refreshes-rituals-so-the-ui-reflects-removal-immediately-e-g-invalidate-refetch-the-react-query-rituals-query-on-success-of-the-authenticated-delete-mutation",
+      "featureTitle": "After a successful authenticated ritual deletion, ensure the frontend data layer refreshes rituals so the UI reflects removal immediately (e.g., invalidate/refetch the React Query ['rituals'] query on success of the authenticated delete mutation).",
+      "files": [
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    }
+  ]
 }

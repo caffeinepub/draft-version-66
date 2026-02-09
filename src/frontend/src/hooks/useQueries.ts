@@ -526,23 +526,39 @@ export function useDeleteRitual() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (ritual: Ritual) => {
+    mutationFn: async (ritual: any) => {
       if (!isAuthenticated) {
         // Guest mode: delete from local storage
         deleteGuestRitual({
           meditationType: ritual.meditationType,
-          duration: Number(ritual.duration),
+          duration: typeof ritual.duration === 'number' ? ritual.duration : Number(ritual.duration),
           ambientSound: ritual.ambientSound,
-          ambientSoundVolume: Number(ritual.ambientSoundVolume),
+          ambientSoundVolume: typeof ritual.ambientSoundVolume === 'number' ? ritual.ambientSoundVolume : Number(ritual.ambientSoundVolume),
         });
         return;
       }
 
       if (!actor) throw new Error('Actor not available');
-      return actor.deleteRitual(ritual);
+      
+      // Normalize ritual payload to match backend Ritual type
+      const normalizedRitual: Ritual = {
+        meditationType: ritual.meditationType,
+        duration: typeof ritual.duration === 'bigint' ? ritual.duration : BigInt(ritual.duration),
+        ambientSound: ritual.ambientSound,
+        ambientSoundVolume: typeof ritual.ambientSoundVolume === 'bigint' ? ritual.ambientSoundVolume : BigInt(ritual.ambientSoundVolume),
+        timestamp: typeof ritual.timestamp === 'bigint' 
+          ? ritual.timestamp 
+          : typeof ritual.timestamp === 'string'
+            ? BigInt(new Date(ritual.timestamp).getTime() * 1_000_000)
+            : BigInt(ritual.timestamp),
+      };
+
+      return actor.deleteRitual(normalizedRitual);
     },
     onSuccess: () => {
+      // Invalidate and refetch rituals query for immediate UI update
       queryClient.invalidateQueries({ queryKey: ['rituals'] });
+      queryClient.refetchQueries({ queryKey: ['rituals'] });
     },
     onError: (error: any) => {
       const message = getCloudSyncErrorMessage(error);

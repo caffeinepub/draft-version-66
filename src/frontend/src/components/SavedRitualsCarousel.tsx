@@ -70,6 +70,7 @@ export default function SavedRitualsCarousel({ rituals, onStart, onDelete, isDel
   const [activeIndex, setActiveIndex] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [ritualToDelete, setRitualToDelete] = useState<Ritual | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -85,48 +86,52 @@ export default function SavedRitualsCarousel({ rituals, onStart, onDelete, isDel
   }, [rituals.length, activeIndex]);
 
   const handlePrevious = () => {
-    if (isDeleting) return;
+    if (isDeleting || isSubmitting) return;
     setActiveIndex((prev) => (prev === 0 ? rituals.length - 1 : prev - 1));
   };
 
   const handleNext = () => {
-    if (isDeleting) return;
+    if (isDeleting || isSubmitting) return;
     setActiveIndex((prev) => (prev === rituals.length - 1 ? 0 : prev + 1));
   };
 
   const handleDeleteClick = (ritual: Ritual) => {
-    if (isDeleting) return;
+    if (isDeleting || isSubmitting) return;
     setRitualToDelete(ritual);
     setDeleteDialogOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
-    if (ritualToDelete) {
-      try {
-        await onDelete(ritualToDelete);
-        setDeleteDialogOpen(false);
-        setRitualToDelete(null);
-      } catch (error) {
-        // Error is handled by parent component
-        setDeleteDialogOpen(false);
-        setRitualToDelete(null);
-      }
+    if (!ritualToDelete || isSubmitting) return;
+    
+    setIsSubmitting(true);
+    try {
+      await onDelete(ritualToDelete);
+      // Only close dialog and reset state after successful deletion
+      setDeleteDialogOpen(false);
+      setRitualToDelete(null);
+    } catch (error) {
+      // Error is handled by parent component (toast shown)
+      // Keep dialog open so user can retry or cancel
+      console.error('Delete failed:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const onTouchStart = (e: React.TouchEvent) => {
-    if (isDeleting) return;
+    if (isDeleting || isSubmitting) return;
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    if (isDeleting) return;
+    if (isDeleting || isSubmitting) return;
     setTouchEnd(e.targetTouches[0].clientX);
   };
 
   const onTouchEnd = () => {
-    if (isDeleting || !touchStart || !touchEnd) return;
+    if (isDeleting || isSubmitting || !touchStart || !touchEnd) return;
     
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
@@ -192,7 +197,7 @@ export default function SavedRitualsCarousel({ rituals, onStart, onDelete, isDel
         {/* Action Buttons - only show for active card */}
         {isActive && (
           <div className="flex items-center justify-end gap-2">
-            {isDeleting ? (
+            {(isDeleting || isSubmitting) ? (
               <Loader2 className="w-5 h-5 text-accent-cyan animate-spin" />
             ) : (
               <>
@@ -202,7 +207,7 @@ export default function SavedRitualsCarousel({ rituals, onStart, onDelete, isDel
                   size="sm"
                   className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full p-2"
                   aria-label="Delete ritual"
-                  disabled={isDeleting}
+                  disabled={isDeleting || isSubmitting}
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -210,7 +215,7 @@ export default function SavedRitualsCarousel({ rituals, onStart, onDelete, isDel
                   onClick={() => onStart(ritual)}
                   size="sm"
                   className="bg-accent-cyan hover:bg-accent-cyan/90 text-primary-dark font-semibold px-6 py-2 rounded-full shadow-md hover:shadow-lg transition-all duration-300"
-                  disabled={isDeleting}
+                  disabled={isDeleting || isSubmitting}
                 >
                   <Play className="w-4 h-4 mr-1" fill="currentColor" />
                   Start
@@ -228,11 +233,16 @@ export default function SavedRitualsCarousel({ rituals, onStart, onDelete, isDel
     const ritual = rituals[0];
     return (
       <>
-        <div className={`max-w-2xl mx-auto mb-6 select-none ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}>
+        <div className={`max-w-2xl mx-auto mb-6 select-none ${(isDeleting || isSubmitting) ? 'opacity-50 pointer-events-none' : ''}`}>
           {renderRitualCard(ritual, true)}
         </div>
 
-        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialog open={deleteDialogOpen} onOpenChange={(open) => {
+          if (!isSubmitting) {
+            setDeleteDialogOpen(open);
+            if (!open) setRitualToDelete(null);
+          }
+        }}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Ritual</AlertDialogTitle>
@@ -241,13 +251,13 @@ export default function SavedRitualsCarousel({ rituals, onStart, onDelete, isDel
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+              <AlertDialogCancel disabled={isSubmitting}>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDeleteConfirm}
                 className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-                disabled={isDeleting}
+                disabled={isSubmitting}
               >
-                {isDeleting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                 Delete
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -296,7 +306,7 @@ export default function SavedRitualsCarousel({ rituals, onStart, onDelete, isDel
   // Multiple rituals: carousel with navigation
   return (
     <>
-      <div className={`relative max-w-2xl mx-auto ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}>
+      <div className={`relative max-w-2xl mx-auto ${(isDeleting || isSubmitting) ? 'opacity-50 pointer-events-none' : ''}`}>
         {/* Carousel Container - increased min-height and bottom margin for wrapping chips */}
         <div
           ref={containerRef}
@@ -331,7 +341,7 @@ export default function SavedRitualsCarousel({ rituals, onStart, onDelete, isDel
             size="icon"
             className="rounded-full bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card hover:scale-110 transition-all duration-300 w-8 h-8"
             aria-label="Previous ritual"
-            disabled={isDeleting}
+            disabled={isDeleting || isSubmitting}
           >
             <ChevronLeft className="w-5 h-5 text-accent-cyan" />
           </Button>
@@ -342,7 +352,7 @@ export default function SavedRitualsCarousel({ rituals, onStart, onDelete, isDel
               <button
                 key={index}
                 onClick={() => {
-                  if (!isDeleting) {
+                  if (!isDeleting && !isSubmitting) {
                     setActiveIndex(index);
                   }
                 }}
@@ -352,7 +362,7 @@ export default function SavedRitualsCarousel({ rituals, onStart, onDelete, isDel
                     : 'bg-border hover:bg-accent-cyan/50'
                 }`}
                 aria-label={`Go to ritual ${index + 1}`}
-                disabled={isDeleting}
+                disabled={isDeleting || isSubmitting}
               />
             ))}
           </div>
@@ -363,7 +373,7 @@ export default function SavedRitualsCarousel({ rituals, onStart, onDelete, isDel
             size="icon"
             className="rounded-full bg-card/80 backdrop-blur-sm border border-border/50 hover:bg-card hover:scale-110 transition-all duration-300 w-8 h-8"
             aria-label="Next ritual"
-            disabled={isDeleting}
+            disabled={isDeleting || isSubmitting}
           >
             <ChevronRight className="w-5 h-5 text-accent-cyan" />
           </Button>
@@ -371,7 +381,12 @@ export default function SavedRitualsCarousel({ rituals, onStart, onDelete, isDel
       </div>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={(open) => {
+        if (!isSubmitting) {
+          setDeleteDialogOpen(open);
+          if (!open) setRitualToDelete(null);
+        }
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Ritual</AlertDialogTitle>
@@ -380,13 +395,13 @@ export default function SavedRitualsCarousel({ rituals, onStart, onDelete, isDel
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isSubmitting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-              disabled={isDeleting}
+              disabled={isSubmitting}
             >
-              {isDeleting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

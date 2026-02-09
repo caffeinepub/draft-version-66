@@ -1,6 +1,59 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Frontend-only plan: no changes required for authenticated ritual deletion fix",
-  "requirements": []
+  "title": "Fix authenticated ritual deletion payload normalization, confirm-modal behavior, and rituals refresh",
+  "requirements": [
+    {
+      "id": "REQ-5",
+      "summary": "Make modal confirm deletion await the delete request, prevent duplicate submissions, and close only on successful deletion.",
+      "acceptanceCriteria": [
+        "When signed in, clicking a ritual’s trash icon and then clicking the modal confirm \"Delete\" triggers exactly one delete request and does not immediately fail with \"Invalid data format. Please check your input.\"",
+        "If the authenticated delete request fails, the ritual remains visible in the rituals list and the UI does not falsely indicate success (dialog may close, but the ritual must not be removed).",
+        "If the authenticated delete request succeeds, the ritual is removed from the UI (rituals list in the modal/carousel updates accordingly)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/SavedRitualsCarousel.tsx",
+          "operation": "modify",
+          "description": "Update the AlertDialog confirm handler to (1) guard against double-submits, (2) await onDelete(ritual) fully, and (3) only close/reset the dialog state after onDelete succeeds; on failure, keep the dialog open (and rely on parent error handling/toast) so the UI does not indicate success."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Normalize authenticated delete payload to match backend Ritual candid types without changing guest/localStorage deletion behavior.",
+      "acceptanceCriteria": [
+        "Authenticated deletion calls actor.deleteRitual with a payload that includes meditationType, duration, ambientSound, and ambientSoundVolume (no missing fields).",
+        "The payload types align with the generated backend candid types (e.g., Nat/bigint where required), so the backend does not reject the request as an invalid format.",
+        "Guest/offline deletion behavior continues to work as before (localStorage deletion path remains unchanged)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Harden useDeleteRitual mutationFn so that in the authenticated path it converts any UI-shaped ritual input into the backend Ritual shape: ensure meditationType, duration (bigint), ambientSound, ambientSoundVolume (bigint) are present and correctly typed/encoded (and include timestamp as bigint if required by the backend type) before calling actor.deleteRitual; keep the guest/localStorage deletion path logic unchanged."
+        },
+        {
+          "path": "frontend/src/pages/DashboardPage.tsx",
+          "operation": "modify",
+          "description": "Ensure the ritual object passed to deleteRitual.mutateAsync remains compatible with the updated useDeleteRitual normalization (e.g., avoid passing UI-only fields as the sole source of truth); keep visual/UI output unchanged."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Refresh rituals data after successful authenticated deletion so the carousel updates immediately.",
+      "acceptanceCriteria": [
+        "On successful authenticated deletion, the rituals query is invalidated (and refetched if needed) and the ritual disappears from the modal’s carousel without a full page reload.",
+        "No regression: other queries and guest-mode flows remain unaffected."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Adjust useDeleteRitual onSuccess behavior to ensure rituals data refreshes immediately after a successful authenticated deletion (e.g., invalidate and refetch the ['rituals'] query on success for authenticated mode), without impacting guest-mode behavior."
+        }
+      ]
+    }
+  ]
 }

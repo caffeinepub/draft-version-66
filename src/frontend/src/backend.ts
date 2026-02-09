@@ -197,7 +197,7 @@ export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createJournalEntry(entry: JournalEntryInput): Promise<JournalEntry>;
     deleteJournalEntry(entryId: bigint): Promise<void>;
-    deleteRitual(ritualToDelete: Ritual): Promise<void>;
+    deleteRitual(ritual: Ritual): Promise<void>;
     editJournalEntry(entry: JournalEntryInput): Promise<JournalEntry>;
     getBooks(): Promise<Array<Book>>;
     getCallerJournalEntries(): Promise<Array<JournalEntry>>;

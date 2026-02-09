@@ -278,7 +278,7 @@ export default function JournalPage() {
                 return (
                   <div
                     key={entry.id.toString()}
-                    className={`bg-card/70 backdrop-blur-sm rounded-xl p-6 border border-accent-cyan/20 shadow-lg hover:shadow-glow transition-all ${
+                    className={`bg-card/70 backdrop-blur-sm rounded-xl p-6 border border-accent-cyan/20 shadow-lg hover:shadow-glow transition-all max-[480px]:relative max-[480px]:pt-[2.8rem] ${
                       isDeletingThisEntry ? 'opacity-50' : ''
                     }`}
                   >
@@ -326,7 +326,7 @@ export default function JournalPage() {
                           </TooltipProvider>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 max-[480px]:absolute max-[480px]:top-[0.8rem] max-[480px]:right-[0.8rem] max-[480px]:flex-nowrap">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -445,15 +445,33 @@ export default function JournalPage() {
               Import
             </span>
           </Button>
-          <input 
+          <input
             ref={fileInputRef}
-            type="file" 
-            accept=".json" 
-            onChange={handleImportFileSelect} 
-            className="hidden" 
+            type="file"
+            accept=".json"
+            onChange={handleImportFileSelect}
+            className="hidden"
           />
         </label>
       </div>
+
+      {/* Import Confirmation Dialog */}
+      <AlertDialog open={importConfirmOpen} onOpenChange={setImportConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Import</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will replace all your current journal entries, progress data, and saved rituals with the imported data. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelImport}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmImport} className="bg-accent-cyan hover:bg-accent-cyan-tinted">
+              Import
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -466,7 +484,7 @@ export default function JournalPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeletingEntry}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+            <AlertDialogAction 
               onClick={handleConfirmDelete}
               disabled={isDeletingEntry}
               className="bg-red-500 hover:bg-red-600"
@@ -478,37 +496,6 @@ export default function JournalPage() {
                 </>
               ) : (
                 'Delete'
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Import Confirmation Dialog */}
-      <AlertDialog open={importConfirmOpen} onOpenChange={setImportConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Import Journal Data</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will replace all your existing journal entries, progress stats, and session records with the imported data. This action cannot be undone. Are you sure you want to continue?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelImport} disabled={importData.isPending}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmImport}
-              disabled={importData.isPending}
-              className="bg-accent-cyan hover:bg-accent-cyan-tinted"
-            >
-              {importData.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Importing...
-                </>
-              ) : (
-                'Import'
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

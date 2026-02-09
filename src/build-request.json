@@ -1,59 +1,92 @@
 {
   "kind": "build_request",
-  "title": "Fix authenticated (online) ritual deletion in backend",
-  "priority": "normal",
+  "title": "Fix authenticated ritual deletion after modal confirm (frontend payload + backend deleteRitual persistence)",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "Update the Motoko backend so authenticated users can delete a saved ritual online using the existing frontend call actor.deleteRitual(ritual), without any frontend changes. Deletion must match the same fields used by guest/local deletion: meditationType, duration, ambientSound, and ambientSoundVolume (ignore timestamp).",
-      "target": "backend",
+      "id": "REQ-5",
+      "text": "Fix the ritual deletion flow that occurs after the user clicks the modal confirmation button (AlertDialogAction \"Delete\" in SavedRitualsCarousel) so that, when authenticated, the confirm handler triggers a valid delete request and only closes the confirmation dialog after the delete request completes successfully.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-7"
         ],
         "quotes": [
-          "Can you allow rituals to be deleted for online? Do not change anything on front-end. Just allow deletion of rituals, like locally it works, but also online it should work(because it doesn't).",
-          "So duration, meditation type, and ambient sound and its volume.",
-          "return actor.deleteRitual(ritual);"
+          "The issue is happening after the modal confirm button is clicked. I suspect request isn't properly sent to the backend or backend doesn't respond and there is no response of ritual being deleted."
         ]
       },
       "acceptanceCriteria": [
-        "When authenticated, calling deleteRitual with a Ritual that exists in the caller’s rituals list removes the matching ritual(s) from that caller’s stored rituals.",
-        "Matching is performed on meditationType, duration, ambientSound, ambientSoundVolume exactly; timestamp differences do not prevent deletion.",
-        "If the specified ritual is not found for that caller, the backend returns an error (trap) consistent with current behavior (e.g., RitualNotFound), and the stored rituals remain unchanged.",
-        "After successful deletion, listCallerRituals for the same caller no longer includes the deleted ritual(s)."
+        "When signed in, clicking a ritual’s trash icon and then clicking the modal confirm \"Delete\" triggers exactly one delete request and does not immediately fail with \"Invalid data format. Please check your input.\"",
+        "If the authenticated delete request fails, the ritual remains visible in the rituals list and the UI does not falsely indicate success (dialog may close, but the ritual must not be removed).",
+        "If the authenticated delete request succeeds, the ritual is removed from the UI (rituals list in the modal/carousel updates accordingly)."
       ]
     },
     {
-      "id": "REQ-2",
-      "text": "Ensure the backend persistently updates ritualsStore when deleting rituals (i.e., the updated filtered list replaces the previous value for the caller key), so the change is visible to subsequent listCallerRituals calls and survives within the canister state as expected.",
-      "target": "backend",
+      "id": "REQ-6",
+      "text": "Ensure the frontend sends a delete payload to the backend that matches what the backend expects for authenticated deletion: meditationType, duration, ambientSound, and ambientSoundVolume must be present and correctly typed/encoded when calling actor.deleteRitual(...). This normalization must occur in the authenticated path (e.g., in DashboardPage’s onDelete handler and/or the useDeleteRitual mutation) without changing visual design.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-7"
         ],
         "quotes": [
-          "var ritualsStore = Map.empty<Principal, List.List<Ritual>>();",
-          "ritualsStore.add(caller, filteredRituals);"
+          "Yes if it is missing those things"
         ]
       },
       "acceptanceCriteria": [
-        "After deleteRitual returns successfully, a subsequent listCallerRituals call in the same session returns the updated list (with deletions reflected).",
-        "No changes are required in the frontend React Query invalidation logic; the existing invalidateQueries({ queryKey: ['rituals'] }) flow results in the UI reflecting the deletion for authenticated users."
+        "Authenticated deletion calls actor.deleteRitual with a payload that includes meditationType, duration, ambientSound, and ambientSoundVolume (no missing fields).",
+        "The payload types align with the generated backend candid types (e.g., Nat/bigint where required), so the backend does not reject the request as an invalid format.",
+        "Guest/offline deletion behavior continues to work as before (localStorage deletion path remains unchanged)."
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Harden and correct the backend canister’s deleteRitual implementation so authenticated users can delete rituals without \"Invalid data format\" errors: accept the frontend payload format for a ritual, locate the matching ritual(s) in ritualsStore for the caller, remove it/them, and persistently write the updated rituals list back into ritualsStore for that caller so subsequent listCallerRituals calls reflect the deletion within canister state.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-4",
+          "msg-7"
+        ],
+        "quotes": [
+          "So I want you to fix online deletion, being able to delete online that reflects ritual being removed on front-end.",
+          "I suspect request isn't properly sent to the backend or backend doesn't respond and there is no response of ritual being deleted."
+        ]
+      },
+      "acceptanceCriteria": [
+        "When authenticated, calling deleteRitual with a valid ritual payload deletes the ritual from the authenticated caller’s ritualsStore list and does not throw an \"Invalid data format\" error.",
+        "After a successful deleteRitual call, a subsequent listCallerRituals call for the same authenticated caller no longer includes the deleted ritual (state update is persisted in ritualsStore for the caller key).",
+        "Deleting a ritual does not affect rituals belonging to other principals (caller isolation is preserved)."
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "After a successful authenticated ritual deletion, ensure the frontend data layer refreshes rituals so the UI reflects removal immediately (e.g., invalidate/refetch the React Query ['rituals'] query on success of the authenticated delete mutation).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "being able to delete online that reflects ritual being removed on front-end"
+        ]
+      },
+      "acceptanceCriteria": [
+        "On successful authenticated deletion, the rituals query is invalidated (and refetched if needed) and the ritual disappears from the modal’s carousel without a full page reload.",
+        "No regression: other queries and guest-mode flows remain unaffected."
       ]
     }
   ],
   "constraints": [
-    "Do not modify any frontend code.",
-    "Keep the existing deleteRitual method name and parameter shape compatible with the current frontend call actor.deleteRitual(ritual).",
-    "Backend must remain a single Motoko actor (all logic in backend/main.mo).",
-    "Use English for any user-facing text in the build request (no new UI text is requested)."
+    "Do not make visual/design changes; limit frontend work to functional/logic changes only.",
+    "Apply changes only to the selected modal confirm delete button flow and its associated deletion logic (do not modify unrelated UI).",
+    "Backend must remain a single Motoko actor in backend/main.mo; introduce backend/migration.mo only if an upgrade requires state migration.",
+    "Do not edit files under frontend/src/components/ui or other paths listed as immutable in SYSTEM_CONTEXT."
   ],
   "nonGoals": [
-    "Adding a new Ritual ID field or changing the Ritual type schema.",
-    "Changing how rituals are displayed, selected, or confirmed in the UI.",
-    "Implementing new authentication methods beyond Internet Identity.",
-    "Adding external databases or services."
+    "Do not change the Journal page responsive 3-button layout behavior (already deployed and confirmed working).",
+    "Do not add new authentication methods or third-party integrations.",
+    "Do not redesign the ritual modal/carousel UI or change copy beyond what is necessary for functional correctness."
   ],
   "imageRequirements": {
     "required": [],

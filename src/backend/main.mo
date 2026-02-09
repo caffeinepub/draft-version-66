@@ -10,12 +10,12 @@ import Iter "mo:core/Iter";
 import Order "mo:core/Order";
 import AccessControl "authorization/access-control";
 import Storage "blob-storage/Storage";
-import Migration "migration";
+
 import MixinStorage "blob-storage/Mixin";
 import MixinAuthorization "authorization/MixinAuthorization";
 
 // Migrate the updated code into the existing canister
-(with migration = Migration.run)
+
 actor {
   type Book = {
     title : Text;
@@ -606,8 +606,7 @@ actor {
     };
   };
 
-  // Update for persistent filtered deletion
-  public shared ({ caller }) func deleteRitual(ritualToDelete : Ritual) : async () {
+  public shared ({ caller }) func deleteRitual(ritual : Ritual) : async () {
     ensureUserInitialized(caller);
 
     switch (ritualsStore.get(caller)) {
@@ -616,10 +615,10 @@ actor {
         let filteredRituals = ritualsList.filter(
           func(existing) {
             not (
-              existing.meditationType == ritualToDelete.meditationType and
-              existing.duration == ritualToDelete.duration and
-              existing.ambientSound == ritualToDelete.ambientSound and
-              existing.ambientSoundVolume == ritualToDelete.ambientSoundVolume
+              existing.meditationType == ritual.meditationType and
+              existing.duration == ritual.duration and
+              existing.ambientSound == ritual.ambientSound and
+              existing.ambientSoundVolume == ritual.ambientSoundVolume
             );
           }
         );
@@ -632,4 +631,3 @@ actor {
     };
   };
 };
-

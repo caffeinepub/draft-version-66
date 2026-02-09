@@ -1,41 +1,68 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-08T13:12:50.958Z",
+  "generatedAt": "2026-02-09T11:18:48.467Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 0,
+    "total": 4,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-1",
-        "summary": "Update the Motoko backend so authenticated users can delete a saved ritual online using the existing frontend call actor.deleteRitual(ritual), without any frontend changes. Deletion must match the same fields used by guest/local deletion: meditationType, duration, ambientSound, and ambientSoundVolume (ignore timestamp).",
+        "id": "REQ-5",
+        "summary": "Fix the ritual deletion flow that occurs after the user clicks the modal confirmation button (AlertDialogAction \"Delete\" in SavedRitualsCarousel) so that, when authenticated, the confirm handler triggers a valid delete request and only closes the confirmation dialog after the delete request completes successfully.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/SavedRitualsCarousel.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/SavedRitualsCarousel.tsx"
+        ]
+      },
+      {
+        "id": "REQ-6",
+        "summary": "Ensure the frontend sends a delete payload to the backend that matches what the backend expects for authenticated deletion: meditationType, duration, ambientSound, and ambientSoundVolume must be present and correctly typed/encoded when calling actor.deleteRitual(...). This normalization must occur in the authenticated path (e.g., in DashboardPage’s onDelete handler and/or the useDeleteRitual mutation) without changing visual design.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/DashboardPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-7",
+        "summary": "Harden and correct the backend canister’s deleteRitual implementation so authenticated users can delete rituals without \"Invalid data format\" errors: accept the frontend payload format for a ritual, locate the matching ritual(s) in ritualsStore for the caller, remove it/them, and persistently write the updated rituals list back into ritualsStore for that caller so subsequent listCallerRituals calls reflect the deletion within canister state.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-2",
-        "summary": "Ensure the backend persistently updates ritualsStore when deleting rituals (i.e., the updated filtered list replaces the previous value for the caller key), so the change is visible to subsequent listCallerRituals calls and survives within the canister state as expected.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "id": "REQ-8",
+        "summary": "After a successful authenticated ritual deletion, ensure the frontend data layer refreshes rituals so the UI reflects removal immediately (e.g., invalidate/refetch the React Query ['rituals'] query on success of the authenticated delete mutation).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts"
+        ]
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
+    "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
+    "frontend/src/components/SavedRitualsCarousel.tsx",
+    "frontend/src/hooks/useQueries.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

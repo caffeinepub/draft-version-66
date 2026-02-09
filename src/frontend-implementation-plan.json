@@ -1,39 +1,6 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Restore original OKLCH global theme variables (light/dark) and Tailwind-compatible formatting",
-  "requirements": [
-    {
-      "id": "REQ-1",
-      "summary": "Restore the user-provided light/dark OKLCH theme tokens in global CSS variables and add missing custom tokens.",
-      "acceptanceCriteria": [
-        "In `frontend/src/index.css`, the `:root` variables exactly match the user-provided values for: `--background`, `--foreground`, `--card`, `--card-foreground`, `--popover`, `--popover-foreground`, `--primary`, `--primary-foreground`, `--secondary`, `--secondary-foreground`, `--muted`, `--muted-foreground`, `--accent`, `--accent-foreground`, `--destructive`, `--destructive-foreground`, `--border`, `--input`, `--ring`, and `--radius`.",
-        "In `frontend/src/index.css`, the `.dark` variables exactly match the user-provided values for the same tokens (including `--ring`).",
-        "In `frontend/src/index.css`, the following custom tokens are present and match the user-provided values in both light and dark where provided: `--accent-cyan`, `--accent-cyan-tinted`, `--accent-lavender`, `--primary-dark`, `--description-gray`, `--selected-element-light`, `--guide-text`.",
-        "After the change, the app is no longer visually “mostly black and white”; backgrounds, borders, and text colors reflect the restored palette in both light and dark modes across all routes."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Update the `:root` (light) and `.dark` (dark) variable blocks to exactly match the user-provided OKLCH values for all listed base tokens, and add any missing custom tokens from the provided list so they are globally available (including `--accent-lavender`, `--primary-dark`, `--description-gray`, `--selected-element-light`, `--guide-text`)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Align variable value formats and usages so Tailwind OKLCH utilities and existing CSS consume theme tokens correctly.",
-      "acceptanceCriteria": [
-        "Tailwind color utilities that rely on `oklch(var(--background))`, `oklch(var(--foreground))`, `oklch(var(--border))`, `oklch(var(--accent-cyan))`, etc. render correct colors using the restored values (no invalid CSS color parsing).",
-        "Key UI elements that explicitly use theme tokens (e.g., buttons using `bg-accent-cyan`, text using `text-description-gray`, borders using `border-border`) display with the intended restored colors in both light and dark themes."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Ensure all theme variables used by Tailwind via `oklch(var(--token))` are defined as space-separated OKLCH channels (not nested `oklch(...)` strings), and update any direct CSS usages in this file that currently treat variables as HSL or as full colors (e.g., `hsl(var(--...))`, `drop-shadow(... var(--accent-cyan))`) to use OKLCH-compatible forms so rendering remains valid in both light and dark modes."
-        }
-      ]
-    }
-  ]
+  "title": "Frontend-only plan: no changes required for authenticated ritual deletion fix",
+  "requirements": []
 }

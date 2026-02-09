@@ -1,58 +1,72 @@
 {
   "kind": "build_request",
-  "title": "Restore original global OKLCH theme variables (light/dark)",
+  "title": "Fix authenticated (online) ritual deletion in backend",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Replace the app’s global theme CSS variables in `frontend/src/index.css` by updating the `:root` (light) and `.dark` (dark) blocks to use the exact OKLCH variable values provided by the user for all listed tokens, and add any missing custom tokens from the provided list so they are available globally.",
-      "target": "frontend",
+      "text": "Update the Motoko backend so authenticated users can delete a saved ritual online using the existing frontend call actor.deleteRitual(ritual), without any frontend changes. Deletion must match the same fields used by guest/local deletion: meditationType, duration, ambientSound, and ambientSoundVolume (ignore timestamp).",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-user-colors"
+          "msg-1"
         ],
         "quotes": [
-          "The original color styles are missing... Is it possible for you to restore original style colors?",
-          "Here are correct colors for reference I got: :root { ... }  .dark { ... }",
-          "1. Yes you can, just so you can fix colors\n2. Yes\n3. These base colors"
+          "Can you allow rituals to be deleted for online? Do not change anything on front-end. Just allow deletion of rituals, like locally it works, but also online it should work(because it doesn't).",
+          "So duration, meditation type, and ambient sound and its volume.",
+          "return actor.deleteRitual(ritual);"
         ]
       },
       "acceptanceCriteria": [
-        "In `frontend/src/index.css`, the `:root` variables exactly match the user-provided values for: `--background`, `--foreground`, `--card`, `--card-foreground`, `--popover`, `--popover-foreground`, `--primary`, `--primary-foreground`, `--secondary`, `--secondary-foreground`, `--muted`, `--muted-foreground`, `--accent`, `--accent-foreground`, `--destructive`, `--destructive-foreground`, `--border`, `--input`, `--ring`, and `--radius`.",
-        "In `frontend/src/index.css`, the `.dark` variables exactly match the user-provided values for the same tokens (including `--ring`).",
-        "In `frontend/src/index.css`, the following custom tokens are present and match the user-provided values in both light and dark where provided: `--accent-cyan`, `--accent-cyan-tinted`, `--accent-lavender`, `--primary-dark`, `--description-gray`, `--selected-element-light`, `--guide-text`.",
-        "After the change, the app is no longer visually “mostly black and white”; backgrounds, borders, and text colors reflect the restored palette in both light and dark modes across all routes."
+        "When authenticated, calling deleteRitual with a Ritual that exists in the caller’s rituals list removes the matching ritual(s) from that caller’s stored rituals.",
+        "Matching is performed on meditationType, duration, ambientSound, ambientSoundVolume exactly; timestamp differences do not prevent deletion.",
+        "If the specified ritual is not found for that caller, the backend returns an error (trap) consistent with current behavior (e.g., RitualNotFound), and the stored rituals remain unchanged.",
+        "After successful deletion, listCallerRituals for the same caller no longer includes the deleted ritual(s)."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Ensure the restored theme variables are used consistently by Tailwind utilities and existing component styles by keeping variable formats compatible with the Tailwind config (i.e., variables used via `oklch(var(--token))` must be defined as space-separated OKLCH channels rather than nested `oklch(...)` strings).",
-      "target": "frontend",
+      "text": "Ensure the backend persistently updates ritualsStore when deleting rituals (i.e., the updated filtered list replaces the previous value for the caller key), so the change is visible to subsequent listCallerRituals calls and survives within the canister state as expected.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-user-colors"
+          "msg-1"
         ],
         "quotes": [
-          "These base colors"
+          "var ritualsStore = Map.empty<Principal, List.List<Ritual>>();",
+          "ritualsStore.add(caller, filteredRituals);"
         ]
       },
       "acceptanceCriteria": [
-        "Tailwind color utilities that rely on `oklch(var(--background))`, `oklch(var(--foreground))`, `oklch(var(--border))`, `oklch(var(--accent-cyan))`, etc. render correct colors using the restored values (no invalid CSS color parsing).",
-        "Key UI elements that explicitly use theme tokens (e.g., buttons using `bg-accent-cyan`, text using `text-description-gray`, borders using `border-border`) display with the intended restored colors in both light and dark themes."
+        "After deleteRitual returns successfully, a subsequent listCallerRituals call in the same session returns the updated list (with deletions reflected).",
+        "No changes are required in the frontend React Query invalidation logic; the existing invalidateQueries({ queryKey: ['rituals'] }) flow results in the UI reflecting the deletion for authenticated users."
       ]
     }
   ],
   "constraints": [
-    "Do not edit any files under `frontend/src/components/ui` (compose existing UI components instead if needed).",
-    "Do not modify immutable hook files: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, or `frontend/src/hooks/useActor.ts`.",
-    "Keep all changes scoped to restoring/aligning global theme variables; do not introduce new app features."
+    "Do not modify any frontend code.",
+    "Keep the existing deleteRitual method name and parameter shape compatible with the current frontend call actor.deleteRitual(ritual).",
+    "Backend must remain a single Motoko actor (all logic in backend/main.mo).",
+    "Use English for any user-facing text in the build request (no new UI text is requested)."
   ],
   "nonGoals": [
-    "Redesigning layouts or adding new UI components beyond what is necessary to verify the restored theme colors.",
-    "Changing backend logic or data models."
+    "Adding a new Ritual ID field or changing the Ritual type schema.",
+    "Changing how rituals are displayed, selected, or confirmed in the UI.",
+    "Implementing new authentication methods beyond Internet Identity.",
+    "Adding external databases or services."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

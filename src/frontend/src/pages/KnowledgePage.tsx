@@ -106,7 +106,7 @@ export default function KnowledgePage() {
 
           {/* Content Section */}
           <div ref={contentRef} className="max-w-4xl mx-auto">
-            <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-border/50">
+            <div>
               {/* Technique Header */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-border">
                 <div className="flex items-center gap-4">

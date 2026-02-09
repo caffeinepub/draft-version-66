@@ -155,9 +155,10 @@ export default function KnowledgeBookPager({ pages, categoryTitle }: KnowledgeBo
           disabled={isFirstPage}
           variant="outline"
           className="border-accent-cyan/50 hover:bg-accent-cyan/10 disabled:opacity-30 disabled:cursor-not-allowed"
+          aria-label="Previous page"
         >
-          <ChevronLeft className="w-4 h-4 mr-2" />
-          Previous
+          <ChevronLeft className="w-4 h-4 max-[380px]:mr-0 min-[381px]:mr-2" />
+          <span className="max-[380px]:sr-only">Previous</span>
         </Button>
 
         {/* Page Indicators */}
@@ -184,9 +185,10 @@ export default function KnowledgeBookPager({ pages, categoryTitle }: KnowledgeBo
           disabled={isLastPage}
           variant="outline"
           className="border-accent-cyan/50 hover:bg-accent-cyan/10 disabled:opacity-30 disabled:cursor-not-allowed"
+          aria-label="Next page"
         >
-          Next
-          <ChevronRight className="w-4 h-4 ml-2" />
+          <span className="max-[380px]:sr-only">Next</span>
+          <ChevronRight className="w-4 h-4 max-[380px]:ml-0 min-[381px]:ml-2" />
         </Button>
       </div>
     </div>

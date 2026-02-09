@@ -1,11 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Restore the app’s original light/dark OKLCH-based global theme variables so the intended color palette renders correctly across the UI.
+**Goal:** Fix backend deletion of saved rituals for authenticated (online) users so the existing frontend call `actor.deleteRitual(ritual)` successfully removes the intended ritual(s).
 
 **Planned changes:**
-- Update `frontend/src/index.css` `:root` (light) and `.dark` (dark) blocks to exactly match the user-provided OKLCH variable values for the standard theme tokens (background/foreground, card/popover, primary/secondary, muted/accent, destructive, border/input/ring, radius).
-- Add any missing custom theme tokens globally in both light/dark (where provided): `--accent-cyan`, `--accent-cyan-tinted`, `--accent-lavender`, `--primary-dark`, `--description-gray`, `--selected-element-light`, `--guide-text`.
-- Ensure all variables remain compatible with Tailwind usage via `oklch(var(--token))` by defining tokens as space-separated OKLCH channels (not nested `oklch(...)` strings).
+- Update the Motoko `deleteRitual` logic to match rituals for deletion using exactly: `meditationType`, `duration`, `ambientSound`, and `ambientSoundVolume`, ignoring `timestamp`.
+- Ensure `ritualsStore` is persistently updated by replacing the caller’s stored rituals list with the filtered result after deletion.
+- Preserve current error behavior when no matching ritual is found (e.g., trap like `RitualNotFound`) and leave stored rituals unchanged in that case.
 
-**User-visible outcome:** The app is no longer mostly black-and-white; restored backgrounds, borders, and text colors display correctly in both light and dark modes across all routes.
+**User-visible outcome:** Authenticated users can delete saved rituals online from the UI (without any frontend changes), and the rituals list updates correctly after deletion.

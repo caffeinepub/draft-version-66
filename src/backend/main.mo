@@ -10,9 +10,12 @@ import Iter "mo:core/Iter";
 import Order "mo:core/Order";
 import AccessControl "authorization/access-control";
 import Storage "blob-storage/Storage";
+import Migration "migration";
 import MixinStorage "blob-storage/Mixin";
 import MixinAuthorization "authorization/MixinAuthorization";
 
+// Migrate the updated code into the existing canister
+(with migration = Migration.run)
 actor {
   type Book = {
     title : Text;
@@ -21,13 +24,6 @@ actor {
     goodreadsLink : Text;
     tags : [Text];
     icon : Text;
-  };
-
-  type MeditationType = {
-    #mindfulness;
-    #metta;
-    #visualization;
-    #ifs;
   };
 
   type MoodState = {
@@ -43,6 +39,13 @@ actor {
     #energized;
     #balanced;
     #restless;
+  };
+
+  type MeditationType = {
+    #mindfulness;
+    #metta;
+    #visualization;
+    #ifs;
   };
 
   type JournalEntry = {
@@ -603,6 +606,7 @@ actor {
     };
   };
 
+  // Update for persistent filtered deletion
   public shared ({ caller }) func deleteRitual(ritualToDelete : Ritual) : async () {
     ensureUserInitialized(caller);
 
@@ -623,9 +627,9 @@ actor {
         if (filteredRituals.size() == ritualsList.size()) {
           Runtime.trap("RitualNotFound: The specified ritual was not found and could not be deleted.");
         };
-
         ritualsStore.add(caller, filteredRituals);
       };
     };
   };
 };
+

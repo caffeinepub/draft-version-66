@@ -1,45 +1,41 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T17:33:17.599Z",
+  "generatedAt": "2026-02-08T13:12:50.958Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 2,
-    "implemented": 2,
+    "implemented": 0,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Replace the app’s global theme CSS variables in `frontend/src/index.css` by updating the `:root` (light) and `.dark` (dark) blocks to use the exact OKLCH variable values provided by the user for all listed tokens, and add any missing custom tokens from the provided list so they are available globally.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/index.css"
-        ],
-        "matchedFiles": [
-          "frontend/src/index.css"
-        ]
+        "summary": "Update the Motoko backend so authenticated users can delete a saved ritual online using the existing frontend call actor.deleteRitual(ritual), without any frontend changes. Deletion must match the same fields used by guest/local deletion: meditationType, duration, ambientSound, and ambientSoundVolume (ignore timestamp).",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       },
       {
         "id": "REQ-2",
-        "summary": "Ensure the restored theme variables are used consistently by Tailwind utilities and existing component styles by keeping variable formats compatible with the Tailwind config (i.e., variables used via `oklch(var(--token))` must be defined as space-separated OKLCH channels rather than nested `oklch(...)` strings).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/index.css"
-        ],
-        "matchedFiles": [
-          "frontend/src/index.css"
-        ]
+        "summary": "Ensure the backend persistently updates ritualsStore when deleting rituals (i.e., the updated filtered list replaces the previous value for the caller key), so the change is visible to subsequent listCallerRituals calls and survives within the canister state as expected.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
-    "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/index.css",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

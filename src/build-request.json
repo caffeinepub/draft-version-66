@@ -1,105 +1,99 @@
 {
   "kind": "build_request",
-  "title": "Fix authenticated ritual deletion after modal confirm (frontend payload + backend deleteRitual persistence)",
-  "priority": "high",
+  "title": "Fix Journal filters layout: always-column container with responsive mood/energy row and fixed date row",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-5",
-      "text": "Fix the ritual deletion flow that occurs after the user clicks the modal confirmation button (AlertDialogAction \"Delete\" in SavedRitualsCarousel) so that, when authenticated, the confirm handler triggers a valid delete request and only closes the confirmation dialog after the delete request completes successfully.",
+      "id": "REQ-1",
+      "text": "Update the selected Journal filters container (/html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[1]/div[1]) in frontend/src/components/JournalFiltersDropdown.tsx so the filter controls layout is always a column (not sm:flex-row), while preserving existing controls, styling theme, and behavior.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7"
+          "msg-1",
+          "msg-2"
         ],
         "quotes": [
-          "The issue is happening after the modal confirm button is clicked. I suspect request isn't properly sent to the backend or backend doesn't respond and there is no response of ritual being deleted."
+          "make filter container column, instead of row",
+          "It should always be column container"
         ]
       },
       "acceptanceCriteria": [
-        "When signed in, clicking a ritual’s trash icon and then clicking the modal confirm \"Delete\" triggers exactly one delete request and does not immediately fail with \"Invalid data format. Please check your input.\"",
-        "If the authenticated delete request fails, the ritual remains visible in the rituals list and the UI does not falsely indicate success (dialog may close, but the ritual must not be removed).",
-        "If the authenticated delete request succeeds, the ritual is removed from the UI (rituals list in the modal/carousel updates accordingly)."
+        "On all viewport widths, the filter controls container stacks its child sections vertically (column layout).",
+        "No filter control is laid out in a single horizontal row at any breakpoint (i.e., remove/avoid sm:flex-row behavior on the selected container)."
       ]
     },
     {
-      "id": "REQ-6",
-      "text": "Ensure the frontend sends a delete payload to the backend that matches what the backend expects for authenticated deletion: meditationType, duration, ambientSound, and ambientSoundVolume must be present and correctly typed/encoded when calling actor.deleteRitual(...). This normalization must occur in the authenticated path (e.g., in DashboardPage’s onDelete handler and/or the useDeleteRitual mutation) without changing visual design.",
+      "id": "REQ-2",
+      "text": "Within the selected Journal filters container, group the Mood and Energy dropdown triggers into a single shared row that shows as two columns by default, and stacks to two rows only below 540px screen width (mood above energy).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7"
+          "msg-0",
+          "msg-1"
         ],
         "quotes": [
-          "Yes if it is missing those things"
+          "mood and energy dropdowns should share single row, and only separate, to 2 rows on lower than 540px width screens.",
+          "3. Yes"
         ]
       },
       "acceptanceCriteria": [
-        "Authenticated deletion calls actor.deleteRitual with a payload that includes meditationType, duration, ambientSound, and ambientSoundVolume (no missing fields).",
-        "The payload types align with the generated backend candid types (e.g., Nat/bigint where required), so the backend does not reject the request as an invalid format.",
-        "Guest/offline deletion behavior continues to work as before (localStorage deletion path remains unchanged)."
+        "At widths >= 540px, Mood and Energy controls render side-by-side on the same row.",
+        "At widths < 540px, Mood renders above Energy (two rows) with no horizontal overflow.",
+        "Both controls remain usable (buttons fully visible/tappable) at narrow widths (e.g., 360px)."
       ]
     },
     {
-      "id": "REQ-7",
-      "text": "Harden and correct the backend canister’s deleteRitual implementation so authenticated users can delete rituals without \"Invalid data format\" errors: accept the frontend payload format for a ritual, locate the matching ritual(s) in ritualsStore for the caller, remove it/them, and persistently write the updated rituals list back into ritualsStore for that caller so subsequent listCallerRituals calls reflect the deletion within canister state.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-4",
-          "msg-7"
-        ],
-        "quotes": [
-          "So I want you to fix online deletion, being able to delete online that reflects ritual being removed on front-end.",
-          "I suspect request isn't properly sent to the backend or backend doesn't respond and there is no response of ritual being deleted."
-        ]
-      },
-      "acceptanceCriteria": [
-        "When authenticated, calling deleteRitual with a valid ritual payload deletes the ritual from the authenticated caller’s ritualsStore list and does not throw an \"Invalid data format\" error.",
-        "After a successful deleteRitual call, a subsequent listCallerRituals call for the same authenticated caller no longer includes the deleted ritual (state update is persisted in ritualsStore for the caller key).",
-        "Deleting a ritual does not affect rituals belonging to other principals (caller isolation is preserved)."
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "text": "After a successful authenticated ritual deletion, ensure the frontend data layer refreshes rituals so the UI reflects removal immediately (e.g., invalidate/refetch the React Query ['rituals'] query on success of the authenticated delete mutation).",
+      "id": "REQ-3",
+      "text": "Within the selected Journal filters container, ensure the Date From and Date To inputs always share a single row with two columns regardless of screen width (including below 540px), without stacking vertically.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-0",
+          "msg-1"
         ],
         "quotes": [
-          "being able to delete online that reflects ritual being removed on front-end"
+          "Date inputs, should share single row as well(in 2 columns), but do not separate on lower widths regardless.",
+          "And date from-to, should also share same row/2 columns regardless of width"
         ]
       },
       "acceptanceCriteria": [
-        "On successful authenticated deletion, the rituals query is invalidated (and refetched if needed) and the ritual disappears from the modal’s carousel without a full page reload.",
-        "No regression: other queries and guest-mode flows remain unaffected."
+        "At all widths, the date inputs remain on the same row in two columns (From on the left, To on the right).",
+        "The date row does not switch to a vertical stack at any breakpoint.",
+        "The date inputs do not overflow the container on small screens."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Prevent horizontal overflow of filter controls (notably the search input and Clear button) on small screens by adjusting sizing/wrapping rules inside the selected container while keeping the existing controls and order.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-0",
+          "msg-1"
+        ],
+        "quotes": [
+          "I also see couple elements, like search input, and clear button ... overflows off the screen on lower screens.",
+          "in row, I see clear btn overflow"
+        ]
+      },
+      "acceptanceCriteria": [
+        "At narrow widths (e.g., 360–430px), no horizontal scrollbar appears due to the filter controls container.",
+        "The Search input and Clear button remain fully visible within the container bounds when activeFilterCount > 0.",
+        "Favorites checkbox label and Clear button do not push other controls off-screen."
       ]
     }
   ],
   "constraints": [
-    "Do not make visual/design changes; limit frontend work to functional/logic changes only.",
-    "Apply changes only to the selected modal confirm delete button flow and its associated deletion logic (do not modify unrelated UI).",
-    "Backend must remain a single Motoko actor in backend/main.mo; introduce backend/migration.mo only if an upgrade requires state migration.",
-    "Do not edit files under frontend/src/components/ui or other paths listed as immutable in SYSTEM_CONTEXT."
+    "Apply layout changes ONLY to the selected element located at /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[1]/div[1] (the filter controls container in frontend/src/components/JournalFiltersDropdown.tsx).",
+    "Do not edit any files under frontend/src/components/ui or any path listed in frontend.immutablePaths."
   ],
   "nonGoals": [
-    "Do not change the Journal page responsive 3-button layout behavior (already deployed and confirmed working).",
-    "Do not add new authentication methods or third-party integrations.",
-    "Do not redesign the ritual modal/carousel UI or change copy beyond what is necessary for functional correctness."
+    "Do not change filtering logic/state management or backend behavior.",
+    "Do not change the set of available filter controls (moods, energy, date range, search, favorites, clear).",
+    "Do not redesign unrelated Journal page layout outside the selected filter container."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

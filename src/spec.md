@@ -1,12 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Fix authenticated ritual deletion so the confirm “Delete” action sends a valid payload, waits for a successful backend response, and reliably removes the ritual from both canister state and the UI.
+**Goal:** Fix the Journal filters layout so controls never overflow on small screens while keeping the same filters, styling theme, and behavior.
 
 **Planned changes:**
-- Update the modal confirm delete handler (SavedRitualsCarousel / DashboardPage onDelete path) so it triggers exactly one authenticated delete request and only closes the dialog after a successful delete.
-- Normalize/complete the authenticated delete payload to match backend expectations (include meditationType, duration, ambientSound, ambientSoundVolume with correct candid-compatible types) while keeping guest/offline localStorage deletion unchanged.
-- Correct backend `deleteRitual` to accept the ritual payload, delete only the caller’s matching ritual(s), and persist the updated rituals list back into `ritualsStore` so deletion remains reflected on subsequent reads.
-- After successful authenticated deletion, invalidate/refetch the frontend rituals data (e.g., React Query `['rituals']`) so the carousel updates immediately without a full reload.
+- Update the selected Journal filters container in `frontend/src/components/JournalFiltersDropdown.tsx` to always use a vertical (column) layout at all breakpoints (remove any `sm:flex-row` behavior on that container).
+- Inside that container, place the Mood and Energy dropdown triggers into a shared row that is two columns by default, and switches to a stacked layout only below 540px (Mood above Energy).
+- Keep Date From and Date To inputs in a single two-column row at all widths (never stack vertically), ensuring they stay within the container on small screens.
+- Adjust sizing/wrapping rules within the selected container to prevent horizontal overflow (notably for the Search input, Favorites label, and Clear button) on narrow screens, without changing control order or functionality.
 
-**User-visible outcome:** When signed in, users can delete a saved ritual via the trash icon and confirm dialog without “Invalid data format” errors; on success the ritual disappears immediately, and on failure it remains visible with no false success.
+**User-visible outcome:** On all screen sizes, Journal filters stack cleanly without horizontal scrolling; Mood/Energy responsively switch below 540px while the date range always stays side-by-side, and the Search/Clear controls remain fully visible on small screens.

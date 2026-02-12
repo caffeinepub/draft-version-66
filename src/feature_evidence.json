@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-ritual-deletion-flow-that-occurs-after-the-user-clicks-the-modal-confirmation-button-alertdialogaction-delete-in-savedritualscarousel-so-that-when-authenticated-the-confirm-handler-triggers-a-valid-delete-request-and-only-closes-the-confirmation-dialog-after-the-delete-request-completes-successfully",
-      "featureTitle": "Fix the ritual deletion flow that occurs after the user clicks the modal confirmation button (AlertDialogAction \"Delete\" in SavedRitualsCarousel) so that, when authenticated, the confirm handler triggers a valid delete request and only closes the confirmation dialog after the delete request completes successfully.",
+      "featureId": "feature-update-the-selected-journal-filters-container-html-1-body-1-div-1-div-1-main-1-div-1-div-2-div-1-div-1-in-frontend-src-components-journalfiltersdropdown-tsx-so-the-filter-controls-layout-is-always-a-column-not-sm-flex-row-while-preserving-existing-controls-styling-theme-and-behavior",
+      "featureTitle": "Update the selected Journal filters container (/html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[1]/div[1]) in frontend/src/components/JournalFiltersDropdown.tsx so the filter controls layout is always a column (not sm:flex-row), while preserving existing controls, styling theme, and behavior.",
       "files": [
-        "frontend/src/components/SavedRitualsCarousel.tsx"
+        "frontend/src/components/JournalFiltersDropdown.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -17,15 +17,15 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-5"
+        "REQ-1"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-ensure-the-frontend-sends-a-delete-payload-to-the-backend-that-matches-what-the-backend-expects-for-authenticated-deletion-meditationtype-duration-ambientsound-and-ambientsoundvolume-must-be-present-and-correctly-typed-encoded-when-calling-actor-deleteritual-this-normalization-must-occur-in-the-authenticated-path-e-g-in-dashboardpage-s-ondelete-handler-and-or-the-usedeleteritual-mutation-without-changing-visual-design",
-      "featureTitle": "Ensure the frontend sends a delete payload to the backend that matches what the backend expects for authenticated deletion: meditationType, duration, ambientSound, and ambientSoundVolume must be present and correctly typed/encoded when calling actor.deleteRitual(...). This normalization must occur in the authenticated path (e.g., in DashboardPage’s onDelete handler and/or the useDeleteRitual mutation) without changing visual design.",
+      "featureId": "feature-within-the-selected-journal-filters-container-group-the-mood-and-energy-dropdown-triggers-into-a-single-shared-row-that-shows-as-two-columns-by-default-and-stacks-to-two-rows-only-below-540px-screen-width-mood-above-energy",
+      "featureTitle": "Within the selected Journal filters container, group the Mood and Energy dropdown triggers into a single shared row that shows as two columns by default, and stacks to two rows only below 540px screen width (mood above energy).",
       "files": [
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/components/JournalFiltersDropdown.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -37,15 +37,15 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-6"
+        "REQ-2"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-after-a-successful-authenticated-ritual-deletion-ensure-the-frontend-data-layer-refreshes-rituals-so-the-ui-reflects-removal-immediately-e-g-invalidate-refetch-the-react-query-rituals-query-on-success-of-the-authenticated-delete-mutation",
-      "featureTitle": "After a successful authenticated ritual deletion, ensure the frontend data layer refreshes rituals so the UI reflects removal immediately (e.g., invalidate/refetch the React Query ['rituals'] query on success of the authenticated delete mutation).",
+      "featureId": "feature-within-the-selected-journal-filters-container-ensure-the-date-from-and-date-to-inputs-always-share-a-single-row-with-two-columns-regardless-of-screen-width-including-below-540px-without-stacking-vertically",
+      "featureTitle": "Within the selected Journal filters container, ensure the Date From and Date To inputs always share a single row with two columns regardless of screen width (including below 540px), without stacking vertically.",
       "files": [
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/components/JournalFiltersDropdown.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -57,7 +57,27 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-8"
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-prevent-horizontal-overflow-of-filter-controls-notably-the-search-input-and-clear-button-on-small-screens-by-adjusting-sizing-wrapping-rules-inside-the-selected-container-while-keeping-the-existing-controls-and-order",
+      "featureTitle": "Prevent horizontal overflow of filter controls (notably the search input and Clear button) on small screens by adjusting sizing/wrapping rules inside the selected container while keeping the existing controls and order.",
+      "files": [
+        "frontend/src/components/JournalFiltersDropdown.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
       ],
       "confidence": "high"
     }

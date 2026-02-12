@@ -1,91 +1,57 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 7,
-  "summary": "Fix authenticated (online) ritual deletion end-to-end (frontend request/confirm handler + backend canister delete logic) so confirming delete after the modal successfully removes the ritual and updates the UI; no design changes. Journal page mobile 3-button action container overflow fix has been deployed and confirmed working.",
+  "projectStateVersion": 3,
+  "summary": "Journal page filter UI needs responsive layout adjustments: outer filter container should be column-based; mood+energy share a row but stack below 540px; date-from/to always stay in one row (2 columns) regardless of width to prevent overflow (e.g., clear button) on smaller screens.",
   "architectural_notes": [
-    "Rituals are stored in Motoko as `var ritualsStore = Map.empty<Principal, List.List<Ritual>>()` keyed by caller Principal.",
-    "Backend `deleteRitual(ritualToDelete : Ritual)` identifies rituals by matching meditationType, duration, ambientSound, and ambientSoundVolume (not timestamp/id).",
-    "Journal page responsive CSS: for widths <=480px, action button container becomes position:absolute; top/right offsets 0.8rem; parent container top padding increased to ~2.8rem to avoid overlap with title/tags; buttons remain one horizontal row.",
-    "Online ritual deletion failure occurs after the modal confirm button; fix likely requires updating the confirm handler/request payload to actor.deleteRitual(ritual) (no UI/design changes) in addition to backend deleteRitual input handling."
+    "Responsive layout rule for Journal filters: container is column at all widths; mood+energy row stacks vertically below 540px; date-from/to stay side-by-side (2 columns) at all widths."
   ],
   "known_issues": [
-    "Online/authenticated ritual deletion currently does not work (local/guest deletion works).",
-    "Authenticated (online) ritual deletion fails after confirming in the modal with error: 'Invalid data format. Please check your input.' Guest/offline deletion works."
+    "Journal page filter controls (e.g., clear button / search input) overflow off-screen on smaller screen widths when filter container is in row layout."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-on-the-journal-page-update-the-selected-3-button-action-container-favorite-edit-delete-so-that-on-screens-at-and-below-480px-width-it-becomes-absolutely-positioned-inside-its-journal-entry-card-offset-0-8rem-from-the-top-and-0-8rem-from-the-right-while-remaining-in-a-single-horizontal-row-no-wrapping-the-layout-on-larger-screens-must-remain-unchanged",
-      "title": "On the Journal page, update the selected 3-button action container (favorite/edit/delete) so that on screens at and below 480px width it becomes absolutely positioned inside its journal entry card, offset 0.8rem from the top and 0.8rem from the right, while remaining in a single horizontal row (no wrapping). The layout on larger screens must remain unchanged.",
+      "id": "feature-update-the-selected-journal-filters-container-html-1-body-1-div-1-div-1-main-1-div-1-div-2-div-1-div-1-in-frontend-src-components-journalfiltersdropdown-tsx-so-the-filter-controls-layout-is-always-a-column-not-sm-flex-row-while-preserving-existing-controls-styling-theme-and-behavior",
+      "title": "Update the selected Journal filters container (/html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[1]/div[1]) in frontend/src/components/JournalFiltersDropdown.tsx so the filter controls layout is always a column (not sm:flex-row), while preserving existing controls, styling theme, and behavior.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-within-the-selected-journal-filters-container-group-the-mood-and-energy-dropdown-triggers-into-a-single-shared-row-that-shows-as-two-columns-by-default-and-stacks-to-two-rows-only-below-540px-screen-width-mood-above-energy",
+      "title": "Within the selected Journal filters container, group the Mood and Energy dropdown triggers into a single shared row that shows as two columns by default, and stacks to two rows only below 540px screen width (mood above energy).",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-within-the-selected-journal-filters-container-ensure-the-date-from-and-date-to-inputs-always-share-a-single-row-with-two-columns-regardless-of-screen-width-including-below-540px-without-stacking-vertically",
+      "title": "Within the selected Journal filters container, ensure the Date From and Date To inputs always share a single row with two columns regardless of screen width (including below 540px), without stacking vertically.",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-adjust-the-journal-entry-parent-container-that-holds-the-entry-contents-tags-and-the-selected-action-button-container-so-that-at-viewport-widths-480px-it-provides-additional-top-padding-2-8rem-and-a-positioning-context-for-the-absolutely-positioned-button-container-e-g-relative-to-prevent-overlap-with-the-journal-entry-header-tags",
-      "title": "Adjust the journal entry parent container that holds the entry contents/tags and the selected action-button container so that, at viewport widths <= 480px, it provides additional top padding (~2.8rem) and a positioning context for the absolutely positioned button container (e.g., `relative`) to prevent overlap with the journal entry header/tags.",
+      "id": "feature-prevent-horizontal-overflow-of-filter-controls-notably-the-search-input-and-clear-button-on-small-screens-by-adjusting-sizing-wrapping-rules-inside-the-selected-container-while-keeping-the-existing-controls-and-order",
+      "title": "Prevent horizontal overflow of filter controls (notably the search input and Clear button) on small screens by adjusting sizing/wrapping rules inside the selected container while keeping the existing controls and order.",
       "reqIds": [
         "REQ-4"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-fix-the-ritual-deletion-flow-that-occurs-after-the-user-clicks-the-modal-confirmation-button-alertdialogaction-delete-in-savedritualscarousel-so-that-when-authenticated-the-confirm-handler-triggers-a-valid-delete-request-and-only-closes-the-confirmation-dialog-after-the-delete-request-completes-successfully",
-      "title": "Fix the ritual deletion flow that occurs after the user clicks the modal confirmation button (AlertDialogAction \"Delete\" in SavedRitualsCarousel) so that, when authenticated, the confirm handler triggers a valid delete request and only closes the confirmation dialog after the delete request completes successfully.",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-frontend-sends-a-delete-payload-to-the-backend-that-matches-what-the-backend-expects-for-authenticated-deletion-meditationtype-duration-ambientsound-and-ambientsoundvolume-must-be-present-and-correctly-typed-encoded-when-calling-actor-deleteritual-this-normalization-must-occur-in-the-authenticated-path-e-g-in-dashboardpage-s-ondelete-handler-and-or-the-usedeleteritual-mutation-without-changing-visual-design",
-      "title": "Ensure the frontend sends a delete payload to the backend that matches what the backend expects for authenticated deletion: meditationType, duration, ambientSound, and ambientSoundVolume must be present and correctly typed/encoded when calling actor.deleteRitual(...). This normalization must occur in the authenticated path (e.g., in DashboardPage’s onDelete handler and/or the useDeleteRitual mutation) without changing visual design.",
-      "reqIds": [
-        "REQ-6"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-after-a-successful-authenticated-ritual-deletion-ensure-the-frontend-data-layer-refreshes-rituals-so-the-ui-reflects-removal-immediately-e-g-invalidate-refetch-the-react-query-rituals-query-on-success-of-the-authenticated-delete-mutation",
-      "title": "After a successful authenticated ritual deletion, ensure the frontend data layer refreshes rituals so the UI reflects removal immediately (e.g., invalidate/refetch the React Query ['rituals'] query on success of the authenticated delete mutation).",
-      "reqIds": [
-        "REQ-8"
       ],
       "version": 1
     }
   ],
   "new_feature_requests": [
     {
-      "id": "AR-3",
-      "summary": "Ensure the backend persistently updates ritualsStore when deleting rituals (i.e., the updated filtered list replaces the previous value for the caller key), so the change is visible to subsequent listCallerRituals calls and survives within the canister state as expected.",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Fix online ritual deletion flow after the modal confirm: update frontend logic (no design changes) so the confirm handler sends a valid/complete ritual payload to actor.deleteRitual(ritual) and correctly updates the UI after successful deletion.",
+      "id": "AR-1",
+      "summary": "Adjust Journal page filter UI layout: make outer filter container always column; mood+energy share one row but stack below 540px; date-from/to always one row (2 columns) across all widths; prevent overflow of search/clear on small screens.",
       "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Harden/update backend canister deleteRitual for authenticated users to accept the frontend payload format without 'Invalid data format' errors and successfully delete the ritual from ritualsStore (matching meditationType, duration, ambientSound, ambientSoundVolume).",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-9",
-      "summary": "Harden and correct the backend canister’s deleteRitual implementation so authenticated users can delete rituals without \"Invalid data format\" errors: accept the frontend payload format for a ritual, locate the matching ritual(s) in ritualsStore for the caller, remove it/them, and persistently write the updated rituals list back into ritualsStore for that caller so subsequent listCallerRituals calls reflect the deletion within canister state.",
-      "reqIds": [
-        "REQ-7"
-      ],
       "status": "pending"
     }
   ],
-  "projectName": "Fix authenticated (online) ritual deletion in backend",
+  "projectName": "Fix Journal filters layout: always-column container with responsive mood/energy row and fixed date row",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

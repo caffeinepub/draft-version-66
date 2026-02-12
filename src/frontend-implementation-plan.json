@@ -1,57 +1,68 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix authenticated ritual deletion payload normalization, confirm-modal behavior, and rituals refresh",
+  "title": "Journal filters layout fix: column container with responsive mood/energy row, fixed date row, and no small-screen overflow",
   "requirements": [
     {
-      "id": "REQ-5",
-      "summary": "Make modal confirm deletion await the delete request, prevent duplicate submissions, and close only on successful deletion.",
+      "id": "REQ-1",
+      "summary": "Make the selected Journal filters container always use a vertical (column) layout across all breakpoints while preserving existing controls and styling.",
       "acceptanceCriteria": [
-        "When signed in, clicking a ritual’s trash icon and then clicking the modal confirm \"Delete\" triggers exactly one delete request and does not immediately fail with \"Invalid data format. Please check your input.\"",
-        "If the authenticated delete request fails, the ritual remains visible in the rituals list and the UI does not falsely indicate success (dialog may close, but the ritual must not be removed).",
-        "If the authenticated delete request succeeds, the ritual is removed from the UI (rituals list in the modal/carousel updates accordingly)."
+        "On all viewport widths, the filter controls container stacks its child sections vertically (column layout).",
+        "No filter control is laid out in a single horizontal row at any breakpoint (i.e., remove/avoid sm:flex-row behavior on the selected container)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/SavedRitualsCarousel.tsx",
+          "path": "frontend/src/components/JournalFiltersDropdown.tsx",
           "operation": "modify",
-          "description": "Update the AlertDialog confirm handler to (1) guard against double-submits, (2) await onDelete(ritual) fully, and (3) only close/reset the dialog state after onDelete succeeds; on failure, keep the dialog open (and rely on parent error handling/toast) so the UI does not indicate success."
+          "description": "Update ONLY the selected filter controls container (the div currently using `flex flex-col sm:flex-row ...`) so it is always a column layout (remove `sm:flex-row`/`sm:items-center` behavior), keeping the same controls, order, theme classes, and behavior intact."
         }
       ]
     },
     {
-      "id": "REQ-6",
-      "summary": "Normalize authenticated delete payload to match backend Ritual candid types without changing guest/localStorage deletion behavior.",
+      "id": "REQ-2",
+      "summary": "Group Mood and Energy dropdown triggers into one shared responsive row: two columns by default, stacking only below 540px (Mood above Energy).",
       "acceptanceCriteria": [
-        "Authenticated deletion calls actor.deleteRitual with a payload that includes meditationType, duration, ambientSound, and ambientSoundVolume (no missing fields).",
-        "The payload types align with the generated backend candid types (e.g., Nat/bigint where required), so the backend does not reject the request as an invalid format.",
-        "Guest/offline deletion behavior continues to work as before (localStorage deletion path remains unchanged)."
+        "At widths >= 540px, Mood and Energy controls render side-by-side on the same row.",
+        "At widths < 540px, Mood renders above Energy (two rows) with no horizontal overflow.",
+        "Both controls remain usable (buttons fully visible/tappable) at narrow widths (e.g., 360px)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/components/JournalFiltersDropdown.tsx",
           "operation": "modify",
-          "description": "Harden useDeleteRitual mutationFn so that in the authenticated path it converts any UI-shaped ritual input into the backend Ritual shape: ensure meditationType, duration (bigint), ambientSound, ambientSoundVolume (bigint) are present and correctly typed/encoded (and include timestamp as bigint if required by the backend type) before calling actor.deleteRitual; keep the guest/localStorage deletion path logic unchanged."
-        },
-        {
-          "path": "frontend/src/pages/DashboardPage.tsx",
-          "operation": "modify",
-          "description": "Ensure the ritual object passed to deleteRitual.mutateAsync remains compatible with the updated useDeleteRitual normalization (e.g., avoid passing UI-only fields as the sole source of truth); keep visual/UI output unchanged."
+          "description": "Within the selected container, wrap the Mood and Energy Popover triggers into a shared row container that uses a 2-column layout at >=540px and a 1-column stack below 540px (Mood first). Adjust trigger sizing (e.g., prefer `w-full`/`min-w-0` over fixed `min-w-[140px]`) to avoid overflow while preserving existing styles."
         }
       ]
     },
     {
-      "id": "REQ-8",
-      "summary": "Refresh rituals data after successful authenticated deletion so the carousel updates immediately.",
+      "id": "REQ-3",
+      "summary": "Keep Date From and Date To inputs permanently in a single two-column row at all screen widths, including below 540px.",
       "acceptanceCriteria": [
-        "On successful authenticated deletion, the rituals query is invalidated (and refetched if needed) and the ritual disappears from the modal’s carousel without a full page reload.",
-        "No regression: other queries and guest-mode flows remain unaffected."
+        "At all widths, the date inputs remain on the same row in two columns (From on the left, To on the right).",
+        "The date row does not switch to a vertical stack at any breakpoint.",
+        "The date inputs do not overflow the container on small screens."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/components/JournalFiltersDropdown.tsx",
           "operation": "modify",
-          "description": "Adjust useDeleteRitual onSuccess behavior to ensure rituals data refreshes immediately after a successful authenticated deletion (e.g., invalidate and refetch the ['rituals'] query on success for authenticated mode), without impacting guest-mode behavior."
+          "description": "Within the selected container, place Date From and Date To into their own dedicated date row that is always two columns (never stacks). Ensure the inputs can shrink to fit small screens (e.g., remove overly large min-widths and apply `min-w-0` where needed) while preserving existing input styling."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Eliminate horizontal overflow on small screens for the Search input and Clear button by adjusting sizing and wrapping rules inside the selected container (no control/order changes).",
+      "acceptanceCriteria": [
+        "At narrow widths (e.g., 360–430px), no horizontal scrollbar appears due to the filter controls container.",
+        "The Search input and Clear button remain fully visible within the container bounds when activeFilterCount > 0.",
+        "Favorites checkbox label and Clear button do not push other controls off-screen."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/JournalFiltersDropdown.tsx",
+          "operation": "modify",
+          "description": "Within the selected container, adjust layout of the Search input, Favorites checkbox, and conditional Clear button to prevent overflow at narrow widths (e.g., allow wrapping with `flex-wrap`, ensure the search input can shrink with `min-w-0`, and keep Clear visible when rendered via appropriate wrapping/sizing). Maintain existing control order and behavior."
         }
       ]
     }

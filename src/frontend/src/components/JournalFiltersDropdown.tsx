@@ -1,12 +1,9 @@
-import { useState } from 'react';
-import { Filter, X } from 'lucide-react';
+import { ChevronDown, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { MoodState, EnergyState } from '../backend';
 
 interface JournalFiltersDropdownProps {
@@ -55,8 +52,6 @@ export default function JournalFiltersDropdown({
   onFilterNotesTextChange,
   onClearFilters,
 }: JournalFiltersDropdownProps) {
-  const [open, setOpen] = useState(false);
-
   const handleMoodToggle = (mood: MoodState) => {
     if (filterMoods.includes(mood)) {
       onFilterMoodsChange(filterMoods.filter((m) => m !== mood));
@@ -83,157 +78,174 @@ export default function JournalFiltersDropdown({
   ].filter(Boolean).length;
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="border-accent-cyan/50 hover:bg-accent-cyan/10 bg-card/90 backdrop-blur-sm relative"
-        >
-          <Filter className="w-4 h-4 mr-2" />
-          Filters
-          {activeFilterCount > 0 && (
-            <span className="ml-2 px-1.5 py-0.5 text-xs font-semibold rounded-full bg-accent-cyan text-white">
-              {activeFilterCount}
-            </span>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="start">
-        <ScrollArea className="h-[500px]">
-          <div className="p-4 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-lg">Filters</h3>
+    <div className="w-full max-w-4xl mx-auto">
+      {/* Always-visible filter controls - column layout at all breakpoints */}
+      <div className="flex flex-col gap-3 bg-card/70 backdrop-blur-sm rounded-xl p-4 border border-accent-cyan/20 shadow-lg">
+        
+        {/* Mood and Energy row - 2 columns at >=540px, stacking below */}
+        <div className="grid grid-cols-1 min-[540px]:grid-cols-2 gap-3">
+          {/* Moods Dropdown */}
+          <Popover>
+            <PopoverTrigger asChild>
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                onClick={onClearFilters}
-                className="h-8 text-xs"
+                className="border-accent-cyan/50 hover:bg-accent-cyan/10 bg-card/90 backdrop-blur-sm justify-between w-full min-w-0"
               >
-                <X className="w-3 h-3 mr-1" />
-                Clear all
+                <span className="flex items-center gap-2">
+                  Moods
+                  {filterMoods.length > 0 && (
+                    <span className="px-1.5 py-0.5 text-xs font-semibold rounded-full bg-accent-cyan text-white">
+                      {filterMoods.length}
+                    </span>
+                  )}
+                </span>
+                <ChevronDown className="w-4 h-4 ml-2 flex-shrink-0" />
               </Button>
-            </div>
-
-            <Separator />
-
-            {/* Favorites Filter */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Favorites</Label>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="favorites"
-                  checked={filterFavorites}
-                  onCheckedChange={(checked) => onFilterFavoritesChange(checked === true)}
-                />
-                <label
-                  htmlFor="favorites"
-                  className="text-sm cursor-pointer"
-                >
-                  Show only favorites
-                </label>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Mood Filter */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Mood</Label>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-3" align="start">
               <div className="space-y-2">
-                {allMoods.map((mood) => (
-                  <div key={mood} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`mood-${mood}`}
-                      checked={filterMoods.includes(mood)}
-                      onCheckedChange={() => handleMoodToggle(mood)}
-                    />
-                    <label
-                      htmlFor={`mood-${mood}`}
-                      className="text-sm cursor-pointer capitalize"
-                    >
-                      {mood}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Energy Filter */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Energy Level</Label>
-              <div className="space-y-2">
-                {allEnergyLevels.map((energy) => (
-                  <div key={energy} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`energy-${energy}`}
-                      checked={filterEnergy.includes(energy)}
-                      onCheckedChange={() => handleEnergyToggle(energy)}
-                    />
-                    <label
-                      htmlFor={`energy-${energy}`}
-                      className="text-sm cursor-pointer capitalize"
-                    >
-                      {energy}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Date Filter */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Date Range</Label>
-              <div className="space-y-2">
-                <div>
-                  <Label htmlFor="date-from" className="text-xs text-muted-foreground">
-                    From
-                  </Label>
-                  <Input
-                    id="date-from"
-                    type="date"
-                    value={filterDateFrom}
-                    onChange={(e) => onFilterDateFromChange(e.target.value)}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="date-to" className="text-xs text-muted-foreground">
-                    To
-                  </Label>
-                  <Input
-                    id="date-to"
-                    type="date"
-                    value={filterDateTo}
-                    onChange={(e) => onFilterDateToChange(e.target.value)}
-                    className="mt-1"
-                  />
+                <Label className="text-sm font-medium">Select Moods</Label>
+                <div className="space-y-2">
+                  {allMoods.map((mood) => (
+                    <div key={mood} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`mood-${mood}`}
+                        checked={filterMoods.includes(mood)}
+                        onCheckedChange={() => handleMoodToggle(mood)}
+                      />
+                      <label
+                        htmlFor={`mood-${mood}`}
+                        className="text-sm cursor-pointer capitalize"
+                      >
+                        {mood}
+                      </label>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
+            </PopoverContent>
+          </Popover>
 
-            <Separator />
+          {/* Energy Levels Dropdown */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-accent-cyan/50 hover:bg-accent-cyan/10 bg-card/90 backdrop-blur-sm justify-between w-full min-w-0"
+              >
+                <span className="flex items-center gap-2">
+                  Energy
+                  {filterEnergy.length > 0 && (
+                    <span className="px-1.5 py-0.5 text-xs font-semibold rounded-full bg-accent-cyan text-white">
+                      {filterEnergy.length}
+                    </span>
+                  )}
+                </span>
+                <ChevronDown className="w-4 h-4 ml-2 flex-shrink-0" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-3" align="start">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Select Energy Levels</Label>
+                <div className="space-y-2">
+                  {allEnergyLevels.map((energy) => (
+                    <div key={energy} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`energy-${energy}`}
+                        checked={filterEnergy.includes(energy)}
+                        onCheckedChange={() => handleEnergyToggle(energy)}
+                      />
+                      <label
+                        htmlFor={`energy-${energy}`}
+                        className="text-sm cursor-pointer capitalize"
+                      >
+                        {energy}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
 
-            {/* Notes Text Search */}
-            <div className="space-y-2">
-              <Label htmlFor="notes-search" className="text-sm font-medium">
-                Search Notes
-              </Label>
-              <Input
-                id="notes-search"
-                type="text"
-                placeholder="Search in reflections..."
-                value={filterNotesText}
-                onChange={(e) => onFilterNotesTextChange(e.target.value)}
-              />
-            </div>
+        {/* Date Range Inputs - always 2 columns at all widths */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="min-w-0">
+            <Label htmlFor="date-from" className="text-xs text-muted-foreground sr-only">
+              From
+            </Label>
+            <Input
+              id="date-from"
+              type="date"
+              value={filterDateFrom}
+              onChange={(e) => onFilterDateFromChange(e.target.value)}
+              placeholder="From date"
+              className="text-sm border-accent-cyan/50 focus:border-accent-cyan w-full"
+            />
           </div>
-        </ScrollArea>
-      </PopoverContent>
-    </Popover>
+          <div className="min-w-0">
+            <Label htmlFor="date-to" className="text-xs text-muted-foreground sr-only">
+              To
+            </Label>
+            <Input
+              id="date-to"
+              type="date"
+              value={filterDateTo}
+              onChange={(e) => onFilterDateToChange(e.target.value)}
+              placeholder="To date"
+              className="text-sm border-accent-cyan/50 focus:border-accent-cyan w-full"
+            />
+          </div>
+        </div>
+
+        {/* Search Input */}
+        <div className="min-w-0">
+          <Label htmlFor="notes-search" className="sr-only">
+            Search Notes
+          </Label>
+          <Input
+            id="notes-search"
+            type="text"
+            placeholder="Search notes..."
+            value={filterNotesText}
+            onChange={(e) => onFilterNotesTextChange(e.target.value)}
+            className="text-sm border-accent-cyan/50 focus:border-accent-cyan w-full"
+          />
+        </div>
+
+        {/* Favorites Checkbox and Clear Button row */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center space-x-2 whitespace-nowrap">
+            <Checkbox
+              id="favorites-filter"
+              checked={filterFavorites}
+              onCheckedChange={(checked) => onFilterFavoritesChange(checked === true)}
+            />
+            <label
+              htmlFor="favorites-filter"
+              className="text-sm cursor-pointer"
+            >
+              Favorites
+            </label>
+          </div>
+
+          {/* Clear Filters Button */}
+          {activeFilterCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClearFilters}
+              className="hover:bg-accent-cyan/10 whitespace-nowrap"
+            >
+              <X className="w-4 h-4 mr-1" />
+              Clear
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

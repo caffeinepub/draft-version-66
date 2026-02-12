@@ -1,68 +1,67 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T11:18:48.467Z",
+  "generatedAt": "2026-02-12T09:50:03.767Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 4,
-    "implemented": 3,
+    "implemented": 4,
     "items": [
       {
-        "id": "REQ-5",
-        "summary": "Fix the ritual deletion flow that occurs after the user clicks the modal confirmation button (AlertDialogAction \"Delete\" in SavedRitualsCarousel) so that, when authenticated, the confirm handler triggers a valid delete request and only closes the confirmation dialog after the delete request completes successfully.",
+        "id": "REQ-1",
+        "summary": "Update the selected Journal filters container (/html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[1]/div[1]) in frontend/src/components/JournalFiltersDropdown.tsx so the filter controls layout is always a column (not sm:flex-row), while preserving existing controls, styling theme, and behavior.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/SavedRitualsCarousel.tsx"
+          "frontend/src/components/JournalFiltersDropdown.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/SavedRitualsCarousel.tsx"
+          "frontend/src/components/JournalFiltersDropdown.tsx"
         ]
       },
       {
-        "id": "REQ-6",
-        "summary": "Ensure the frontend sends a delete payload to the backend that matches what the backend expects for authenticated deletion: meditationType, duration, ambientSound, and ambientSoundVolume must be present and correctly typed/encoded when calling actor.deleteRitual(...). This normalization must occur in the authenticated path (e.g., in DashboardPage’s onDelete handler and/or the useDeleteRitual mutation) without changing visual design.",
+        "id": "REQ-2",
+        "summary": "Within the selected Journal filters container, group the Mood and Energy dropdown triggers into a single shared row that shows as two columns by default, and stacks to two rows only below 540px screen width (mood above energy).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/DashboardPage.tsx"
+          "frontend/src/components/JournalFiltersDropdown.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/components/JournalFiltersDropdown.tsx"
         ]
       },
       {
-        "id": "REQ-7",
-        "summary": "Harden and correct the backend canister’s deleteRitual implementation so authenticated users can delete rituals without \"Invalid data format\" errors: accept the frontend payload format for a ritual, locate the matching ritual(s) in ritualsStore for the caller, remove it/them, and persistently write the updated rituals list back into ritualsStore for that caller so subsequent listCallerRituals calls reflect the deletion within canister state.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-8",
-        "summary": "After a successful authenticated ritual deletion, ensure the frontend data layer refreshes rituals so the UI reflects removal immediately (e.g., invalidate/refetch the React Query ['rituals'] query on success of the authenticated delete mutation).",
+        "id": "REQ-3",
+        "summary": "Within the selected Journal filters container, ensure the Date From and Date To inputs always share a single row with two columns regardless of screen width (including below 540px), without stacking vertically.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/components/JournalFiltersDropdown.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/components/JournalFiltersDropdown.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Prevent horizontal overflow of filter controls (notably the search input and Clear button) on small screens by adjusting sizing/wrapping rules inside the selected container while keeping the existing controls and order.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/JournalFiltersDropdown.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/JournalFiltersDropdown.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/SavedRitualsCarousel.tsx",
-    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/components/JournalFiltersDropdown.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -1,6 +1,16 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Download, Upload, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useTheme } from 'next-themes';
 import PageBackgroundShell from '../components/PageBackgroundShell';
 import StandardPageNav from '../components/StandardPageNav';
@@ -16,6 +26,10 @@ export default function ProgressPage() {
   const { data: stats, isLoading, isError, error, refetch } = useProgressStats();
   const importData = useImportData();
   const exportData = useExportData();
+  
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [showImportConfirm, setShowImportConfirm] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExport = async () => {
     try {
@@ -26,18 +40,42 @@ export default function ProgressPage() {
     }
   };
 
-  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    setPendingFile(file);
+    setShowImportConfirm(true);
+  };
+
+  const handleImportCancel = () => {
+    setShowImportConfirm(false);
+    setPendingFile(null);
+    // Clear the file input so the same file can be selected again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleImportConfirm = async () => {
+    if (!pendingFile) return;
+
     try {
-      await importData.mutateAsync({ file, overwrite: false });
+      await importData.mutateAsync({ file: pendingFile, overwrite: true });
       toast.success('Progress data imported successfully');
+      setShowImportConfirm(false);
+      setPendingFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     } catch (error: any) {
       // Error already handled by mutation onError
+      setShowImportConfirm(false);
+      setPendingFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
-
-    event.target.value = '';
   };
 
   const totalMinutes = stats ? Number(stats.totalMinutes) : 0;
@@ -83,35 +121,40 @@ export default function ProgressPage() {
                 <ProgressBowl totalMinutes={totalMinutes} theme={theme || 'dark'} />
               </div>
 
-              {/* Stats Card */}
-              <div className="bg-card/70 backdrop-blur-sm rounded-2xl p-8 border border-accent-cyan/20 shadow-glow max-w-md mx-auto">
-                <div className="space-y-6">
-                  <div className="text-center pb-4 border-b border-accent-cyan/20">
-                    <div className="text-5xl font-bold text-accent-cyan mb-2">
-                      {formatRankDisplay(totalMinutes)}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Current Rank</div>
+              {/* Redesigned Stats Card */}
+              <div className="bg-card/70 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-accent-cyan/20 shadow-glow max-w-2xl mx-auto">
+                {/* Compact Header */}
+                <div className="text-center mb-6">
+                  <h2 className="text-lg font-semibold text-muted-foreground mb-1">Your Journey</h2>
+                  <div className="text-3xl font-bold text-accent-cyan">
+                    {formatRankDisplay(totalMinutes)}
                   </div>
+                </div>
 
-                  <div className="text-center pb-4 border-b border-accent-cyan/20">
-                    <div className="text-4xl font-bold text-foreground mb-2">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                  {/* Total Minutes */}
+                  <div className="bg-background/40 rounded-xl p-4 text-center border border-accent-cyan/10 hover:border-accent-cyan/30 transition-colors">
+                    <div className="text-3xl sm:text-4xl font-bold text-foreground mb-1">
                       {totalMinutes.toLocaleString()}
                     </div>
-                    <div className="text-sm text-muted-foreground">Total Minutes</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground font-medium">Total Minutes</div>
                   </div>
 
-                  <div className="text-center pb-4 border-b border-accent-cyan/20">
-                    <div className="text-4xl font-bold text-foreground mb-2">
+                  {/* Day Streak */}
+                  <div className="bg-background/40 rounded-xl p-4 text-center border border-accent-cyan/10 hover:border-accent-cyan/30 transition-colors">
+                    <div className="text-3xl sm:text-4xl font-bold text-foreground mb-1">
                       {currentStreak}
                     </div>
-                    <div className="text-sm text-muted-foreground">Day Streak</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground font-medium">Day Streak</div>
                   </div>
 
-                  <div className="text-center">
-                    <div className="text-4xl font-bold text-foreground mb-2">
+                  {/* This Month */}
+                  <div className="bg-background/40 rounded-xl p-4 text-center border border-accent-cyan/10 hover:border-accent-cyan/30 transition-colors">
+                    <div className="text-3xl sm:text-4xl font-bold text-foreground mb-1">
                       {monthlyMinutes}
                     </div>
-                    <div className="text-sm text-muted-foreground">This Month</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground font-medium">This Month</div>
                   </div>
                 </div>
               </div>
@@ -145,9 +188,46 @@ export default function ProgressPage() {
               Import
             </span>
           </Button>
-          <input type="file" accept=".json" onChange={handleImport} className="hidden" />
+          <input 
+            ref={fileInputRef}
+            type="file" 
+            accept=".json" 
+            onChange={handleFileSelect} 
+            className="hidden" 
+          />
         </label>
       </div>
+
+      {/* Import Confirmation Dialog */}
+      <AlertDialog open={showImportConfirm} onOpenChange={setShowImportConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Import</AlertDialogTitle>
+            <AlertDialogDescription>
+              Importing will overwrite all your existing journal entries and progress data. This action cannot be undone. Are you sure you want to continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleImportCancel} disabled={importData.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleImportConfirm}
+              disabled={importData.isPending}
+              className="bg-accent-cyan hover:bg-accent-cyan/90"
+            >
+              {importData.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Importing...
+                </>
+              ) : (
+                'Confirm Import'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageBackgroundShell>
   );
 }

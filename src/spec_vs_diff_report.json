@@ -1,25 +1,46 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T11:18:48.464Z",
-  "summary": "Frontend changes in SavedRitualsCarousel implement an async confirm-delete flow that awaits onDelete and only closes/reset the dialog after success, keeping the dialog open on failure. The useQueries hook is described as normalizing the authenticated delete payload (including required ritual fields and bigint/Nat conversions) and invalidating the rituals query on success. Backend deleteRitual hardening/persistent ritualsStore update is not evidenced in the provided backend/main.mo diff excerpt.",
+  "generatedAt": "2026-02-12T09:50:03.764Z",
+  "summary": "The diff clearly implements an always-column layout for the Journal filters container and adds a responsive Mood/Energy row that becomes two columns at >=540px. However, the diff is truncated before showing the Date From/To row and the Search/Clear overflow fixes, so those requirements cannot be confirmed. The diff also includes modifications to files outside the allowed scope (frontend-file-summaries.txt and project_state.json), which were not requested and violate the constraint to apply layout changes only to the selected element/container.",
   "missing_requirements": [
     {
-      "id": "REQ-7",
-      "requirement": "Harden and correct the backend canister’s deleteRitual implementation to accept the frontend ritual payload, delete matching ritual(s) for the caller, and persistently write the updated rituals list back into ritualsStore so subsequent listCallerRituals reflects the deletion.",
-      "reason": "The backend/main.mo diff content shown is truncated and does not include any visible changes to deleteRitual or ritualsStore update logic; therefore implementation of the required persistent deletion behavior cannot be verified from the provided evidence.",
+      "id": "REQ-3",
+      "requirement": "Ensure the Date From and Date To inputs always share a single row with two columns regardless of screen width (including below 540px), without stacking vertically.",
+      "reason": "The JournalFiltersDropdown.tsx diff is truncated before any Date From/Date To layout code appears, so there is no evidence the date inputs were placed in an always-two-column row across all breakpoints.",
       "evidence": [
-        "backend/main.mo (truncated; no deleteRitual/ritualsStore update shown)"
+        "frontend/src/components/JournalFiltersDropdown.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Prevent horizontal overflow of filter controls (notably the search input and Clear button) on small screens by adjusting sizing/wrapping rules inside the selected container while keeping the existing controls and order.",
+      "reason": "The shown portion only covers the outer container and the Mood/Energy row. The diff is truncated before Search/Clear layout details, so overflow-prevention changes for those controls cannot be verified.",
+      "evidence": [
+        "frontend/src/components/JournalFiltersDropdown.tsx (truncated)"
       ]
     }
   ],
-  "hallucinated_features": [],
-  "confidence": 0.62,
+  "hallucinated_features": [
+    {
+      "description": "Modified repository summary/metadata file frontend-file-summaries.txt, which is unrelated to the requested Journal filters container layout change.",
+      "reason": "BuildRequest constrains layout changes to only the selected element/container in frontend/src/components/JournalFiltersDropdown.tsx; changes to this summary file are not requested.",
+      "evidence": [
+        "frontend-file-summaries.txt"
+      ]
+    },
+    {
+      "description": "Modified project_state.json tracking file.",
+      "reason": "BuildRequest does not request updating project tracking/state files and explicitly constrains changes to the selected Journal filters container in JournalFiltersDropdown.tsx.",
+      "evidence": [
+        "project_state.json"
+      ]
+    }
+  ],
+  "confidence": 0.66,
   "changed_files": [
-    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/SavedRitualsCarousel.tsx",
-    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/components/JournalFiltersDropdown.tsx",
     "project_state.json"
   ]
 }

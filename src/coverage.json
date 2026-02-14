@@ -1,57 +1,50 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T09:50:03.767Z",
+  "generatedAt": "2026-02-14T15:41:20.138Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 4,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-1",
-        "summary": "Update the selected Journal filters container (/html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[1]/div[1]) in frontend/src/components/JournalFiltersDropdown.tsx so the filter controls layout is always a column (not sm:flex-row), while preserving existing controls, styling theme, and behavior.",
+        "id": "REQ-6",
+        "summary": "On the pre-meditation setup view (PreMeditationPage when phase is \"setup\"), move the \"More Details\" button so it is centered at the bottom of the meditation guide container (not positioned at the top-right).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/JournalFiltersDropdown.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/JournalFiltersDropdown.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx"
         ]
       },
       {
-        "id": "REQ-2",
-        "summary": "Within the selected Journal filters container, group the Mood and Energy dropdown triggers into a single shared row that shows as two columns by default, and stacks to two rows only below 540px screen width (mood above energy).",
+        "id": "REQ-7",
+        "summary": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), increase the size of the two standard slider control containers (volume and time/seek) so they are easier to use (e.g., larger container height and/or padding) while keeping them as standard slider inputs and preserving their current behavior.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/JournalFiltersDropdown.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx",
+          "frontend/src/index.css"
         ],
         "matchedFiles": [
-          "frontend/src/components/JournalFiltersDropdown.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx",
+          "frontend/src/index.css"
         ]
       },
       {
-        "id": "REQ-3",
-        "summary": "Within the selected Journal filters container, ensure the Date From and Date To inputs always share a single row with two columns regardless of screen width (including below 540px), without stacking vertically.",
+        "id": "REQ-8",
+        "summary": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), restyle the play/pause button so it better matches the app’s existing theme and also adjust its sizing/shape (not just colors).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/JournalFiltersDropdown.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx",
+          "frontend/src/index.css"
         ],
         "matchedFiles": [
-          "frontend/src/components/JournalFiltersDropdown.tsx"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Prevent horizontal overflow of filter controls (notably the search input and Clear button) on small screens by adjusting sizing/wrapping rules inside the selected container while keeping the existing controls and order.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/JournalFiltersDropdown.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/JournalFiltersDropdown.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx",
+          "frontend/src/index.css"
         ]
       }
     ]
@@ -61,7 +54,8 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/JournalFiltersDropdown.tsx",
+    "frontend/src/index.css",
+    "frontend/src/pages/PreMeditationPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -79,7 +79,7 @@ export default function KnowledgePage() {
   };
 
   return (
-    <PageBackgroundShell variant="default" intensity={0.3}>
+    <PageBackgroundShell variant="default" intensity={0.35}>
       {/* Standard navigation overlay */}
       <StandardPageNav />
 

@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-selected-journal-filters-container-html-1-body-1-div-1-div-1-main-1-div-1-div-2-div-1-div-1-in-frontend-src-components-journalfiltersdropdown-tsx-so-the-filter-controls-layout-is-always-a-column-not-sm-flex-row-while-preserving-existing-controls-styling-theme-and-behavior",
-      "featureTitle": "Update the selected Journal filters container (/html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[1]/div[1]) in frontend/src/components/JournalFiltersDropdown.tsx so the filter controls layout is always a column (not sm:flex-row), while preserving existing controls, styling theme, and behavior.",
+      "featureId": "feature-on-the-pre-meditation-setup-view-premeditationpage-when-phase-is-setup-move-the-more-details-button-so-it-is-centered-at-the-bottom-of-the-meditation-guide-container-not-positioned-at-the-top-right",
+      "featureTitle": "On the pre-meditation setup view (PreMeditationPage when phase is \"setup\"), move the \"More Details\" button so it is centered at the bottom of the meditation guide container (not positioned at the top-right).",
       "files": [
-        "frontend/src/components/JournalFiltersDropdown.tsx"
+        "frontend/src/pages/PreMeditationPage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -17,15 +17,16 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-1"
+        "REQ-6"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-within-the-selected-journal-filters-container-group-the-mood-and-energy-dropdown-triggers-into-a-single-shared-row-that-shows-as-two-columns-by-default-and-stacks-to-two-rows-only-below-540px-screen-width-mood-above-energy",
-      "featureTitle": "Within the selected Journal filters container, group the Mood and Energy dropdown triggers into a single shared row that shows as two columns by default, and stacks to two rows only below 540px screen width (mood above energy).",
+      "featureId": "feature-on-the-in-session-meditation-view-premeditationpage-when-phase-is-active-increase-the-size-of-the-two-standard-slider-control-containers-volume-and-time-seek-so-they-are-easier-to-use-e-g-larger-container-height-and-or-padding-while-keeping-them-as-standard-slider-inputs-and-preserving-their-current-behavior",
+      "featureTitle": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), increase the size of the two standard slider control containers (volume and time/seek) so they are easier to use (e.g., larger container height and/or padding) while keeping them as standard slider inputs and preserving their current behavior.",
       "files": [
-        "frontend/src/components/JournalFiltersDropdown.tsx"
+        "frontend/src/index.css",
+        "frontend/src/pages/PreMeditationPage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -37,15 +38,16 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-2"
+        "REQ-7"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-within-the-selected-journal-filters-container-ensure-the-date-from-and-date-to-inputs-always-share-a-single-row-with-two-columns-regardless-of-screen-width-including-below-540px-without-stacking-vertically",
-      "featureTitle": "Within the selected Journal filters container, ensure the Date From and Date To inputs always share a single row with two columns regardless of screen width (including below 540px), without stacking vertically.",
+      "featureId": "feature-on-the-in-session-meditation-view-premeditationpage-when-phase-is-active-restyle-the-play-pause-button-so-it-better-matches-the-app-s-existing-theme-and-also-adjust-its-sizing-shape-not-just-colors",
+      "featureTitle": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), restyle the play/pause button so it better matches the app’s existing theme and also adjust its sizing/shape (not just colors).",
       "files": [
-        "frontend/src/components/JournalFiltersDropdown.tsx"
+        "frontend/src/index.css",
+        "frontend/src/pages/PreMeditationPage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -57,27 +59,7 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-prevent-horizontal-overflow-of-filter-controls-notably-the-search-input-and-clear-button-on-small-screens-by-adjusting-sizing-wrapping-rules-inside-the-selected-container-while-keeping-the-existing-controls-and-order",
-      "featureTitle": "Prevent horizontal overflow of filter controls (notably the search input and Clear button) on small screens by adjusting sizing/wrapping rules inside the selected container while keeping the existing controls and order.",
-      "files": [
-        "frontend/src/components/JournalFiltersDropdown.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "authorization@4.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-4"
+        "REQ-8"
       ],
       "confidence": "high"
     }

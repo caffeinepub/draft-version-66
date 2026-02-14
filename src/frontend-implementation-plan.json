@@ -1,68 +1,64 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Journal filters layout fix: column container with responsive mood/energy row, fixed date row, and no small-screen overflow",
+  "title": "Pre-meditation UI polish: guide button reposition, larger slider hit areas, themed play/pause restyle",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Make the selected Journal filters container always use a vertical (column) layout across all breakpoints while preserving existing controls and styling.",
+      "id": "REQ-6",
+      "summary": "Reposition the \"More Details\" button to be horizontally centered at the bottom of the meditation guide container during setup phase.",
       "acceptanceCriteria": [
-        "On all viewport widths, the filter controls container stacks its child sections vertically (column layout).",
-        "No filter control is laid out in a single horizontal row at any breakpoint (i.e., remove/avoid sm:flex-row behavior on the selected container)."
+        "When viewing the pre-meditation page in setup phase, the \"More Details\" button is visually located at the bottom edge of the guide container.",
+        "The \"More Details\" button is horizontally centered within the guide container.",
+        "The \"More Details\" button still triggers the existing navigation behavior (to the Knowledge page with the current meditation type)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/JournalFiltersDropdown.tsx",
+          "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Update ONLY the selected filter controls container (the div currently using `flex flex-col sm:flex-row ...`) so it is always a column layout (remove `sm:flex-row`/`sm:items-center` behavior), keeping the same controls, order, theme classes, and behavior intact."
+          "description": "Update the setup-phase layout for the meditation guide container so the existing \"More Details\" Button is rendered in a bottom-aligned, horizontally centered area (instead of top-right positioning) while preserving the current click handler/navigation. Use the shadcn-ui Button component for consistent styling (verify the component's usage instructions before implementing)."
         }
       ]
     },
     {
-      "id": "REQ-2",
-      "summary": "Group Mood and Energy dropdown triggers into one shared responsive row: two columns by default, stacking only below 540px (Mood above Energy).",
+      "id": "REQ-7",
+      "summary": "Increase the size of the volume and seek/time slider control containers during active phase to improve usability while keeping standard slider inputs and behavior.",
       "acceptanceCriteria": [
-        "At widths >= 540px, Mood and Energy controls render side-by-side on the same row.",
-        "At widths < 540px, Mood renders above Energy (two rows) with no horizontal overflow.",
-        "Both controls remain usable (buttons fully visible/tappable) at narrow widths (e.g., 360px)."
+        "In active phase, both the volume and seek/time slider areas have noticeably larger hit/visual area than before (increased padding and/or container sizing).",
+        "Both controls remain standard slider inputs (no knob/dial replacement).",
+        "Changing the volume slider still updates ambient audio volume as before.",
+        "Changing the seek/time slider still adjusts the session time as before."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/JournalFiltersDropdown.tsx",
+          "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Within the selected container, wrap the Mood and Energy Popover triggers into a shared row container that uses a 2-column layout at >=540px and a 1-column stack below 540px (Mood first). Adjust trigger sizing (e.g., prefer `w-full`/`min-w-0` over fixed `min-w-[140px]`) to avoid overflow while preserving existing styles."
+          "description": "Adjust the active-phase UI around the two existing Slider controls (volume and seek/time) to increase container height/padding (and optionally add min-height) for a larger touch target, without changing slider type or handlers. Continue using the shadcn-ui Slider component (verify the component's usage instructions before implementing)."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "If needed to achieve consistent larger hit areas across themes, add a small, scoped utility/class for the pre-meditation active-phase slider container sizing (padding/min-height) and apply it from PreMeditationPage."
         }
       ]
     },
     {
-      "id": "REQ-3",
-      "summary": "Keep Date From and Date To inputs permanently in a single two-column row at all screen widths, including below 540px.",
+      "id": "REQ-8",
+      "summary": "Restyle the active-phase play/pause button to better match the app theme and update its sizing/shape while preserving toggle behavior and icon switching.",
       "acceptanceCriteria": [
-        "At all widths, the date inputs remain on the same row in two columns (From on the left, To on the right).",
-        "The date row does not switch to a vertical stack at any breakpoint.",
-        "The date inputs do not overflow the container on small screens."
+        "In active phase, the play/pause control has updated visual styling consistent with the app’s existing meditation theme (typography/colors/shadows consistent with other themed elements on the page).",
+        "The play/pause control’s size and/or shape is changed (e.g., larger touch target and updated proportions), not just a color tweak.",
+        "The button continues to toggle pause/resume exactly as before, including correctly switching the Play vs Pause icon."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/JournalFiltersDropdown.tsx",
+          "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Within the selected container, place Date From and Date To into their own dedicated date row that is always two columns (never stacks). Ensure the inputs can shrink to fit small screens (e.g., remove overly large min-widths and apply `min-w-0` where needed) while preserving existing input styling."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Eliminate horizontal overflow on small screens for the Search input and Clear button by adjusting sizing and wrapping rules inside the selected container (no control/order changes).",
-      "acceptanceCriteria": [
-        "At narrow widths (e.g., 360–430px), no horizontal scrollbar appears due to the filter controls container.",
-        "The Search input and Clear button remain fully visible within the container bounds when activeFilterCount > 0.",
-        "Favorites checkbox label and Clear button do not push other controls off-screen."
-      ],
-      "file_operations": [
+          "description": "Update the active-phase play/pause Button styling to a more theme-consistent treatment (e.g., revised shape/proportions, enhanced shadows/rings, updated sizing) while keeping the existing onClick (togglePause) logic and Play/Pause icon switching intact. Use the existing shadcn-ui Button component (verify the component's usage instructions before implementing)."
+        },
         {
-          "path": "frontend/src/components/JournalFiltersDropdown.tsx",
+          "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Within the selected container, adjust layout of the Search input, Favorites checkbox, and conditional Clear button to prevent overflow at narrow widths (e.g., allow wrapping with `flex-wrap`, ensure the search input can shrink with `min-w-0`, and keep Clear visible when rendered via appropriate wrapping/sizing). Maintain existing control order and behavior."
+          "description": "Add any additional scoped utility/class needed for the updated play/pause control styling (e.g., consistent glow/ring across light/dark modes) and keep it limited to the pre-meditation active-phase control to avoid global regressions."
         }
       ]
     }

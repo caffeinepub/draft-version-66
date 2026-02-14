@@ -1,11 +1,50 @@
 {
   "kind": "build_request",
-  "title": "Fix Journal filters layout: always-column container with responsive mood/energy row and fixed date row",
+  "title": "Pre-meditation UI polish: move More Details button, enlarge sliders, and restyle play/pause",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "Update the selected Journal filters container (/html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[1]/div[1]) in frontend/src/components/JournalFiltersDropdown.tsx so the filter controls layout is always a column (not sm:flex-row), while preserving existing controls, styling theme, and behavior.",
+      "id": "REQ-6",
+      "text": "On the pre-meditation setup view (PreMeditationPage when phase is \"setup\"), move the \"More Details\" button so it is centered at the bottom of the meditation guide container (not positioned at the top-right).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "In pre-meditation page, \"More Details\" button. Should be at the bottom of guide container, instead how it is now at the top right.",
+          "1. Centered at the bottom of the guide container, yes"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When viewing the pre-meditation page in setup phase, the \"More Details\" button is visually located at the bottom edge of the guide container.",
+        "The \"More Details\" button is horizontally centered within the guide container.",
+        "The \"More Details\" button still triggers the existing navigation behavior (to the Knowledge page with the current meditation type)."
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), increase the size of the two standard slider control containers (volume and time/seek) so they are easier to use (e.g., larger container height and/or padding) while keeping them as standard slider inputs and preserving their current behavior.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "In meditation page(when user meditates/in a session), 2 inputs, one for volume controlling, and other time controlling, should have a little bigger containers, they are too small as of now, increase maybe padding?",
+          "Remain standard input sliders"
+        ]
+      },
+      "acceptanceCriteria": [
+        "In active phase, both the volume and seek/time slider areas have noticeably larger hit/visual area than before (increased padding and/or container sizing).",
+        "Both controls remain standard slider inputs (no knob/dial replacement).",
+        "Changing the volume slider still updates ambient audio volume as before.",
+        "Changing the seek/time slider still adjusts the session time as before."
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), restyle the play/pause button so it better matches the app’s existing theme and also adjust its sizing/shape (not just colors).",
       "target": "frontend",
       "source": {
         "messageIds": [
@@ -13,84 +52,26 @@
           "msg-2"
         ],
         "quotes": [
-          "make filter container column, instead of row",
-          "It should always be column container"
+          "3. Yes, as well as play/pause btn",
+          "1. Both, visual and sizing/shape."
         ]
       },
       "acceptanceCriteria": [
-        "On all viewport widths, the filter controls container stacks its child sections vertically (column layout).",
-        "No filter control is laid out in a single horizontal row at any breakpoint (i.e., remove/avoid sm:flex-row behavior on the selected container)."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Within the selected Journal filters container, group the Mood and Energy dropdown triggers into a single shared row that shows as two columns by default, and stacks to two rows only below 540px screen width (mood above energy).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-0",
-          "msg-1"
-        ],
-        "quotes": [
-          "mood and energy dropdowns should share single row, and only separate, to 2 rows on lower than 540px width screens.",
-          "3. Yes"
-        ]
-      },
-      "acceptanceCriteria": [
-        "At widths >= 540px, Mood and Energy controls render side-by-side on the same row.",
-        "At widths < 540px, Mood renders above Energy (two rows) with no horizontal overflow.",
-        "Both controls remain usable (buttons fully visible/tappable) at narrow widths (e.g., 360px)."
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Within the selected Journal filters container, ensure the Date From and Date To inputs always share a single row with two columns regardless of screen width (including below 540px), without stacking vertically.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-0",
-          "msg-1"
-        ],
-        "quotes": [
-          "Date inputs, should share single row as well(in 2 columns), but do not separate on lower widths regardless.",
-          "And date from-to, should also share same row/2 columns regardless of width"
-        ]
-      },
-      "acceptanceCriteria": [
-        "At all widths, the date inputs remain on the same row in two columns (From on the left, To on the right).",
-        "The date row does not switch to a vertical stack at any breakpoint.",
-        "The date inputs do not overflow the container on small screens."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Prevent horizontal overflow of filter controls (notably the search input and Clear button) on small screens by adjusting sizing/wrapping rules inside the selected container while keeping the existing controls and order.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-0",
-          "msg-1"
-        ],
-        "quotes": [
-          "I also see couple elements, like search input, and clear button ... overflows off the screen on lower screens.",
-          "in row, I see clear btn overflow"
-        ]
-      },
-      "acceptanceCriteria": [
-        "At narrow widths (e.g., 360–430px), no horizontal scrollbar appears due to the filter controls container.",
-        "The Search input and Clear button remain fully visible within the container bounds when activeFilterCount > 0.",
-        "Favorites checkbox label and Clear button do not push other controls off-screen."
+        "In active phase, the play/pause control has updated visual styling consistent with the app’s existing meditation theme (typography/colors/shadows consistent with other themed elements on the page).",
+        "The play/pause control’s size and/or shape is changed (e.g., larger touch target and updated proportions), not just a color tweak.",
+        "The button continues to toggle pause/resume exactly as before, including correctly switching the Play vs Pause icon."
       ]
     }
   ],
   "constraints": [
-    "Apply layout changes ONLY to the selected element located at /html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[1]/div[1] (the filter controls container in frontend/src/components/JournalFiltersDropdown.tsx).",
-    "Do not edit any files under frontend/src/components/ui or any path listed in frontend.immutablePaths."
+    "Frontend immutable paths must not be edited: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui (compose existing UI components instead).",
+    "Do not change the control type for the in-session inputs: keep them as standard slider inputs.",
+    "Keep all changes scoped to UI/layout/styling; no backend changes are required for these requests."
   ],
   "nonGoals": [
-    "Do not change filtering logic/state management or backend behavior.",
-    "Do not change the set of available filter controls (moods, energy, date range, search, favorites, clear).",
-    "Do not redesign unrelated Journal page layout outside the selected filter container."
+    "Do not introduce alternative control paradigms (e.g., circular knobs) for volume or time controls.",
+    "Do not add new backend endpoints or data models as part of these UI adjustments.",
+    "Do not change the meditation timer logic, audio selection logic, or navigation destinations beyond repositioning/restyling UI elements."
   ],
   "imageRequirements": {
     "required": [],

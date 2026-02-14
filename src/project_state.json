@@ -1,44 +1,32 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Journal page filter UI needs responsive layout adjustments: outer filter container should be column-based; mood+energy share a row but stack below 540px; date-from/to always stay in one row (2 columns) regardless of width to prevent overflow (e.g., clear button) on smaller screens.",
-  "architectural_notes": [
-    "Responsive layout rule for Journal filters: container is column at all widths; mood+energy row stacks vertically below 540px; date-from/to stay side-by-side (2 columns) at all widths."
-  ],
-  "known_issues": [
-    "Journal page filter controls (e.g., clear button / search input) overflow off-screen on smaller screen widths when filter container is in row layout."
-  ],
+  "summary": "Meditation app UI polish: adjust pre-meditation layout and in-session controls to better match the app’s theme.",
+  "architectural_notes": [],
+  "known_issues": [],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-update-the-selected-journal-filters-container-html-1-body-1-div-1-div-1-main-1-div-1-div-2-div-1-div-1-in-frontend-src-components-journalfiltersdropdown-tsx-so-the-filter-controls-layout-is-always-a-column-not-sm-flex-row-while-preserving-existing-controls-styling-theme-and-behavior",
-      "title": "Update the selected Journal filters container (/html[1]/body[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[1]/div[1]) in frontend/src/components/JournalFiltersDropdown.tsx so the filter controls layout is always a column (not sm:flex-row), while preserving existing controls, styling theme, and behavior.",
+      "id": "feature-on-the-pre-meditation-setup-view-premeditationpage-when-phase-is-setup-move-the-more-details-button-so-it-is-centered-at-the-bottom-of-the-meditation-guide-container-not-positioned-at-the-top-right",
+      "title": "On the pre-meditation setup view (PreMeditationPage when phase is \"setup\"), move the \"More Details\" button so it is centered at the bottom of the meditation guide container (not positioned at the top-right).",
       "reqIds": [
-        "REQ-1"
+        "REQ-6"
       ],
       "version": 1
     },
     {
-      "id": "feature-within-the-selected-journal-filters-container-group-the-mood-and-energy-dropdown-triggers-into-a-single-shared-row-that-shows-as-two-columns-by-default-and-stacks-to-two-rows-only-below-540px-screen-width-mood-above-energy",
-      "title": "Within the selected Journal filters container, group the Mood and Energy dropdown triggers into a single shared row that shows as two columns by default, and stacks to two rows only below 540px screen width (mood above energy).",
+      "id": "feature-on-the-in-session-meditation-view-premeditationpage-when-phase-is-active-increase-the-size-of-the-two-standard-slider-control-containers-volume-and-time-seek-so-they-are-easier-to-use-e-g-larger-container-height-and-or-padding-while-keeping-them-as-standard-slider-inputs-and-preserving-their-current-behavior",
+      "title": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), increase the size of the two standard slider control containers (volume and time/seek) so they are easier to use (e.g., larger container height and/or padding) while keeping them as standard slider inputs and preserving their current behavior.",
       "reqIds": [
-        "REQ-2"
+        "REQ-7"
       ],
       "version": 1
     },
     {
-      "id": "feature-within-the-selected-journal-filters-container-ensure-the-date-from-and-date-to-inputs-always-share-a-single-row-with-two-columns-regardless-of-screen-width-including-below-540px-without-stacking-vertically",
-      "title": "Within the selected Journal filters container, ensure the Date From and Date To inputs always share a single row with two columns regardless of screen width (including below 540px), without stacking vertically.",
+      "id": "feature-on-the-in-session-meditation-view-premeditationpage-when-phase-is-active-restyle-the-play-pause-button-so-it-better-matches-the-app-s-existing-theme-and-also-adjust-its-sizing-shape-not-just-colors",
+      "title": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), restyle the play/pause button so it better matches the app’s existing theme and also adjust its sizing/shape (not just colors).",
       "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-prevent-horizontal-overflow-of-filter-controls-notably-the-search-input-and-clear-button-on-small-screens-by-adjusting-sizing-wrapping-rules-inside-the-selected-container-while-keeping-the-existing-controls-and-order",
-      "title": "Prevent horizontal overflow of filter controls (notably the search input and Clear button) on small screens by adjusting sizing/wrapping rules inside the selected container while keeping the existing controls and order.",
-      "reqIds": [
-        "REQ-4"
+        "REQ-8"
       ],
       "version": 1
     }
@@ -46,12 +34,24 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Adjust Journal page filter UI layout: make outer filter container always column; mood+energy share one row but stack below 540px; date-from/to always one row (2 columns) across all widths; prevent overflow of search/clear on small screens.",
+      "summary": "Move 'More Details' button to centered bottom of the guide container on the pre-meditation page.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Increase size/padding of in-session volume and time standard sliders to improve usability while keeping slider inputs.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Restyle and resize/reshape the play/pause button to better match the app’s theme.",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Fix Journal filters layout: always-column container with responsive mood/energy row and fixed date row",
+  "projectName": "Pre-meditation UI polish: move More Details button, enlarge sliders, and restyle play/pause",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

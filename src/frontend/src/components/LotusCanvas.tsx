@@ -57,8 +57,8 @@ export default function LotusCanvas({ variant = 'default', intensity = 1.0 }: Lo
       let baseMultiplier = 1.0;
       
       if (variant === 'premed') {
-        // Pre-meditation page: much stronger on light, moderate on dark
-        baseMultiplier = theme === 'dark' ? 1.8 : 3.5;
+        // Pre-meditation page: increased by 15% (1.8 -> 2.07, 3.5 -> 4.025)
+        baseMultiplier = theme === 'dark' ? 2.07 : 4.025;
       } else if (variant === 'enhanced') {
         baseMultiplier = theme === 'dark' ? 1.3 : 2.5;
       } else {

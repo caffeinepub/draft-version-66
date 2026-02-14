@@ -172,6 +172,48 @@
     position: relative;
     z-index: 50;
   }
+
+  /* Enhanced slider containers for pre-meditation active phase */
+  .premed-slider-container {
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+  }
+
+  .premed-slider-container:hover {
+    background: oklch(var(--card) / 0.5);
+    border-color: oklch(var(--accent-cyan) / 0.3);
+  }
+
+  /* Enhanced play/pause button for pre-meditation active phase */
+  .premed-play-pause-btn {
+    background: oklch(var(--accent-cyan) / 0.15);
+    border: 2px solid oklch(var(--accent-cyan) / 0.5);
+    color: oklch(var(--accent-cyan));
+    transition: all 0.3s ease;
+  }
+
+  .premed-play-pause-btn:hover {
+    background: oklch(var(--accent-cyan) / 0.25);
+    border-color: oklch(var(--accent-cyan));
+    transform: scale(1.05);
+    box-shadow: 0 0 20px oklch(var(--accent-cyan) / 0.4), 0 0 40px oklch(var(--accent-cyan) / 0.2);
+  }
+
+  .premed-play-pause-btn:active {
+    transform: scale(0.98);
+  }
+
+  .dark .premed-play-pause-btn {
+    background: oklch(var(--accent-cyan) / 0.2);
+    border-color: oklch(var(--accent-cyan) / 0.6);
+  }
+
+  .dark .premed-play-pause-btn:hover {
+    background: oklch(var(--accent-cyan) / 0.3);
+    border-color: oklch(var(--accent-cyan));
+  }
 }
 
 #wwm4eh::-webkit-scrollbar {

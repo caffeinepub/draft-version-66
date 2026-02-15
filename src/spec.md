@@ -1,11 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Polish the pre-meditation and in-session meditation UI by improving layout and control usability while preserving existing behaviors.
+**Goal:** Refine the PreMeditationPage layout/styling by improving in-session Volume/Time label placement and padding, and moving the setup-phase meditation guide to the bottom of the page.
 
 **Planned changes:**
-- On the pre-meditation setup view, reposition the “More Details” button to be horizontally centered at the bottom edge of the meditation guide container while keeping its current navigation behavior.
-- On the in-session (active) view, increase the size/padding of the volume and time/seek slider containers to provide a larger visual and hit area, keeping both as standard slider inputs with the same behavior.
-- On the in-session (active) view, restyle the play/pause button to better match the app theme and adjust its size/shape (not only colors) while keeping its toggle behavior and icons unchanged.
+- In PreMeditationPage when phase is `"active"`, reposition the Volume and Time/Seek labels to render top-left outside their respective slider containers, and increase label font size using a Tailwind px-based text utility.
+- In PreMeditationPage when phase is `"active"`, update the Volume and Time/Seek container padding to Tailwind `px-6 py-5` and remove the `premed-slider-container` class from those containers.
+- Remove/retire `premed-slider-container` usage for the in-session Volume/Time containers and ensure no remaining references are required for those two controls (optionally remove the unused CSS block if safe).
+- In PreMeditationPage when phase is `"setup"`, move the pre-session meditation guide container to be the last section on the page (below all other setup controls) without breaking guide interactions.
 
-**User-visible outcome:** In setup, “More Details” appears centered at the bottom of the guide container; in-session sliders are easier to interact with; and the play/pause control looks more cohesive with the app theme and has an improved touch-friendly shape/size.
+**User-visible outcome:** During an active session, Volume and Time/Seek labels appear above their sliders with clearer styling and adjusted padding; during setup, the meditation guide appears at the bottom of the setup page while continuing to function normally.

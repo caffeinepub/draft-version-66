@@ -1,32 +1,40 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Meditation app UI polish: adjust pre-meditation layout and in-session controls to better match the app’s theme.",
+  "summary": "New project",
   "architectural_notes": [],
   "known_issues": [],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-on-the-pre-meditation-setup-view-premeditationpage-when-phase-is-setup-move-the-more-details-button-so-it-is-centered-at-the-bottom-of-the-meditation-guide-container-not-positioned-at-the-top-right",
-      "title": "On the pre-meditation setup view (PreMeditationPage when phase is \"setup\"), move the \"More Details\" button so it is centered at the bottom of the meditation guide container (not positioned at the top-right).",
+      "id": "feature-on-the-in-session-meditation-view-premeditationpage-when-phase-is-active-update-the-volume-and-time-seek-slider-sections-so-their-labels-render-at-the-top-left-outside-the-slider-container-and-use-a-larger-font-size-in-pixels-than-the-current-label-styling",
+      "title": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), update the Volume and Time/Seek slider sections so their labels render at the top-left outside the slider container and use a larger font size (in pixels) than the current label styling.",
       "reqIds": [
-        "REQ-6"
+        "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-on-the-in-session-meditation-view-premeditationpage-when-phase-is-active-increase-the-size-of-the-two-standard-slider-control-containers-volume-and-time-seek-so-they-are-easier-to-use-e-g-larger-container-height-and-or-padding-while-keeping-them-as-standard-slider-inputs-and-preserving-their-current-behavior",
-      "title": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), increase the size of the two standard slider control containers (volume and time/seek) so they are easier to use (e.g., larger container height and/or padding) while keeping them as standard slider inputs and preserving their current behavior.",
+      "id": "feature-on-the-in-session-meditation-view-premeditationpage-when-phase-is-active-update-the-container-elements-that-hold-the-volume-and-time-seek-inputs-to-use-tailwind-classes-px-6-py-5-and-remove-the-premed-slider-container-class-from-those-containers",
+      "title": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), update the container elements that hold the Volume and Time/Seek inputs to use Tailwind classes \"px-6 py-5\" and remove the \"premed-slider-container\" class from those containers.",
       "reqIds": [
-        "REQ-7"
+        "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-on-the-in-session-meditation-view-premeditationpage-when-phase-is-active-restyle-the-play-pause-button-so-it-better-matches-the-app-s-existing-theme-and-also-adjust-its-sizing-shape-not-just-colors",
-      "title": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), restyle the play/pause button so it better matches the app’s existing theme and also adjust its sizing/shape (not just colors).",
+      "id": "feature-remove-or-retire-the-premed-slider-container-styling-so-it-is-no-longer-used-by-the-volume-time-containers-after-the-class-removal-ensuring-there-are-no-remaining-references-for-these-two-controls",
+      "title": "Remove or retire the \"premed-slider-container\" styling so it is no longer used by the Volume/Time containers after the class removal, ensuring there are no remaining references for these two controls.",
       "reqIds": [
-        "REQ-8"
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-pre-meditation-setup-view-premeditationpage-when-phase-is-setup-move-the-meditation-guide-container-the-guide-stepper-content-shown-before-starting-a-session-to-be-the-last-container-in-the-page-hierarchy-bottom-of-the-setup-page-below-all-other-setup-controls-sections",
+      "title": "On the pre-meditation setup view (PreMeditationPage when phase is \"setup\"), move the meditation guide container (the guide/stepper content shown before starting a session) to be the last container in the page hierarchy (bottom of the setup page), below all other setup controls/sections.",
+      "reqIds": [
+        "REQ-4"
       ],
       "version": 1
     }
@@ -34,24 +42,24 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Move 'More Details' button to centered bottom of the guide container on the pre-meditation page.",
+      "summary": "Meditation session: move volume and time input labels to top-left outside container and increase label font size",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Increase size/padding of in-session volume and time standard sliders to improve usability while keeping slider inputs.",
+      "summary": "Meditation session: adjust padding for volume/time input containers to px-6 py-5 and remove premed-slider-container class",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Restyle and resize/reshape the play/pause button to better match the app’s theme.",
+      "summary": "Pre-med page: move meditation guide container to the bottom (last in hierarchy)",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Pre-meditation UI polish: move More Details button, enlarge sliders, and restyle play/pause",
+  "projectName": "Adjust in-session volume/time input labels & padding; move pre-meditation guide to page bottom",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

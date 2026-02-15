@@ -173,19 +173,6 @@
     z-index: 50;
   }
 
-  /* Enhanced slider containers for pre-meditation active phase */
-  .premed-slider-container {
-    min-height: 60px;
-    display: flex;
-    align-items: center;
-    transition: all 0.3s ease;
-  }
-
-  .premed-slider-container:hover {
-    background: oklch(var(--card) / 0.5);
-    border-color: oklch(var(--accent-cyan) / 0.3);
-  }
-
   /* Enhanced play/pause button for pre-meditation active phase */
   .premed-play-pause-btn {
     background: oklch(var(--accent-cyan) / 0.15);

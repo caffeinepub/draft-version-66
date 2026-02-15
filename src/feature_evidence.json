@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-on-the-pre-meditation-setup-view-premeditationpage-when-phase-is-setup-move-the-more-details-button-so-it-is-centered-at-the-bottom-of-the-meditation-guide-container-not-positioned-at-the-top-right",
-      "featureTitle": "On the pre-meditation setup view (PreMeditationPage when phase is \"setup\"), move the \"More Details\" button so it is centered at the bottom of the meditation guide container (not positioned at the top-right).",
+      "featureId": "feature-on-the-in-session-meditation-view-premeditationpage-when-phase-is-active-update-the-volume-and-time-seek-slider-sections-so-their-labels-render-at-the-top-left-outside-the-slider-container-and-use-a-larger-font-size-in-pixels-than-the-current-label-styling",
+      "featureTitle": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), update the Volume and Time/Seek slider sections so their labels render at the top-left outside the slider container and use a larger font size (in pixels) than the current label styling.",
       "files": [
         "frontend/src/pages/PreMeditationPage.tsx"
       ],
@@ -17,13 +17,33 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-6"
+        "REQ-1"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-on-the-in-session-meditation-view-premeditationpage-when-phase-is-active-increase-the-size-of-the-two-standard-slider-control-containers-volume-and-time-seek-so-they-are-easier-to-use-e-g-larger-container-height-and-or-padding-while-keeping-them-as-standard-slider-inputs-and-preserving-their-current-behavior",
-      "featureTitle": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), increase the size of the two standard slider control containers (volume and time/seek) so they are easier to use (e.g., larger container height and/or padding) while keeping them as standard slider inputs and preserving their current behavior.",
+      "featureId": "feature-on-the-in-session-meditation-view-premeditationpage-when-phase-is-active-update-the-container-elements-that-hold-the-volume-and-time-seek-inputs-to-use-tailwind-classes-px-6-py-5-and-remove-the-premed-slider-container-class-from-those-containers",
+      "featureTitle": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), update the container elements that hold the Volume and Time/Seek inputs to use Tailwind classes \"px-6 py-5\" and remove the \"premed-slider-container\" class from those containers.",
+      "files": [
+        "frontend/src/pages/PreMeditationPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-remove-or-retire-the-premed-slider-container-styling-so-it-is-no-longer-used-by-the-volume-time-containers-after-the-class-removal-ensuring-there-are-no-remaining-references-for-these-two-controls",
+      "featureTitle": "Remove or retire the \"premed-slider-container\" styling so it is no longer used by the Volume/Time containers after the class removal, ensuring there are no remaining references for these two controls.",
       "files": [
         "frontend/src/index.css",
         "frontend/src/pages/PreMeditationPage.tsx"
@@ -38,15 +58,14 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-7"
+        "REQ-3"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-on-the-in-session-meditation-view-premeditationpage-when-phase-is-active-restyle-the-play-pause-button-so-it-better-matches-the-app-s-existing-theme-and-also-adjust-its-sizing-shape-not-just-colors",
-      "featureTitle": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), restyle the play/pause button so it better matches the app’s existing theme and also adjust its sizing/shape (not just colors).",
+      "featureId": "feature-on-the-pre-meditation-setup-view-premeditationpage-when-phase-is-setup-move-the-meditation-guide-container-the-guide-stepper-content-shown-before-starting-a-session-to-be-the-last-container-in-the-page-hierarchy-bottom-of-the-setup-page-below-all-other-setup-controls-sections",
+      "featureTitle": "On the pre-meditation setup view (PreMeditationPage when phase is \"setup\"), move the meditation guide container (the guide/stepper content shown before starting a session) to be the last container in the page hierarchy (bottom of the setup page), below all other setup controls/sections.",
       "files": [
-        "frontend/src/index.css",
         "frontend/src/pages/PreMeditationPage.tsx"
       ],
       "components": [
@@ -59,7 +78,7 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-8"
+        "REQ-4"
       ],
       "confidence": "high"
     }

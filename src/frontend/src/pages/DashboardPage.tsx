@@ -80,7 +80,7 @@ export default function DashboardPage() {
   const hasRituals = rituals && rituals.length > 0;
 
   return (
-    <PageBackgroundShell variant="default" intensity={0.35}>
+    <PageBackgroundShell variant="default" intensity={0.42}>
       <StandardPageNav showBackButton={false} />
       <FloatingNav />
 

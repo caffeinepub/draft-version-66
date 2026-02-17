@@ -1,12 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Refine the PreMeditationPage layout/styling by improving in-session Volume/Time label placement and padding, and moving the setup-phase meditation guide to the bottom of the page.
+**Goal:** Refine the meditation UI by strengthening the animated dashboard lotus background, improving pre-meditation layout clarity with boxed sections, and correcting active-session controls (play/pause shape and time scrubber behavior).
 
 **Planned changes:**
-- In PreMeditationPage when phase is `"active"`, reposition the Volume and Time/Seek labels to render top-left outside their respective slider containers, and increase label font size using a Tailwind px-based text utility.
-- In PreMeditationPage when phase is `"active"`, update the Volume and Time/Seek container padding to Tailwind `px-6 py-5` and remove the `premed-slider-container` class from those containers.
-- Remove/retire `premed-slider-container` usage for the in-session Volume/Time containers and ensure no remaining references are required for those two controls (optionally remove the unused CSS block if safe).
-- In PreMeditationPage when phase is `"setup"`, move the pre-session meditation guide container to be the last section on the page (below all other setup controls) without breaking guide interactions.
+- Increase the visibility/intensity of the /dashboard canvas-rendered lotus and particle background by ~20% while keeping it animated and non-interactive (pointer-events disabled).
+- On /pre-meditation (setup phase), group ambient sound picker, duration selector, and Begin/Save Ritual buttons into a single clearly visible card-style container.
+- On /pre-meditation (setup phase), place the meditation guide into its own separate card-style container and add a bottom-centered “More details” button that navigates to the relevant /knowledge category and deep-links/scrolls to the selected technique’s content.
+- On /pre-meditation (active phase), change the play/pause control to a circular button while keeping its icon and behavior the same.
+- Fix the active meditation time scrubber to behave like a standard media scrubber: left decreases remaining time, right increases remaining time, with immediate and consistent updates (thumb position + mm:ss) while paused or playing.
 
-**User-visible outcome:** During an active session, Volume and Time/Seek labels appear above their sliders with clearer styling and adjusted padding; during setup, the meditation guide appears at the bottom of the setup page while continuing to function normally.
+**User-visible outcome:** The dashboard background animation appears stronger, the pre-meditation setup is organized into clear boxed sections with a “More details” link into the correct knowledge content, and the active session has a round play/pause button plus a correctly behaving, responsive time scrubber.

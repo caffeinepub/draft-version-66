@@ -1,92 +1,117 @@
 {
   "kind": "build_request",
-  "title": "Adjust in-session volume/time input labels & padding; move pre-meditation guide to page bottom",
+  "title": "Meditation UI refinements: stronger dashboard lotus background, boxed pre-meditation layout, and correct time scrubber behavior",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), update the Volume and Time/Seek slider sections so their labels render at the top-left outside the slider container and use a larger font size (in pixels) than the current label styling.",
+      "text": "Increase the Dashboard page’s canvas-based background lotus and particle visibility/strength by ~20% compared to the current dashboard appearance, while keeping the background fully animated and non-interactive (pointer-events disabled).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "user-1"
         ],
         "quotes": [
-          "Input that controls volume of the picked ambient sound, and input that controls time"
+          "Background lotus with background particles which are both animated with canvas"
         ]
       },
       "acceptanceCriteria": [
-        "When phase === \"active\", the Volume control label is positioned at the top-left outside the visual container that wraps the volume slider.",
-        "When phase === \"active\", the Time/Seek control label is positioned at the top-left outside the visual container that wraps the time/seek slider.",
-        "Both labels have a visibly larger font size than before and are set using a Tailwind px-based text size utility (e.g., text-[...]px).",
-        "No changes to slider behavior (value changes, timer seek, audio volume) are introduced."
+        "On /dashboard, the lotus + particle canvas background appears ~20% more visible/intense than before (both lotus glow/petals and particles).",
+        "The lotus/particles remain animated via canvas rendering, and the canvas remains non-interactive (does not block clicks/scroll)."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), update the container elements that hold the Volume and Time/Seek inputs to use Tailwind classes \"px-6 py-5\" and remove the \"premed-slider-container\" class from those containers.",
+      "text": "On the Pre-meditation setup UI (/pre-meditation, setup phase), group the ambient sound picker, the duration selector, and the primary actions (Begin and Save Ritual buttons) into a single clearly visible boxed container (card-style with background/border/shadow) that holds this content together.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "user-1"
         ],
         "quotes": [
-          "Basically add these classes for those containers that hold those inputs  px-6 py-5 , and remove this class premed-slider-container"
+          "Ye, the ambient sound picker with duration selector and begin/save ritual buttons, should be in a single container."
         ]
       },
       "acceptanceCriteria": [
-        "In PreMeditationPage active-phase UI, the wrapper/container for the volume input includes \"px-6 py-5\".",
-        "In PreMeditationPage active-phase UI, the wrapper/container for the time/seek input includes \"px-6 py-5\".",
-        "In PreMeditationPage active-phase UI, neither container includes the \"premed-slider-container\" class.",
-        "Layout reflects reduced vertical padding compared to the previous container styling while preserving consistent horizontal padding."
+        "In setup phase on /pre-meditation, ambient sound selection + duration selection + Begin/Save Ritual actions are visually contained within one card/boxed container.",
+        "The container is clearly distinguishable from the background (e.g., uses a surface/background color plus border and/or shadow)."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Remove or retire the \"premed-slider-container\" styling so it is no longer used by the Volume/Time containers after the class removal, ensuring there are no remaining references for these two controls.",
+      "text": "On the Pre-meditation setup UI (/pre-meditation, setup phase), place the meditation guide content into its own separate clearly visible boxed container, and add a bottom-centered button labeled \"More details\" that navigates to the Knowledge page for the currently selected meditation type (deep-linking to that technique’s content).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "user-1"
         ],
         "quotes": [
-          "remove this class premed-slider-container"
+          "and then meditation guide also should be in a single boxxed container where there is a button at the bottom center with more details which redirects to specific knowledge page."
         ]
       },
       "acceptanceCriteria": [
-        "There are no remaining \"premed-slider-container\" className usages for the in-session Volume and Time/Seek containers.",
-        "If the CSS utility class block for \".premed-slider-container\" remains in frontend/src/index.css, it is not required by the in-session Volume/Time controls; alternatively, the unused CSS block is removed without causing visual regressions elsewhere."
+        "In setup phase on /pre-meditation, the meditation guide is inside a distinct card/boxed container separate from the ambient/duration/actions container.",
+        "A bottom-centered button with English label \"More details\" is present within the guide container.",
+        "Clicking \"More details\" navigates to /knowledge with the category corresponding to the current meditation type and triggers the existing deep-link scroll behavior to the content section."
       ]
     },
     {
       "id": "REQ-4",
-      "text": "On the pre-meditation setup view (PreMeditationPage when phase is \"setup\"), move the meditation guide container (the guide/stepper content shown before starting a session) to be the last container in the page hierarchy (bottom of the setup page), below all other setup controls/sections.",
+      "text": "In the active meditation session UI (the active phase on /pre-meditation), update the play/pause control so the button is round (circular) rather than square/rectangular, while keeping the icon and action behavior unchanged.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "user-1"
         ],
         "quotes": [
-          "Yes, pretty much"
+          "meditation page, has a pause/play button which looks like a square, it should be round instead"
         ]
       },
       "acceptanceCriteria": [
-        "When phase === \"setup\", the meditation guide container renders after all other setup sections (e.g., meditation type info, duration/time selection, ambient sound selection, mood/energy selections, etc.).",
-        "The guide container appears visually at the bottom of the setup page content (last section before the page ends), without overlapping other content.",
-        "All existing guide functionality (step navigation, “More Details” button behavior if present) continues to work."
+        "During an active meditation session, the play/pause button renders with a circular shape (equal width/height and fully rounded corners).",
+        "Tapping the button still correctly toggles between pause and play behavior."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Fix the active meditation time scrubber so it behaves like a standard media scrubber: dragging the thumb from right to left decreases the remaining time and dragging left to right increases the remaining time; updates must be immediately reactive (thumb position and displayed time update consistently) and allow controlling minutes+seconds at any moment during the session (paused or playing).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "user-1"
+        ],
+        "quotes": [
+          "drag from right to left, it decreases time. Let's say user has selected 15 minutes, he can manage at any point meditation those 15 minutes and seconds. It's similar to how youtube player works, you can control time with range input."
+        ]
+      },
+      "acceptanceCriteria": [
+        "In active phase, the time scrubber direction is correct: moving the thumb left reduces remaining time; moving it right increases remaining time.",
+        "The displayed remaining time (mm:ss) and the scrubber thumb stay in sync while dragging (no reversed visual behavior).",
+        "Seeking works while the timer is running and while paused, and updates the session state immediately (remaining time and progress visuals update accordingly)."
       ]
     }
   ],
   "constraints": [
-    "Frontend immutable paths must not be modified: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui/*.",
-    "Keep all backend logic in the existing single Motoko actor (no new backend services)."
+    "Frontend immutable paths must not be edited: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui (compose these components instead).",
+    "Keep the backend as a single Motoko actor; no backend changes are required for these UI-only adjustments."
   ],
   "nonGoals": [
-    "Do not change meditation timer logic, seek behavior, audio playback behavior, or state management beyond layout/styling changes needed for labels and padding.",
-    "Do not redesign unrelated controls or pages outside PreMeditationPage active/setup phases."
+    "Do not add new authentication providers or external services.",
+    "Do not introduce new routes beyond using the existing /knowledge deep-linking behavior.",
+    "Do not redesign unrelated pages (Landing/Journal/Progress/Books) beyond the specified UI changes."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

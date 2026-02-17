@@ -1,53 +1,22 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-14T16:18:40.798Z",
-  "summary": "All four requested UI/layout requirements for PreMeditationPage (active-phase labels + padding/class removal; setup-phase guide moved to bottom; retire premed-slider-container styling) appear to be implemented per the diff summary. However, the diff also includes multiple unrelated styling/UI changes not requested in the BuildRequest.",
+  "generatedAt": "2026-02-16T12:12:58.446Z",
+  "summary": "All specified UI refinements appear to be implemented: dashboard background intensity is increased via PageBackgroundShell, pre-meditation setup content is reorganized into card containers with a \"More details\" button, the active play/pause button is circular, and the time scrubber behavior is described as corrected. Some additional ritual-related navigation behavior was added that was not requested.",
   "missing_requirements": [],
   "hallucinated_features": [
     {
-      "description": "Play/pause button styling changes (larger size, enhanced borders/shadows/hover/active states) beyond the requested Volume/Time label and padding adjustments",
-      "reason": "BuildRequest non-goals restrict changes to layout/styling needed for labels and padding; play/pause button changes were not requested.",
+      "description": "Added/expanded ritual navigation to /pre-meditation including passing full ritual settings (duration, ambient sound, volume) and an autoStart flag, plus ritual deletion handling from the dashboard.",
+      "reason": "The BuildRequest focuses only on background intensity, pre-meditation layout boxing, \"More details\" deep-linking, circular play/pause, and scrubber behavior—no changes were requested to ritual start/delete flows or adding auto-start behavior.",
       "evidence": [
-        "frontend-file-summaries.txt (mentions .premed-play-pause-btn and play/pause button w-20 h-20 styling changes)",
-        "frontend/src/index.css (mentions themed play/pause button styling in summary)",
-        "frontend-file-summaries.txt (PreMeditationPage description mentions enhanced play/pause button size/styling)"
-      ]
-    },
-    {
-      "description": "Lotus/background visibility/intensity adjustments on PreMeditationPage",
-      "reason": "Not requested; requirement scope is limited to slider labels/padding and moving the setup guide container.",
-      "evidence": [
-        "frontend-file-summaries.txt (PreMeditationPage description mentions lotus background with intensity 0.3)"
-      ]
-    },
-    {
-      "description": "Forcing single-column layout at all widths for setup content",
-      "reason": "Not requested as part of moving the guide container; this is a broader layout change.",
-      "evidence": [
-        "frontend-file-summaries.txt (PreMeditationPage description mentions single-column layout forced at all widths for setup content)"
-      ]
-    },
-    {
-      "description": "Passing a corrected prop name (selectedMusic) to AmbientMusicCarousel",
-      "reason": "Not requested; this is a functional/wiring change unrelated to label/padding/guide ordering requirements.",
-      "evidence": [
-        "frontend-file-summaries.txt (PreMeditationPage description mentions correct prop name (selectedMusic) passed to AmbientMusicCarousel)"
-      ]
-    },
-    {
-      "description": "Broad global CSS/theme changes (restored OKLCH token system, Playfair Display font, added/updated animations, scrollbar/notification styling)",
-      "reason": "Not requested; scope is limited to specific PreMeditationPage layout/styling changes for sliders and guide position.",
-      "evidence": [
-        "frontend-file-summaries.txt (index.css description mentions restored OKLCH system, font, animations, scrollbar, notification styling)",
-        "frontend/src/index.css"
+        "frontend/src/pages/DashboardPage.tsx"
       ]
     }
   ],
   "confidence": 0.66,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/index.css",
+    "frontend/src/pages/DashboardPage.tsx",
     "frontend/src/pages/PreMeditationPage.tsx",
     "project_state.json"
   ]

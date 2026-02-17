@@ -1,29 +1,29 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-14T16:18:40.801Z",
+  "generatedAt": "2026-02-16T12:12:58.449Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 4,
+    "total": 5,
+    "implemented": 5,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), update the Volume and Time/Seek slider sections so their labels render at the top-left outside the slider container and use a larger font size (in pixels) than the current label styling.",
+        "summary": "Increase the Dashboard page’s canvas-based background lotus and particle visibility/strength by ~20% compared to the current dashboard appearance, while keeping the background fully animated and non-interactive (pointer-events disabled).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
+          "frontend/src/pages/DashboardPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
+          "frontend/src/pages/DashboardPage.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), update the container elements that hold the Volume and Time/Seek inputs to use Tailwind classes \"px-6 py-5\" and remove the \"premed-slider-container\" class from those containers.",
+        "summary": "On the Pre-meditation setup UI (/pre-meditation, setup phase), group the ambient sound picker, the duration selector, and the primary actions (Begin and Save Ritual buttons) into a single clearly visible boxed container (card-style with background/border/shadow) that holds this content together.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/pages/PreMeditationPage.tsx"
@@ -34,20 +34,29 @@
       },
       {
         "id": "REQ-3",
-        "summary": "Remove or retire the \"premed-slider-container\" styling so it is no longer used by the Volume/Time containers after the class removal, ensuring there are no remaining references for these two controls.",
+        "summary": "On the Pre-meditation setup UI (/pre-meditation, setup phase), place the meditation guide content into its own separate clearly visible boxed container, and add a bottom-centered button labeled \"More details\" that navigates to the Knowledge page for the currently selected meditation type (deep-linking to that technique’s content).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/index.css",
           "frontend/src/pages/PreMeditationPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/index.css",
           "frontend/src/pages/PreMeditationPage.tsx"
         ]
       },
       {
         "id": "REQ-4",
-        "summary": "On the pre-meditation setup view (PreMeditationPage when phase is \"setup\"), move the meditation guide container (the guide/stepper content shown before starting a session) to be the last container in the page hierarchy (bottom of the setup page), below all other setup controls/sections.",
+        "summary": "In the active meditation session UI (the active phase on /pre-meditation), update the play/pause control so the button is round (circular) rather than square/rectangular, while keeping the icon and action behavior unchanged.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/PreMeditationPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/PreMeditationPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Fix the active meditation time scrubber so it behaves like a standard media scrubber: dragging the thumb from right to left decreases the remaining time and dragging left to right increases the remaining time; updates must be immediately reactive (thumb position and displayed time update consistently) and allow controlling minutes+seconds at any moment during the session (paused or playing).",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/pages/PreMeditationPage.tsx"
@@ -63,7 +72,7 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/index.css",
+    "frontend/src/pages/DashboardPage.tsx",
     "frontend/src/pages/PreMeditationPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",

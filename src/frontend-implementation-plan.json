@@ -1,75 +1,82 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Pre-meditation in-session label/padding adjustments and setup guide repositioning",
+  "title": "Meditation UI refinements for dashboard background, pre-meditation layout, and active-session controls",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "In active-phase PreMeditationPage, move Volume and Time/Seek labels to top-left outside their slider containers and increase label font size using Tailwind px-based text utilities, without changing slider behavior.",
+      "summary": "Increase Dashboard lotus/particle canvas background visibility by ~20% while keeping it animated and non-interactive.",
       "acceptanceCriteria": [
-        "When phase === \"active\", the Volume control label is positioned at the top-left outside the visual container that wraps the volume slider.",
-        "When phase === \"active\", the Time/Seek control label is positioned at the top-left outside the visual container that wraps the time/seek slider.",
-        "Both labels have a visibly larger font size than before and are set using a Tailwind px-based text size utility (e.g., text-[...]px).",
-        "No changes to slider behavior (value changes, timer seek, audio volume) are introduced."
+        "On /dashboard, the lotus + particle canvas background appears ~20% more visible/intense than before (both lotus glow/petals and particles).",
+        "The lotus/particles remain animated via canvas rendering, and the canvas remains non-interactive (does not block clicks/scroll)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/PreMeditationPage.tsx",
+          "path": "frontend/src/pages/DashboardPage.tsx",
           "operation": "modify",
-          "description": "Adjust the active-phase JSX for the Volume and Time/Seek slider sections so each label renders above (outside) the slider container and aligns top-left (e.g., remove centered label styling and apply Tailwind px-based text sizing like text-[14px]/text-[16px], plus left alignment). Keep existing Slider props and handlers intact to avoid behavioral changes. Note: this uses existing shadcn-ui Label/Slider components—verify the component's usage instructions before implementing."
+          "description": "Increase the PageBackgroundShell/LotusCanvas intensity used on the Dashboard by ~20% (e.g., adjust the intensity prop) without changing animation behavior; ensure the background remains click-through (canvas has pointer-events disabled)."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "In active-phase PreMeditationPage, update Volume and Time/Seek slider wrapper containers to use Tailwind px-6 py-5 and remove the premed-slider-container class.",
+      "summary": "Box the pre-meditation setup controls (ambient sound, duration, Begin/Save Ritual) into a single card-style container.",
       "acceptanceCriteria": [
-        "In PreMeditationPage active-phase UI, the wrapper/container for the volume input includes \"px-6 py-5\".",
-        "In PreMeditationPage active-phase UI, the wrapper/container for the time/seek input includes \"px-6 py-5\".",
-        "In PreMeditationPage active-phase UI, neither container includes the \"premed-slider-container\" class.",
-        "Layout reflects reduced vertical padding compared to the previous container styling while preserving consistent horizontal padding."
+        "In setup phase on /pre-meditation, ambient sound selection + duration selection + Begin/Save Ritual actions are visually contained within one card/boxed container.",
+        "The container is clearly distinguishable from the background (e.g., uses a surface/background color plus border and/or shadow)."
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Update the active-phase container className values that wrap the Volume Slider and the Time/Seek Slider to include Tailwind \"px-6 py-5\" and remove the \"premed-slider-container\" class from both. Preserve all other structural/layout classes needed for backgrounds/borders and keep slider wiring unchanged. Note: this uses the existing shadcn-ui Slider component—verify the component's usage instructions before implementing."
+          "description": "In the setup phase layout, wrap the AmbientMusicCarousel, DurationRangeInput, and the primary action buttons (Begin and Save Ritual) inside a single visually distinct boxed container (card styling via Tailwind and/or existing shadcn-ui primitives such as Card if available). Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Retire the premed-slider-container styling so it is no longer required after removing the class from the in-session Volume/Time controls, ensuring no remaining references for those two controls.",
+      "summary": "Box the meditation guide into its own container and add a bottom-centered 'More details' button that deep-links to the matching Knowledge technique section.",
       "acceptanceCriteria": [
-        "There are no remaining \"premed-slider-container\" className usages for the in-session Volume and Time/Seek containers.",
-        "If the CSS utility class block for \".premed-slider-container\" remains in frontend/src/index.css, it is not required by the in-session Volume/Time controls; alternatively, the unused CSS block is removed without causing visual regressions elsewhere."
+        "In setup phase on /pre-meditation, the meditation guide is inside a distinct card/boxed container separate from the ambient/duration/actions container.",
+        "A bottom-centered button with English label \"More details\" is present within the guide container.",
+        "Clicking \"More details\" navigates to /knowledge with the category corresponding to the current meditation type and triggers the existing deep-link scroll behavior to the content section."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Remove the \".premed-slider-container\" utility styling block (and its hover block) if it is no longer used anywhere after the PreMeditationPage updates, or otherwise ensure it is not relied upon by the active-phase Volume/Time slider containers. Validate there are no remaining references for those two controls."
-        },
-        {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Verify the Volume and Time/Seek containers no longer reference the \"premed-slider-container\" class, and that replacement Tailwind classes fully cover required spacing/structure for the two controls."
+          "description": "Update the setup phase layout to place the MeditationGuideStepper and related guide content into a separate boxed container; add a bottom-centered Button labeled \"More details\" wired to the existing navigation logic (category=selectedType and scrollToContent enabled) so KnowledgePage deep-link scroll triggers. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "In setup-phase PreMeditationPage, move the meditation guide (guide/stepper) container to the bottom of the page content hierarchy, after all setup controls.",
+      "summary": "Make the active-session play/pause control circular while preserving its icon and behavior.",
       "acceptanceCriteria": [
-        "When phase === \"setup\", the meditation guide container renders after all other setup sections (e.g., meditation type info, duration/time selection, ambient sound selection, mood/energy selections, etc.).",
-        "The guide container appears visually at the bottom of the setup page content (last section before the page ends), without overlapping other content.",
-        "All existing guide functionality (step navigation, “More Details” button behavior if present) continues to work."
+        "During an active meditation session, the play/pause button renders with a circular shape (equal width/height and fully rounded corners).",
+        "Tapping the button still correctly toggles between pause and play behavior."
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Reorder the setup-phase JSX so the MeditationGuideStepper (guide container) renders last within the setup page's main content, below all other setup controls/sections. Keep the guide props/handlers (including any “More Details” behavior) unchanged to preserve existing functionality. Note: this uses the existing MeditationGuideStepper component—verify the component's usage instructions before implementing."
+          "description": "In the active phase UI controls, adjust the play/pause Button styling to be circular (equal width/height with fully rounded corners) while keeping the same icon and click handler behavior (togglePause) unchanged. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Fix the active-session time scrubber to behave like a standard media scrubber with correct direction, immediate reactivity, and seeking while paused or playing.",
+      "acceptanceCriteria": [
+        "In active phase, the time scrubber direction is correct: moving the thumb left reduces remaining time; moving it right increases remaining time.",
+        "The displayed remaining time (mm:ss) and the scrubber thumb stay in sync while dragging (no reversed visual behavior).",
+        "Seeking works while the timer is running and while paused, and updates the session state immediately (remaining time and progress visuals update accordingly)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/PreMeditationPage.tsx",
+          "operation": "modify",
+          "description": "Rebind the active-session scrubber control (Slider/range) so its value directly represents timeRemaining (min=0, max=totalTime, value=timeRemaining) and on drag calls seekTime(newRemainingSeconds); ensure the displayed mm:ss uses the same timeRemaining state and that progress visuals update consistently while dragging, whether paused or playing. Verify the component's usage instructions before implementing."
         }
       ]
     }

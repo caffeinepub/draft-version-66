@@ -1,40 +1,50 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
+  "summary": "Meditation app UI refinements: enhance dashboard background lotus/particles, restructure pre-med layout into boxed containers with a knowledge link button, and fix meditation controls (round play/pause button and correct time scrubber behavior).",
   "architectural_notes": [],
-  "known_issues": [],
-  "isFixRequest": false,
+  "known_issues": [
+    "Meditation page time slider/range input behaves reversed visually and is not reactive properly"
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-on-the-in-session-meditation-view-premeditationpage-when-phase-is-active-update-the-volume-and-time-seek-slider-sections-so-their-labels-render-at-the-top-left-outside-the-slider-container-and-use-a-larger-font-size-in-pixels-than-the-current-label-styling",
-      "title": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), update the Volume and Time/Seek slider sections so their labels render at the top-left outside the slider container and use a larger font size (in pixels) than the current label styling.",
+      "id": "feature-increase-the-dashboard-page-s-canvas-based-background-lotus-and-particle-visibility-strength-by-20-compared-to-the-current-dashboard-appearance-while-keeping-the-background-fully-animated-and-non-interactive-pointer-events-disabled",
+      "title": "Increase the Dashboard page’s canvas-based background lotus and particle visibility/strength by ~20% compared to the current dashboard appearance, while keeping the background fully animated and non-interactive (pointer-events disabled).",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-on-the-in-session-meditation-view-premeditationpage-when-phase-is-active-update-the-container-elements-that-hold-the-volume-and-time-seek-inputs-to-use-tailwind-classes-px-6-py-5-and-remove-the-premed-slider-container-class-from-those-containers",
-      "title": "On the in-session meditation view (PreMeditationPage when phase is \"active\"), update the container elements that hold the Volume and Time/Seek inputs to use Tailwind classes \"px-6 py-5\" and remove the \"premed-slider-container\" class from those containers.",
+      "id": "feature-on-the-pre-meditation-setup-ui-pre-meditation-setup-phase-group-the-ambient-sound-picker-the-duration-selector-and-the-primary-actions-begin-and-save-ritual-buttons-into-a-single-clearly-visible-boxed-container-card-style-with-background-border-shadow-that-holds-this-content-together",
+      "title": "On the Pre-meditation setup UI (/pre-meditation, setup phase), group the ambient sound picker, the duration selector, and the primary actions (Begin and Save Ritual buttons) into a single clearly visible boxed container (card-style with background/border/shadow) that holds this content together.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-remove-or-retire-the-premed-slider-container-styling-so-it-is-no-longer-used-by-the-volume-time-containers-after-the-class-removal-ensuring-there-are-no-remaining-references-for-these-two-controls",
-      "title": "Remove or retire the \"premed-slider-container\" styling so it is no longer used by the Volume/Time containers after the class removal, ensuring there are no remaining references for these two controls.",
+      "id": "feature-on-the-pre-meditation-setup-ui-pre-meditation-setup-phase-place-the-meditation-guide-content-into-its-own-separate-clearly-visible-boxed-container-and-add-a-bottom-centered-button-labeled-more-details-that-navigates-to-the-knowledge-page-for-the-currently-selected-meditation-type-deep-linking-to-that-technique-s-content",
+      "title": "On the Pre-meditation setup UI (/pre-meditation, setup phase), place the meditation guide content into its own separate clearly visible boxed container, and add a bottom-centered button labeled \"More details\" that navigates to the Knowledge page for the currently selected meditation type (deep-linking to that technique’s content).",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-on-the-pre-meditation-setup-view-premeditationpage-when-phase-is-setup-move-the-meditation-guide-container-the-guide-stepper-content-shown-before-starting-a-session-to-be-the-last-container-in-the-page-hierarchy-bottom-of-the-setup-page-below-all-other-setup-controls-sections",
-      "title": "On the pre-meditation setup view (PreMeditationPage when phase is \"setup\"), move the meditation guide container (the guide/stepper content shown before starting a session) to be the last container in the page hierarchy (bottom of the setup page), below all other setup controls/sections.",
+      "id": "feature-in-the-active-meditation-session-ui-the-active-phase-on-pre-meditation-update-the-play-pause-control-so-the-button-is-round-circular-rather-than-square-rectangular-while-keeping-the-icon-and-action-behavior-unchanged",
+      "title": "In the active meditation session UI (the active phase on /pre-meditation), update the play/pause control so the button is round (circular) rather than square/rectangular, while keeping the icon and action behavior unchanged.",
       "reqIds": [
         "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-active-meditation-time-scrubber-so-it-behaves-like-a-standard-media-scrubber-dragging-the-thumb-from-right-to-left-decreases-the-remaining-time-and-dragging-left-to-right-increases-the-remaining-time-updates-must-be-immediately-reactive-thumb-position-and-displayed-time-update-consistently-and-allow-controlling-minutes-seconds-at-any-moment-during-the-session-paused-or-playing",
+      "title": "Fix the active meditation time scrubber so it behaves like a standard media scrubber: dragging the thumb from right to left decreases the remaining time and dragging left to right increases the remaining time; updates must be immediately reactive (thumb position and displayed time update consistently) and allow controlling minutes+seconds at any moment during the session (paused or playing).",
+      "reqIds": [
+        "REQ-5"
       ],
       "version": 1
     }
@@ -42,24 +52,36 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Meditation session: move volume and time input labels to top-left outside container and increase label font size",
+      "summary": "Dashboard: increase visibility (~20%) of background lotus and animated background particle canvas",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Meditation session: adjust padding for volume/time input containers to px-6 py-5 and remove premed-slider-container class",
+      "summary": "Pre-med page: group ambient sound picker + duration selector + begin/save ritual buttons into a single visible boxed container",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Pre-med page: move meditation guide container to the bottom (last in hierarchy)",
+      "summary": "Pre-med page: place meditation guide content in its own visible boxed container with a bottom-center 'More details' button linking to a specific knowledge page",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Meditation page: change pause/play button from square to round",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Meditation page: fix reversed/reactivity issue in time scrubber so it behaves like a media player (drag left decreases time, drag right increases; supports minutes+seconds control during a 15-min session)",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Adjust in-session volume/time input labels & padding; move pre-meditation guide to page bottom",
+  "projectName": "Meditation UI refinements: stronger dashboard lotus background, boxed pre-meditation layout, and correct time scrubber behavior",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

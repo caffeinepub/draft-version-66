@@ -1,29 +1,29 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-16T12:12:58.449Z",
+  "generatedAt": "2026-02-18T13:43:18.400Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 5,
+    "total": 4,
+    "implemented": 4,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Increase the Dashboard page’s canvas-based background lotus and particle visibility/strength by ~20% compared to the current dashboard appearance, while keeping the background fully animated and non-interactive (pointer-events disabled).",
+        "summary": "On the Pre-Meditation page, change the \"More Details\" button label text to exactly \"More Details\" (English) to prevent overflow on small screens, while keeping the same link destination/behavior as before.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/DashboardPage.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/DashboardPage.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "On the Pre-meditation setup UI (/pre-meditation, setup phase), group the ambient sound picker, the duration selector, and the primary actions (Begin and Save Ritual buttons) into a single clearly visible boxed container (card-style with background/border/shadow) that holds this content together.",
+        "summary": "On the active meditation session view, update the Play/Pause control to render as a circular (round) icon button rather than a square button.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/pages/PreMeditationPage.tsx"
@@ -34,7 +34,7 @@
       },
       {
         "id": "REQ-3",
-        "summary": "On the Pre-meditation setup UI (/pre-meditation, setup phase), place the meditation guide content into its own separate clearly visible boxed container, and add a bottom-centered button labeled \"More details\" that navigates to the Knowledge page for the currently selected meditation type (deep-linking to that technique’s content).",
+        "summary": "On the active meditation session view, left-align the labels for the Volume control and the Adjusting Time control so each label sits above-left and is aligned to the left edge of its corresponding control container.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/pages/PreMeditationPage.tsx"
@@ -45,21 +45,11 @@
       },
       {
         "id": "REQ-4",
-        "summary": "In the active meditation session UI (the active phase on /pre-meditation), update the play/pause control so the button is round (circular) rather than square/rectangular, while keeping the icon and action behavior unchanged.",
+        "summary": "Fix the Adjusting Time slider in the active meditation session view so the thumb position and track fill respond visually in the expected left-to-right direction (dragging left shows the thumb on the left; dragging right shows the thumb on the right; left corresponds to less time and right to more time).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-5",
-        "summary": "Fix the active meditation time scrubber so it behaves like a standard media scrubber: dragging the thumb from right to left decreases the remaining time and dragging left to right increases the remaining time; updates must be immediately reactive (thumb position and displayed time update consistently) and allow controlling minutes+seconds at any moment during the session (paused or playing).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx",
+          "frontend/index.css"
         ],
         "matchedFiles": [
           "frontend/src/pages/PreMeditationPage.tsx"
@@ -72,7 +62,6 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/pages/DashboardPage.tsx",
     "frontend/src/pages/PreMeditationPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",

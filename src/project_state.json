@@ -1,87 +1,51 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Meditation app UI refinements: enhance dashboard background lotus/particles, restructure pre-med layout into boxed containers with a knowledge link button, and fix meditation controls (round play/pause button and correct time scrubber behavior).",
+  "summary": "New project",
   "architectural_notes": [],
   "known_issues": [
-    "Meditation page time slider/range input behaves reversed visually and is not reactive properly"
+    "Pre-med page: 'More Details in Knowledge Base' button label overflows on smaller screens; should be shortened to 'More Details' while keeping same link destination.",
+    "Meditation session page: play/pause button is square; should be circular.",
+    "Meditation session page: labels for Volume control and Adjusting Time control are not left-aligned with the left edge of their containers.",
+    "Meditation session page: Adjusting Time slider thumb visual position is reversed (drag left shows thumb right and vice versa); should behave left-to-right (left=less time, right=more time)."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-increase-the-dashboard-page-s-canvas-based-background-lotus-and-particle-visibility-strength-by-20-compared-to-the-current-dashboard-appearance-while-keeping-the-background-fully-animated-and-non-interactive-pointer-events-disabled",
-      "title": "Increase the Dashboard page’s canvas-based background lotus and particle visibility/strength by ~20% compared to the current dashboard appearance, while keeping the background fully animated and non-interactive (pointer-events disabled).",
+      "id": "feature-on-the-pre-meditation-page-change-the-more-details-button-label-text-to-exactly-more-details-english-to-prevent-overflow-on-small-screens-while-keeping-the-same-link-destination-behavior-as-before",
+      "title": "On the Pre-Meditation page, change the \"More Details\" button label text to exactly \"More Details\" (English) to prevent overflow on small screens, while keeping the same link destination/behavior as before.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-on-the-pre-meditation-setup-ui-pre-meditation-setup-phase-group-the-ambient-sound-picker-the-duration-selector-and-the-primary-actions-begin-and-save-ritual-buttons-into-a-single-clearly-visible-boxed-container-card-style-with-background-border-shadow-that-holds-this-content-together",
-      "title": "On the Pre-meditation setup UI (/pre-meditation, setup phase), group the ambient sound picker, the duration selector, and the primary actions (Begin and Save Ritual buttons) into a single clearly visible boxed container (card-style with background/border/shadow) that holds this content together.",
+      "id": "feature-on-the-active-meditation-session-view-update-the-play-pause-control-to-render-as-a-circular-round-icon-button-rather-than-a-square-button",
+      "title": "On the active meditation session view, update the Play/Pause control to render as a circular (round) icon button rather than a square button.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-on-the-pre-meditation-setup-ui-pre-meditation-setup-phase-place-the-meditation-guide-content-into-its-own-separate-clearly-visible-boxed-container-and-add-a-bottom-centered-button-labeled-more-details-that-navigates-to-the-knowledge-page-for-the-currently-selected-meditation-type-deep-linking-to-that-technique-s-content",
-      "title": "On the Pre-meditation setup UI (/pre-meditation, setup phase), place the meditation guide content into its own separate clearly visible boxed container, and add a bottom-centered button labeled \"More details\" that navigates to the Knowledge page for the currently selected meditation type (deep-linking to that technique’s content).",
+      "id": "feature-on-the-active-meditation-session-view-left-align-the-labels-for-the-volume-control-and-the-adjusting-time-control-so-each-label-sits-above-left-and-is-aligned-to-the-left-edge-of-its-corresponding-control-container",
+      "title": "On the active meditation session view, left-align the labels for the Volume control and the Adjusting Time control so each label sits above-left and is aligned to the left edge of its corresponding control container.",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-in-the-active-meditation-session-ui-the-active-phase-on-pre-meditation-update-the-play-pause-control-so-the-button-is-round-circular-rather-than-square-rectangular-while-keeping-the-icon-and-action-behavior-unchanged",
-      "title": "In the active meditation session UI (the active phase on /pre-meditation), update the play/pause control so the button is round (circular) rather than square/rectangular, while keeping the icon and action behavior unchanged.",
+      "id": "feature-fix-the-adjusting-time-slider-in-the-active-meditation-session-view-so-the-thumb-position-and-track-fill-respond-visually-in-the-expected-left-to-right-direction-dragging-left-shows-the-thumb-on-the-left-dragging-right-shows-the-thumb-on-the-right-left-corresponds-to-less-time-and-right-to-more-time",
+      "title": "Fix the Adjusting Time slider in the active meditation session view so the thumb position and track fill respond visually in the expected left-to-right direction (dragging left shows the thumb on the left; dragging right shows the thumb on the right; left corresponds to less time and right to more time).",
       "reqIds": [
         "REQ-4"
       ],
       "version": 1
-    },
-    {
-      "id": "feature-fix-the-active-meditation-time-scrubber-so-it-behaves-like-a-standard-media-scrubber-dragging-the-thumb-from-right-to-left-decreases-the-remaining-time-and-dragging-left-to-right-increases-the-remaining-time-updates-must-be-immediately-reactive-thumb-position-and-displayed-time-update-consistently-and-allow-controlling-minutes-seconds-at-any-moment-during-the-session-paused-or-playing",
-      "title": "Fix the active meditation time scrubber so it behaves like a standard media scrubber: dragging the thumb from right to left decreases the remaining time and dragging left to right increases the remaining time; updates must be immediately reactive (thumb position and displayed time update consistently) and allow controlling minutes+seconds at any moment during the session (paused or playing).",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "version": 1
     }
   ],
-  "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Dashboard: increase visibility (~20%) of background lotus and animated background particle canvas",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Pre-med page: group ambient sound picker + duration selector + begin/save ritual buttons into a single visible boxed container",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Pre-med page: place meditation guide content in its own visible boxed container with a bottom-center 'More details' button linking to a specific knowledge page",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Meditation page: change pause/play button from square to round",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Meditation page: fix reversed/reactivity issue in time scrubber so it behaves like a media player (drag left decreases time, drag right increases; supports minutes+seconds control during a 15-min session)",
-      "reqIds": [],
-      "status": "pending"
-    }
-  ],
-  "projectName": "Meditation UI refinements: stronger dashboard lotus background, boxed pre-meditation layout, and correct time scrubber behavior",
+  "new_feature_requests": [],
+  "projectName": "Meditation App",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

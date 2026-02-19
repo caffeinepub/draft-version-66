@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-increase-the-dashboard-page-s-canvas-based-background-lotus-and-particle-visibility-strength-by-20-compared-to-the-current-dashboard-appearance-while-keeping-the-background-fully-animated-and-non-interactive-pointer-events-disabled",
-      "featureTitle": "Increase the Dashboard page’s canvas-based background lotus and particle visibility/strength by ~20% compared to the current dashboard appearance, while keeping the background fully animated and non-interactive (pointer-events disabled).",
+      "featureId": "feature-on-the-pre-meditation-page-change-the-more-details-button-label-text-to-exactly-more-details-english-to-prevent-overflow-on-small-screens-while-keeping-the-same-link-destination-behavior-as-before",
+      "featureTitle": "On the Pre-Meditation page, change the \"More Details\" button label text to exactly \"More Details\" (English) to prevent overflow on small screens, while keeping the same link destination/behavior as before.",
       "files": [
-        "frontend/src/pages/DashboardPage.tsx"
+        "frontend/src/pages/PreMeditationPage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -22,8 +22,8 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-on-the-pre-meditation-setup-ui-pre-meditation-setup-phase-group-the-ambient-sound-picker-the-duration-selector-and-the-primary-actions-begin-and-save-ritual-buttons-into-a-single-clearly-visible-boxed-container-card-style-with-background-border-shadow-that-holds-this-content-together",
-      "featureTitle": "On the Pre-meditation setup UI (/pre-meditation, setup phase), group the ambient sound picker, the duration selector, and the primary actions (Begin and Save Ritual buttons) into a single clearly visible boxed container (card-style with background/border/shadow) that holds this content together.",
+      "featureId": "feature-on-the-active-meditation-session-view-update-the-play-pause-control-to-render-as-a-circular-round-icon-button-rather-than-a-square-button",
+      "featureTitle": "On the active meditation session view, update the Play/Pause control to render as a circular (round) icon button rather than a square button.",
       "files": [
         "frontend/src/pages/PreMeditationPage.tsx"
       ],
@@ -42,8 +42,8 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-on-the-pre-meditation-setup-ui-pre-meditation-setup-phase-place-the-meditation-guide-content-into-its-own-separate-clearly-visible-boxed-container-and-add-a-bottom-centered-button-labeled-more-details-that-navigates-to-the-knowledge-page-for-the-currently-selected-meditation-type-deep-linking-to-that-technique-s-content",
-      "featureTitle": "On the Pre-meditation setup UI (/pre-meditation, setup phase), place the meditation guide content into its own separate clearly visible boxed container, and add a bottom-centered button labeled \"More details\" that navigates to the Knowledge page for the currently selected meditation type (deep-linking to that technique’s content).",
+      "featureId": "feature-on-the-active-meditation-session-view-left-align-the-labels-for-the-volume-control-and-the-adjusting-time-control-so-each-label-sits-above-left-and-is-aligned-to-the-left-edge-of-its-corresponding-control-container",
+      "featureTitle": "On the active meditation session view, left-align the labels for the Volume control and the Adjusting Time control so each label sits above-left and is aligned to the left edge of its corresponding control container.",
       "files": [
         "frontend/src/pages/PreMeditationPage.tsx"
       ],
@@ -62,8 +62,8 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-in-the-active-meditation-session-ui-the-active-phase-on-pre-meditation-update-the-play-pause-control-so-the-button-is-round-circular-rather-than-square-rectangular-while-keeping-the-icon-and-action-behavior-unchanged",
-      "featureTitle": "In the active meditation session UI (the active phase on /pre-meditation), update the play/pause control so the button is round (circular) rather than square/rectangular, while keeping the icon and action behavior unchanged.",
+      "featureId": "feature-fix-the-adjusting-time-slider-in-the-active-meditation-session-view-so-the-thumb-position-and-track-fill-respond-visually-in-the-expected-left-to-right-direction-dragging-left-shows-the-thumb-on-the-left-dragging-right-shows-the-thumb-on-the-right-left-corresponds-to-less-time-and-right-to-more-time",
+      "featureTitle": "Fix the Adjusting Time slider in the active meditation session view so the thumb position and track fill respond visually in the expected left-to-right direction (dragging left shows the thumb on the left; dragging right shows the thumb on the right; left corresponds to less time and right to more time).",
       "files": [
         "frontend/src/pages/PreMeditationPage.tsx"
       ],
@@ -78,26 +78,6 @@
       ],
       "testIds": [
         "REQ-4"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-fix-the-active-meditation-time-scrubber-so-it-behaves-like-a-standard-media-scrubber-dragging-the-thumb-from-right-to-left-decreases-the-remaining-time-and-dragging-left-to-right-increases-the-remaining-time-updates-must-be-immediately-reactive-thumb-position-and-displayed-time-update-consistently-and-allow-controlling-minutes-seconds-at-any-moment-during-the-session-paused-or-playing",
-      "featureTitle": "Fix the active meditation time scrubber so it behaves like a standard media scrubber: dragging the thumb from right to left decreases the remaining time and dragging left to right increases the remaining time; updates must be immediately reactive (thumb position and displayed time update consistently) and allow controlling minutes+seconds at any moment during the session (paused or playing).",
-      "files": [
-        "frontend/src/pages/PreMeditationPage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "authorization@4.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-5"
       ],
       "confidence": "high"
     }

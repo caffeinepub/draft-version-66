@@ -1,13 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Refine the meditation UI by strengthening the animated dashboard lotus background, improving pre-meditation layout clarity with boxed sections, and correcting active-session controls (play/pause shape and time scrubber behavior).
+**Goal:** Improve Pre-Meditation and active session UI usability by fixing button label overflow and correcting/aligning key meditation controls.
 
 **Planned changes:**
-- Increase the visibility/intensity of the /dashboard canvas-rendered lotus and particle background by ~20% while keeping it animated and non-interactive (pointer-events disabled).
-- On /pre-meditation (setup phase), group ambient sound picker, duration selector, and Begin/Save Ritual buttons into a single clearly visible card-style container.
-- On /pre-meditation (setup phase), place the meditation guide into its own separate card-style container and add a bottom-centered “More details” button that navigates to the relevant /knowledge category and deep-links/scrolls to the selected technique’s content.
-- On /pre-meditation (active phase), change the play/pause control to a circular button while keeping its icon and behavior the same.
-- Fix the active meditation time scrubber to behave like a standard media scrubber: left decreases remaining time, right increases remaining time, with immediate and consistent updates (thumb position + mm:ss) while paused or playing.
+- Update the Pre-Meditation page “More Details” button label to exactly “More Details” (English) without changing its existing navigation/deep link behavior.
+- Change the active session Play/Pause control to a circular icon button (instead of a square button) while keeping the icon centered responsively.
+- Left-align the “Volume” and “Adjusting Time” labels so each sits above-left and aligned to the left edge of its corresponding control container across screen sizes.
+- Fix the “Adjusting Time” slider so left-to-right thumb position and track fill visually match the selected value (left = less time, right = more time), removing any inverted behavior.
 
-**User-visible outcome:** The dashboard background animation appears stronger, the pre-meditation setup is organized into clear boxed sections with a “More details” link into the correct knowledge content, and the active session has a round play/pause button plus a correctly behaving, responsive time scrubber.
+**User-visible outcome:** On small screens, the Pre-Meditation “More Details” button no longer overflows; during an active meditation, the Play/Pause button is round, control labels align properly, and the Adjusting Time slider behaves visually as expected.

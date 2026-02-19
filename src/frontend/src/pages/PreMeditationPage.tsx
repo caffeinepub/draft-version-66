@@ -321,6 +321,11 @@ export default function PreMeditationPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-8">
+                {/* Duration Selection - MOVED TO TOP */}
+                <div className="space-y-4">
+                  <DurationRangeInput value={duration} onChange={setDuration} />
+                </div>
+
                 {/* Ambient Sound Selection */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-foreground">Ambient Sound</h3>
@@ -332,42 +337,37 @@ export default function PreMeditationPage() {
                   />
                 </div>
 
-                {/* Duration Selection */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-foreground">Duration</h3>
-                  <DurationRangeInput value={duration} onChange={setDuration} />
-                </div>
-
                 {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
                   <Button
                     onClick={handleBeginMeditation}
-                    size="lg"
-                    className="w-full sm:w-auto bg-accent-cyan hover:bg-accent-cyan-tinted text-white font-semibold px-12 py-6 text-lg rounded-full shadow-glow-strong transition-all"
+                    className="flex-1 h-10 text-base bg-accent-cyan hover:bg-accent-cyan-tinted text-white font-semibold shadow-md hover:shadow-lg transition-all"
                   >
-                    <Play className="w-6 h-6 mr-2" />
-                    Begin
+                    Begin Meditation
                   </Button>
-
                   <Button
                     onClick={handleSaveRitual}
                     disabled={saveRitual.isPending}
-                    size="lg"
                     variant="outline"
-                    className="w-full sm:w-auto border-accent-cyan/50 hover:bg-accent-cyan/10 text-accent-cyan-tinted font-semibold px-12 py-6 text-lg rounded-full transition-all"
+                    className="flex-1 h-10 text-base border-accent-cyan/50 text-accent-cyan hover:bg-accent-cyan/10 font-semibold"
                   >
                     {saveRitual.isPending ? (
-                      <Loader2 className="w-6 h-6 mr-2 animate-spin" />
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
                     ) : (
-                      <Save className="w-6 h-6 mr-2" />
+                      <>
+                        <Save className="mr-2 h-4 w-4" />
+                        Save Ritual
+                      </>
                     )}
-                    Save Ritual
                   </Button>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Meditation Guide Container */}
+            {/* Meditation Guide */}
             <Card className="bg-background/80 backdrop-blur-sm border-accent-cyan/20 shadow-lg">
               <CardHeader>
                 <CardTitle className="text-2xl text-center text-accent-cyan-tinted">
@@ -377,15 +377,14 @@ export default function PreMeditationPage() {
               <CardContent className="space-y-6">
                 <MeditationGuideStepper steps={currentGuide.steps} />
                 
-                {/* More Details Button - Bottom Center */}
                 <div className="flex justify-center pt-4">
                   <Button
                     onClick={handleMoreDetails}
                     variant="outline"
-                    className="border-accent-cyan/50 hover:bg-accent-cyan/10 text-accent-cyan-tinted font-medium px-8 py-3 rounded-full transition-all"
+                    className="h-10 text-base border-accent-cyan/50 text-accent-cyan hover:bg-accent-cyan/10 font-semibold"
                   >
-                    <BookOpen className="w-5 h-5 mr-2" />
-                    More details
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    More Details
                   </Button>
                 </div>
               </CardContent>
@@ -402,70 +401,71 @@ export default function PreMeditationPage() {
       <PageBackgroundShell variant="premed" intensity={0.3}>
         <StandardPageNav />
 
-        <main className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-12">
-          <div className="w-full max-w-2xl mx-auto space-y-12">
+        <main className="relative z-10 min-h-screen flex items-center justify-center px-4 py-20">
+          <div className="w-full max-w-2xl mx-auto space-y-8">
             {/* Timer Display */}
-            <div className="flex justify-center">
-              <div className="relative w-80 h-80">
-                <MeditationWaveFillIndicator progress={progress} />
+            <div className="flex flex-col items-center space-y-6">
+              <div className="relative">
+                <MeditationWaveFillIndicator progress={progress} size={280} />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-6xl font-bold text-accent-cyan-tinted tabular-nums">
+                    <div className="text-5xl font-bold text-accent-cyan-tinted">
                       {formatTime(timeRemaining)}
                     </div>
                     <div className="text-sm text-muted-foreground mt-2">
-                      {Math.round(progress * 100)}% complete
+                      {Math.round(progress * 100)}% Complete
                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* Play/Pause Button - Now Circular */}
+              <Button
+                onClick={togglePause}
+                size="lg"
+                className="premed-play-pause-btn w-16 h-16 rounded-full p-0 flex items-center justify-center"
+              >
+                {isPaused ? <Play className="h-7 w-7" /> : <Pause className="h-7 w-7" />}
+              </Button>
             </div>
 
-            {/* Controls */}
-            <div className="space-y-8">
-              {/* Play/Pause Button - Circular */}
-              <div className="flex justify-center">
-                <Button
-                  onClick={togglePause}
-                  size="lg"
-                  className="w-16 h-16 rounded-full bg-accent-cyan hover:bg-accent-cyan-tinted text-white shadow-glow-strong transition-all p-0"
-                >
-                  {isPaused ? (
-                    <Play className="w-8 h-8" />
-                  ) : (
-                    <Pause className="w-8 h-8" />
-                  )}
-                </Button>
-              </div>
-
-              {/* Volume Control */}
-              <div className="space-y-3">
-                <Label className="text-sm font-medium text-foreground block text-center">
-                  Volume: {volume}%
-                </Label>
+            {/* Volume Control */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-foreground text-left block">
+                Volume
+              </Label>
+              <div className="flex items-center gap-4">
                 <Slider
                   value={[volume]}
-                  onValueChange={(vals) => setVolume(vals[0])}
+                  onValueChange={(val) => setVolume(val[0])}
                   min={0}
                   max={100}
-                  step={5}
-                  className="w-full"
+                  step={1}
+                  className="flex-1"
                 />
+                <span className="text-sm text-muted-foreground w-12 text-right">
+                  {volume}%
+                </span>
               </div>
+            </div>
 
-              {/* Time Scrubber */}
-              <div className="space-y-3">
-                <Label className="text-sm font-medium text-foreground block text-center">
-                  Adjust Time
-                </Label>
+            {/* Time Adjustment Control */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-foreground text-left block">
+                Adjust Time
+              </Label>
+              <div className="flex items-center gap-4">
                 <Slider
                   value={[timeRemaining]}
-                  onValueChange={(vals) => seekTime(vals[0])}
+                  onValueChange={(val) => seekTime(val[0])}
                   min={0}
                   max={totalTime}
                   step={1}
-                  className="w-full"
+                  className="flex-1"
                 />
+                <span className="text-sm text-muted-foreground w-16 text-right">
+                  {formatTime(timeRemaining)}
+                </span>
               </div>
             </div>
           </div>
@@ -480,35 +480,35 @@ export default function PreMeditationPage() {
       <StandardPageNav />
 
       <main className="relative z-10 min-h-screen flex items-center justify-center px-4 py-20">
-        <div className="w-full max-w-2xl mx-auto space-y-8">
-          <div className="text-center space-y-4">
-            <CheckCircle2 className="w-16 h-16 mx-auto text-accent-cyan animate-pulse" />
-            <h2 className="text-3xl font-bold text-accent-cyan-tinted">Session Complete</h2>
-            <p className="text-muted-foreground">Take a moment to reflect on your practice</p>
-          </div>
-
+        <div className="w-full max-w-2xl mx-auto">
           <Card className="bg-background/80 backdrop-blur-sm border-accent-cyan/20 shadow-lg">
-            <CardContent className="space-y-6 pt-6">
+            <CardHeader>
+              <CardTitle className="text-2xl text-center text-accent-cyan-tinted flex items-center justify-center gap-2">
+                <CheckCircle2 className="h-6 w-6" />
+                Session Complete
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
               {/* Mood Selection */}
-              <div className="space-y-4">
-                <Label className="text-lg font-semibold">How do you feel? (Select all that apply)</Label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div className="space-y-3">
+                <Label className="text-base font-semibold text-foreground">
+                  How are you feeling? (Select all that apply)
+                </Label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {Object.entries(moodIconMap).map(([mood, Icon]) => {
                     const isSelected = selectedMoods.includes(mood as MoodState);
                     return (
                       <button
                         key={mood}
                         onClick={() => handleMoodToggle(mood as MoodState)}
-                        className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
+                        className={`flex items-center gap-2 p-3 rounded-lg border-2 transition-all ${
                           isSelected
-                            ? 'border-accent-cyan bg-accent-cyan/10'
-                            : 'border-border hover:border-accent-cyan/50'
+                            ? 'border-accent-cyan bg-accent-cyan/10 text-accent-cyan'
+                            : 'border-border hover:border-accent-cyan/50 text-muted-foreground hover:text-foreground'
                         }`}
                       >
-                        <Icon className={`w-8 h-8 ${isSelected ? 'text-accent-cyan' : 'text-muted-foreground'}`} />
-                        <span className={`text-sm font-medium capitalize ${isSelected ? 'text-accent-cyan' : 'text-foreground'}`}>
-                          {mood}
-                        </span>
+                        <Icon className="h-5 w-5" />
+                        <span className="text-sm font-medium capitalize">{mood}</span>
                       </button>
                     );
                   })}
@@ -516,25 +516,25 @@ export default function PreMeditationPage() {
               </div>
 
               {/* Energy Selection */}
-              <div className="space-y-4">
-                <Label className="text-lg font-semibold">Energy Level</Label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="space-y-3">
+                <Label className="text-base font-semibold text-foreground">
+                  Energy Level
+                </Label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {Object.entries(energyIconMap).map(([energy, Icon]) => {
                     const isSelected = selectedEnergy === energy;
                     return (
                       <button
                         key={energy}
                         onClick={() => setSelectedEnergy(energy as EnergyState)}
-                        className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
+                        className={`flex items-center gap-2 p-3 rounded-lg border-2 transition-all ${
                           isSelected
-                            ? 'border-accent-cyan bg-accent-cyan/10'
-                            : 'border-border hover:border-accent-cyan/50'
+                            ? 'border-accent-cyan bg-accent-cyan/10 text-accent-cyan'
+                            : 'border-border hover:border-accent-cyan/50 text-muted-foreground hover:text-foreground'
                         }`}
                       >
-                        <Icon className={`w-8 h-8 ${isSelected ? 'text-accent-cyan' : 'text-muted-foreground'}`} />
-                        <span className={`text-sm font-medium capitalize ${isSelected ? 'text-accent-cyan' : 'text-foreground'}`}>
-                          {energy}
-                        </span>
+                        <Icon className="h-5 w-5" />
+                        <span className="text-sm font-medium capitalize">{energy}</span>
                       </button>
                     );
                   })}
@@ -542,17 +542,16 @@ export default function PreMeditationPage() {
               </div>
 
               {/* Personal Notes */}
-              <div className="space-y-4">
-                <Label htmlFor="reflection" className="text-lg font-semibold">
+              <div className="space-y-3">
+                <Label htmlFor="reflection" className="text-base font-semibold text-foreground">
                   Personal Notes (Optional)
                 </Label>
                 <Textarea
                   id="reflection"
-                  placeholder="What insights or experiences would you like to remember from this session?"
+                  placeholder="How was your session? Any insights or observations..."
                   value={reflection}
                   onChange={(e) => setReflection(e.target.value)}
-                  rows={4}
-                  className="resize-none"
+                  className="min-h-[120px] resize-none"
                 />
               </div>
 
@@ -565,8 +564,9 @@ export default function PreMeditationPage() {
                 />
                 <Label
                   htmlFor="favorite"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex items-center gap-2"
                 >
+                  <Heart className="h-4 w-4" />
                   Mark as Favorite
                 </Label>
               </div>
@@ -575,19 +575,15 @@ export default function PreMeditationPage() {
               <Button
                 onClick={handleSaveReflection}
                 disabled={recordSession.isPending || createJournalEntry.isPending}
-                size="lg"
-                className="w-full bg-accent-cyan hover:bg-accent-cyan-tinted text-white font-semibold py-6 text-lg rounded-full shadow-glow-strong transition-all"
+                className="w-full bg-accent-cyan hover:bg-accent-cyan-tinted text-white font-semibold shadow-md hover:shadow-lg transition-all"
               >
                 {recordSession.isPending || createJournalEntry.isPending ? (
                   <>
-                    <Loader2 className="w-6 h-6 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Saving...
                   </>
                 ) : (
-                  <>
-                    <CheckCircle2 className="w-6 h-6 mr-2" />
-                    Save & Continue
-                  </>
+                  'Save & Continue'
                 )}
               </Button>
             </CardContent>

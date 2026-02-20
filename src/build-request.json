@@ -1,107 +1,118 @@
 {
   "kind": "build_request",
-  "title": "Fix Pre-Meditation page button label overflow and active meditation controls UI",
-  "projectName": "Meditation App",
+  "title": "Refine meditation session controls and pre-med layout",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "On the Pre-Meditation page, change the \"More Details\" button label text to exactly \"More Details\" (English) to prevent overflow on small screens, while keeping the same link destination/behavior as before.",
+      "text": "Move the meditation guide container to the bottom of PreMeditationPage, maintaining its current structure with the 'More details' button centered at the bottom of the container",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4",
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "In pre-med page, the more-details button, should just say \"More Details\", because now it says \"More Details in Knowledge Base\", and it overflows on lower screens .",
-          "1. Yes, still link the same"
+          "in pre med page, put meditation guide container at the bottom of the page, instead like it is right now, at the top. Keep structure all the same, more details button should be at the bottom of meditation guide container centered."
         ]
       },
       "acceptanceCriteria": [
-        "In the Pre-Meditation page UI, the button text reads exactly \"More Details\".",
-        "Clicking the button navigates to the same destination as before (Knowledge page deep link behavior remains unchanged).",
-        "On small/mobile widths, the button label no longer overflows its container."
+        "Meditation guide container appears at the bottom of PreMeditationPage",
+        "'More details' button remains centered at the bottom of the meditation guide container",
+        "Container structure and content remain unchanged"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "On the active meditation session view, update the Play/Pause control to render as a circular (round) icon button rather than a square button.",
+      "text": "Add a hover-only glow effect to the pause/play button on the meditation session page, using the existing theme color",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-2",
+          "msg-3"
         ],
         "quotes": [
-          "meditation session page, has a play/pause button that is squared shape, it should be round/circle instead."
+          "make pause/play round circle button glow, and change to main color of the webpage",
+          "Glow effect on hover only",
+          "Use existing color theme, yes"
         ]
       },
       "acceptanceCriteria": [
-        "The Play/Pause button is visually circular (equal width/height with fully rounded corners).",
-        "The Play/Pause icon remains centered within the circular button across responsive breakpoints."
+        "Pause/play button shows glow effect only when hovered",
+        "Glow effect uses the main color from the existing theme",
+        "No glow effect when not hovering"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "On the active meditation session view, left-align the labels for the Volume control and the Adjusting Time control so each label sits above-left and is aligned to the left edge of its corresponding control container.",
+      "text": "Fix the pause/play button to control audio playback in addition to the timer, so pausing stops both the audio and timer",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4",
-          "msg-6"
+          "msg-2"
         ],
         "quotes": [
-          "the labels above control inputs, are above, but they are not quite above left, they are not alligned with left side of containers at all. Fix that.",
-          "2. The labels that are for control input volume, and the control input adjusting time."
+          "pause/play button currently doesn't stop audio, it only stops the timer"
         ]
       },
       "acceptanceCriteria": [
-        "The Volume label is positioned above its control container and its left edge aligns with the container's left edge.",
-        "The Adjusting Time label is positioned above its control container and its left edge aligns with the container's left edge.",
-        "Label alignment remains correct on small screens and larger screens (no drift/misalignment)."
+        "Clicking pause stops both the meditation audio and timer",
+        "Clicking play resumes both the audio and timer from where they were paused",
+        "Audio and timer remain synchronized"
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Fix the Adjusting Time slider in the active meditation session view so the thumb position and track fill respond visually in the expected left-to-right direction (dragging left shows the thumb on the left; dragging right shows the thumb on the right; left corresponds to less time and right to more time).",
+      "text": "Place time control (audio scrubber allowing navigation to any point) and volume control inputs in a themed container on the meditation session page with clear indicators, including a percentage display for volume",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4",
-          "msg-6"
+          "msg-2",
+          "msg-3"
         ],
         "quotes": [
-          "make adjusting time control input, respond properly visually thumb, as I control it, the visual control is reversed. For instance, if I drag to left side, the visual thumb appears on the right side and vice versa.",
-          "3. Yes, left = less time etc."
+          "Put time control and volume control inputs in container with UI fitting theme. Controls should have indication, like volume control, what is the % of a volume",
+          "I mean the input, which exists already in that page, like a youtube video player, where user can navigate through any video part manually, but here, user can only control time"
         ]
       },
       "acceptanceCriteria": [
-        "Dragging the Adjusting Time slider thumb to the left moves the thumb visually left and results in a smaller time value.",
-        "Dragging the Adjusting Time slider thumb to the right moves the thumb visually right and results in a larger time value.",
-        "No inverted/RTL visual behavior remains (thumb position and filled track correspond to the selected value)."
+        "Time control scrubber allows users to navigate to any point in the meditation audio",
+        "Volume control displays current volume as a percentage",
+        "Both controls are placed in a single container styled to match the app theme",
+        "Controls have clear visual indicators of their current state"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Adjust timer text color on the meditation session page to be white/light in dark theme and black/dark in light theme",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "currently, the timer has white color, keep that white/light color for dark theme, and black/dark color for light theme"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Timer displays in white or light color when dark theme is active",
+        "Timer displays in black or dark color when light theme is active",
+        "Timer text remains clearly readable in both themes"
       ]
     }
   ],
   "constraints": [
-    "Do not change the navigation destination/behavior of the Pre-Meditation \"More Details\" button; only change its displayed label text.",
-    "Use English for any user-facing text changes."
+    "Use only the existing theme colors; do not introduce new color values",
+    "Maintain the current structure of the meditation guide container when repositioning it",
+    "Preserve existing audio scrubber functionality while enhancing controls"
   ],
   "nonGoals": [
-    "No backend/Motoko changes.",
-    "No changes to unrelated UI elements outside the specified button/controls."
+    "Changing the meditation guide content or steps",
+    "Modifying the pause/play button shape beyond ensuring it's circular",
+    "Adding new audio features beyond pause/play control and scrubbing",
+    "Redesigning the overall meditation session page layout"
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

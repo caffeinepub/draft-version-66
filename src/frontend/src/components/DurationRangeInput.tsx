@@ -20,7 +20,7 @@ export default function DurationRangeInput({
   };
 
   return (
-    <div id="1uxme31" className="space-y-4">
+    <div id="duration-range-input" className="space-y-4">
       <div className="flex items-center justify-between">
         <Label className="text-lg font-medium text-foreground">
           Duration

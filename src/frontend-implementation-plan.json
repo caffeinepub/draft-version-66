@@ -1,73 +1,91 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Pre-Meditation button label overflow fix and active meditation controls UI adjustments",
+  "title": "Refine meditation session controls and pre-med layout",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Shorten the Pre-Meditation \"More Details\" button label to exactly \"More Details\" without changing navigation behavior.",
+      "summary": "Move meditation guide container to bottom of PreMeditationPage with centered 'More details' button",
       "acceptanceCriteria": [
-        "In the Pre-Meditation page UI, the button text reads exactly \"More Details\".",
-        "Clicking the button navigates to the same destination as before (Knowledge page deep link behavior remains unchanged).",
-        "On small/mobile widths, the button label no longer overflows its container."
+        "Meditation guide container appears at the bottom of PreMeditationPage",
+        "'More details' button remains centered at the bottom of the meditation guide container",
+        "Container structure and content remain unchanged"
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Update the existing \"More Details\" action button to display the label text exactly \"More Details\" (English) while reusing the existing click handler/navigation logic (keep the same destination/behavior). If the button uses shadcn-ui Button, keep it and only adjust displayed label (and any minimal layout classes needed to avoid overflow). Verify the component's usage instructions before implementing."
+          "description": "Reorder the layout structure to place the MeditationGuideStepper section at the bottom of the page while maintaining all existing content, structure, and the centered 'More details' button positioning within the guide container"
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Make the active session Play/Pause control a circular icon button.",
+      "summary": "Add hover-only glow effect to pause/play button using existing theme color",
       "acceptanceCriteria": [
-        "The Play/Pause button is visually circular (equal width/height with fully rounded corners).",
-        "The Play/Pause icon remains centered within the circular button across responsive breakpoints."
+        "Pause/play button shows glow effect only when hovered",
+        "Glow effect uses the main color from the existing theme",
+        "No glow effect when not hovering"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/PreMeditationPage.tsx",
+          "path": "frontend/src/pages/ActiveMeditationPage.tsx",
           "operation": "modify",
-          "description": "In the active meditation session UI (the in-session/\"active\" phase view), change the Play/Pause control styling to a true circular icon button (equal width/height + fully rounded), ensuring the icon remains centered. If implemented with shadcn-ui Button, keep using it and adjust size/shape via className/props only. Verify the component's usage instructions before implementing."
+          "description": "Add hover state styling to the pause/play button that applies a glow effect using the existing theme accent color (--accent from the theme system), ensuring the glow only appears on hover and uses CSS transitions for smooth activation"
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Left-align the Volume and Adjusting Time labels above their respective controls in the active session view.",
+      "summary": "Fix pause/play button to control both audio and timer synchronously",
       "acceptanceCriteria": [
-        "The Volume label is positioned above its control container and its left edge aligns with the container's left edge.",
-        "The Adjusting Time label is positioned above its control container and its left edge aligns with the container's left edge.",
-        "Label alignment remains correct on small screens and larger screens (no drift/misalignment)."
+        "Clicking pause stops both the meditation audio and timer",
+        "Clicking play resumes both the audio and timer from where they were paused",
+        "Audio and timer remain synchronized"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/PreMeditationPage.tsx",
+          "path": "frontend/src/pages/ActiveMeditationPage.tsx",
           "operation": "modify",
-          "description": "In the active meditation session UI, adjust the layout for the Volume control and Adjusting Time control so each label is placed above-left and left-aligned to the same left edge as its control container (use consistent container structure and text alignment utilities). If labels are rendered with shadcn-ui Label, keep the component and update only layout/alignment classes. Verify the component's usage instructions before implementing."
+          "description": "Update the pause/play button handler to control both the audio element (via pause/play methods) and the timer state synchronously, ensuring the audio playback state matches the timer isRunning state"
+        },
+        {
+          "path": "frontend/src/hooks/useMeditationTimer.ts",
+          "operation": "modify",
+          "description": "Ensure the toggleTimer function properly exposes the running state and that external audio control can be coordinated with timer pause/resume actions"
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Fix the Adjusting Time slider so thumb and track fill move left-to-right with value.",
+      "summary": "Place time control scrubber and volume control with percentage in themed container",
       "acceptanceCriteria": [
-        "Dragging the Adjusting Time slider thumb to the left moves the thumb visually left and results in a smaller time value.",
-        "Dragging the Adjusting Time slider thumb to the right moves the thumb visually right and results in a larger time value.",
-        "No inverted/RTL visual behavior remains (thumb position and filled track correspond to the selected value)."
+        "Time control scrubber allows users to navigate to any point in the meditation audio",
+        "Volume control displays current volume as a percentage",
+        "Both controls are placed in a single container styled to match the app theme",
+        "Controls have clear visual indicators of their current state"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/PreMeditationPage.tsx",
+          "path": "frontend/src/pages/ActiveMeditationPage.tsx",
           "operation": "modify",
-          "description": "In the active meditation session UI, correct the Adjusting Time slider so the visual direction and filled track correspond to the value in a standard LTR manner (left = less time, right = more time). Ensure no direction/transform styling is causing inversion and keep the existing behavior for changing the time value. If implemented with shadcn-ui Slider, continue using it and adjust configuration/styling to remove inverted behavior. Verify the component's usage instructions before implementing."
-        },
+          "description": "Create a themed container wrapping the existing audio scrubber (time control) and volume control inputs. Add a percentage display element that shows the current volume level. Style the container to match the app's theme using existing color variables and ensure both controls have clear visual indicators (progress bars, thumb styling). Wire the time control scrubber to update the audio currentTime and the timer's seekTo function for synchronization"
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Adjust timer text color to be white/light in dark theme and black/dark in light theme",
+      "acceptanceCriteria": [
+        "Timer displays in white or light color when dark theme is active",
+        "Timer displays in black or dark color when light theme is active",
+        "Timer text remains clearly readable in both themes"
+      ],
+      "file_operations": [
         {
-          "path": "frontend/index.css",
+          "path": "frontend/src/pages/ActiveMeditationPage.tsx",
           "operation": "modify",
-          "description": "If the inversion is caused by global styles (e.g., direction/transform rules affecting slider track/thumb), add a minimal, scoped CSS fix to ensure the Adjusting Time slider renders LTR (thumb and range fill) without impacting unrelated sliders elsewhere in the app."
+          "description": "Update the timer display text styling to use theme-aware color classes (e.g., text-white dark:text-white and text-black for light theme, or using CSS custom properties that adapt to theme) ensuring high contrast and readability in both light and dark modes"
         }
       ]
     }

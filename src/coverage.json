@@ -1,18 +1,18 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-18T13:43:18.400Z",
+  "generatedAt": "2026-02-20T13:12:11.014Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 4,
+    "total": 5,
+    "implemented": 1,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "On the Pre-Meditation page, change the \"More Details\" button label text to exactly \"More Details\" (English) to prevent overflow on small screens, while keeping the same link destination/behavior as before.",
+        "summary": "Move the meditation guide container to the bottom of PreMeditationPage, maintaining its current structure with the 'More details' button centered at the bottom of the container",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/pages/PreMeditationPage.tsx"
@@ -23,37 +23,40 @@
       },
       {
         "id": "REQ-2",
-        "summary": "On the active meditation session view, update the Play/Pause control to render as a circular (round) icon button rather than a square button.",
-        "status": "implemented",
+        "summary": "Add a hover-only glow effect to the pause/play button on the meditation session page, using the existing theme color",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
+          "frontend/src/pages/ActiveMeditationPage.tsx"
         ],
-        "matchedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
-        ]
+        "matchedFiles": []
       },
       {
         "id": "REQ-3",
-        "summary": "On the active meditation session view, left-align the labels for the Volume control and the Adjusting Time control so each label sits above-left and is aligned to the left edge of its corresponding control container.",
-        "status": "implemented",
+        "summary": "Fix the pause/play button to control audio playback in addition to the timer, so pausing stops both the audio and timer",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
+          "frontend/src/pages/ActiveMeditationPage.tsx",
+          "frontend/src/hooks/useMeditationTimer.ts"
         ],
-        "matchedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
-        ]
+        "matchedFiles": []
       },
       {
         "id": "REQ-4",
-        "summary": "Fix the Adjusting Time slider in the active meditation session view so the thumb position and track fill respond visually in the expected left-to-right direction (dragging left shows the thumb on the left; dragging right shows the thumb on the right; left corresponds to less time and right to more time).",
-        "status": "implemented",
+        "summary": "Place time control (audio scrubber allowing navigation to any point) and volume control inputs in a themed container on the meditation session page with clear indicators, including a percentage display for volume",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx",
-          "frontend/index.css"
+          "frontend/src/pages/ActiveMeditationPage.tsx"
         ],
-        "matchedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
-        ]
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Adjust timer text color on the meditation session page to be white/light in dark theme and black/dark in light theme",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/pages/ActiveMeditationPage.tsx"
+        ],
+        "matchedFiles": []
       }
     ]
   },

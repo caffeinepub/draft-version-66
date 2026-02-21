@@ -1,115 +1,112 @@
 {
   "kind": "build_request",
-  "title": "Refine meditation session controls and pre-med layout",
+  "title": "Refine pre-meditation and meditation page UI controls",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Move the meditation guide container to the bottom of PreMeditationPage, maintaining its current structure with the 'More details' button centered at the bottom of the container",
+      "text": "Reduce the height of the Begin Meditation and Save Ritual buttons proportionally on the pre-meditation page so they are appropriately sized when stacked in single column layout",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6"
         ],
         "quotes": [
-          "in pre med page, put meditation guide container at the bottom of the page, instead like it is right now, at the top. Keep structure all the same, more details button should be at the bottom of meditation guide container centered."
+          "They seem way too big in height, make them equally smaller proportionally and appropriately"
         ]
       },
       "acceptanceCriteria": [
-        "Meditation guide container appears at the bottom of PreMeditationPage",
-        "'More details' button remains centered at the bottom of the meditation guide container",
-        "Container structure and content remain unchanged"
+        "Button heights are visibly smaller than current implementation",
+        "Proportions remain consistent when buttons wrap to single column",
+        "Buttons maintain readability and touch-friendly sizing"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Add a hover-only glow effect to the pause/play button on the meditation session page, using the existing theme color",
+      "text": "Add a dynamic title to the meditation guide container on the pre-meditation page that corresponds to the selected meditation type (e.g., 'Meditation Guide', 'Mindfulness Guide', 'Metta Guide', 'Visualization Guide', 'IFS Guide')",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2",
-          "msg-3"
+          "msg-6"
         ],
         "quotes": [
-          "make pause/play round circle button glow, and change to main color of the webpage",
-          "Glow effect on hover only",
-          "Use existing color theme, yes"
+          "Just meditation guide, or corresponding title, like Mindfulness Guide etc."
         ]
       },
       "acceptanceCriteria": [
-        "Pause/play button shows glow effect only when hovered",
-        "Glow effect uses the main color from the existing theme",
-        "No glow effect when not hovering"
+        "Title displays above or within the meditation guide container",
+        "Title text matches the selected meditation type",
+        "Title updates dynamically when meditation type changes"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Fix the pause/play button to control audio playback in addition to the timer, so pausing stops both the audio and timer",
+      "text": "Add a semi-transparent background to the play/pause button on the meditation page using the app's main theme color, and implement a subtle hover glow effect",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-6"
         ],
         "quotes": [
-          "pause/play button currently doesn't stop audio, it only stops the timer"
+          "The color that fits the app theme, similar to main color"
         ]
       },
       "acceptanceCriteria": [
-        "Clicking pause stops both the meditation audio and timer",
-        "Clicking play resumes both the audio and timer from where they were paused",
-        "Audio and timer remain synchronized"
+        "Play/pause button has a visible semi-transparent background",
+        "Background color matches the app's primary theme color",
+        "Hover state shows a subtle glow effect",
+        "Button remains easily visible and accessible"
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Place time control (audio scrubber allowing navigation to any point) and volume control inputs in a themed container on the meditation session page with clear indicators, including a percentage display for volume",
+      "text": "Reduce the height of the time control and volume control input containers on the meditation page to make them more compact",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2",
-          "msg-3"
+          "msg-5",
+          "msg-6"
         ],
         "quotes": [
-          "Put time control and volume control inputs in container with UI fitting theme. Controls should have indication, like volume control, what is the % of a volume",
-          "I mean the input, which exists already in that page, like a youtube video player, where user can navigate through any video part manually, but here, user can only control time"
+          "containers that hold control inputs, that of time control input, and volume control input, they are too big in height",
+          "They seem way too big in height, make them equally smaller proportionally and appropriately"
         ]
       },
       "acceptanceCriteria": [
-        "Time control scrubber allows users to navigate to any point in the meditation audio",
-        "Volume control displays current volume as a percentage",
-        "Both controls are placed in a single container styled to match the app theme",
-        "Controls have clear visual indicators of their current state"
+        "Control containers have visibly reduced height",
+        "Controls remain usable and touch-friendly",
+        "Layout remains balanced and aligned"
       ]
     },
     {
       "id": "REQ-5",
-      "text": "Adjust timer text color on the meditation session page to be white/light in dark theme and black/dark in light theme",
+      "text": "Fix the time control slider on the meditation page so it responds correctly: dragging left decreases time and dragging right increases time",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-5"
         ],
         "quotes": [
-          "currently, the timer has white color, keep that white/light color for dark theme, and black/dark color for light theme"
+          "time control input itself, are responding visually in reverse order, I as a user drag it to the left side, it goes to right, and vice versa"
         ]
       },
       "acceptanceCriteria": [
-        "Timer displays in white or light color when dark theme is active",
-        "Timer displays in black or dark color when light theme is active",
-        "Timer text remains clearly readable in both themes"
+        "Dragging slider handle left decreases the time value",
+        "Dragging slider handle right increases the time value",
+        "Visual indicator moves in the same direction as user drag"
       ]
     }
   ],
   "constraints": [
-    "Use only the existing theme colors; do not introduce new color values",
-    "Maintain the current structure of the meditation guide container when repositioning it",
-    "Preserve existing audio scrubber functionality while enhancing controls"
+    "Maintain all existing functionality on both pre-meditation and meditation pages",
+    "Keep the 'More Details' button centered at the bottom of the meditation guide container",
+    "Preserve the existing structure of the pre-meditation page",
+    "Do not modify the time and volume control functionality, only visual presentation"
   ],
   "nonGoals": [
-    "Changing the meditation guide content or steps",
-    "Modifying the pause/play button shape beyond ensuring it's circular",
-    "Adding new audio features beyond pause/play control and scrubbing",
-    "Redesigning the overall meditation session page layout"
+    "Changing the overall layout structure of either page",
+    "Modifying control functionality beyond visual corrections",
+    "Adding new features or controls"
   ],
   "imageRequirements": {
     "required": [],

@@ -131,6 +131,17 @@ const formatMeditationType = (type: string): string => {
   return typeMap[type] || 'Mindfulness';
 };
 
+// Helper to get meditation guide title
+const getMeditationGuideTitle = (type: string): string => {
+  const titleMap: Record<string, string> = {
+    mindfulness: 'Mindfulness Guide',
+    metta: 'Metta Guide',
+    visualization: 'Visualization Guide',
+    ifs: 'IFS Guide',
+  };
+  return titleMap[type] || 'Meditation Guide';
+};
+
 export default function PreMeditationPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: '/pre-meditation' }) as { 
@@ -349,87 +360,76 @@ export default function PreMeditationPage() {
               <h1 className="text-4xl md:text-5xl font-bold text-accent-cyan">
                 {formatMeditationType(selectedType)}
               </h1>
-              <p className="text-lg text-muted-foreground">
-                Prepare your practice
-              </p>
+              <p className="text-lg text-muted-foreground">Prepare your practice</p>
             </div>
 
-            {/* Duration Selection */}
-            <Card className="bg-background/80 backdrop-blur-sm border-accent-cyan/20 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-xl text-center">Duration</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+            {/* Unified Controls Container */}
+            <Card className="bg-card/80 backdrop-blur-sm border-border/50">
+              <CardContent className="pt-6 space-y-6">
+                {/* Duration Input */}
                 <DurationRangeInput
                   value={duration}
                   onChange={setDuration}
-                  min={5}
-                  max={60}
                 />
+
+                {/* Ambient Sound Picker */}
+                <div className="space-y-3">
+                  <Label className="text-base font-medium">Ambient Sound</Label>
+                  <AmbientMusicCarousel
+                    selectedMusic={selectedMusicId}
+                    onSelectMusic={setSelectedMusicId}
+                    volume={volume}
+                    onVolumeChange={setVolume}
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <Button
+                    onClick={handleBeginMeditation}
+                    className="flex-1 bg-accent-cyan hover:bg-accent-cyan/90 text-white py-2.5"
+                    disabled={recordSession.isPending || createJournalEntry.isPending}
+                  >
+                    Begin Meditation
+                  </Button>
+                  <Button
+                    onClick={handleSaveRitual}
+                    variant="outline"
+                    className="flex-1 py-2.5"
+                    disabled={saveRitual.isPending}
+                  >
+                    {saveRitual.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="mr-2 h-4 w-4" />
+                        Save Ritual
+                      </>
+                    )}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
 
-            {/* Ambient Music Selection */}
-            <Card className="bg-background/80 backdrop-blur-sm border-accent-cyan/20 shadow-lg">
+            {/* Meditation Guide Container */}
+            <Card className="bg-card/80 backdrop-blur-sm border-border/50">
               <CardHeader>
-                <CardTitle className="text-xl text-center">Ambient Sound</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <AmbientMusicCarousel
-                  selectedMusic={selectedMusicId}
-                  onSelectMusic={setSelectedMusicId}
-                  volume={volume}
-                  onVolumeChange={setVolume}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-              <Button
-                onClick={handleBeginMeditation}
-                size="lg"
-                className="premed-play-pause-btn w-full sm:w-auto"
-              >
-                <Play className="w-5 h-5 mr-2" />
-                Begin Meditation
-              </Button>
-              <Button
-                onClick={handleSaveRitual}
-                variant="outline"
-                size="lg"
-                disabled={saveRitual.isPending}
-                className="w-full sm:w-auto border-accent-cyan/30 hover:bg-accent-cyan/10"
-              >
-                {saveRitual.isPending ? (
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                ) : (
-                  <Save className="w-5 h-5 mr-2" />
-                )}
-                Save as Ritual
-              </Button>
-            </div>
-
-            {/* Meditation Guide Card - Moved to Bottom */}
-            <Card className="bg-background/80 backdrop-blur-sm border-accent-cyan/20 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-2xl text-center text-accent-cyan-tinted flex items-center justify-center gap-2">
-                  <BookOpen className="w-6 h-6" />
-                  Meditation Guide
+                <CardTitle className="text-center text-xl">
+                  {getMeditationGuideTitle(selectedType)}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent>
                 <MeditationGuideStepper steps={currentGuide.steps} />
-                
-                {/* More Details Button - Centered at Bottom */}
-                <div className="flex justify-center pt-4">
+                <div className="flex justify-center mt-6">
                   <Button
                     onClick={handleMoreDetails}
                     variant="outline"
-                    size="lg"
-                    className="border-accent-cyan/30 hover:bg-accent-cyan/10"
+                    className="gap-2"
                   >
-                    <BookOpen className="w-5 h-5 mr-2" />
+                    <BookOpen className="h-4 w-4" />
                     More Details
                   </Button>
                 </div>
@@ -449,72 +449,54 @@ export default function PreMeditationPage() {
 
         <main className="relative z-10 min-h-screen flex items-center justify-center px-4 py-20">
           <div className="w-full max-w-2xl mx-auto space-y-8">
-            {/* Timer Display with Wave Fill */}
+            {/* Timer Display */}
             <div className="flex flex-col items-center space-y-6">
               <div className="relative">
-                <MeditationWaveFillIndicator progress={progress} size={280} />
+                <MeditationWaveFillIndicator progress={progress} size={300} />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-5xl font-bold text-foreground dark:text-white">
+                  <div className="text-5xl font-light text-foreground tabular-nums">
                     {formatTime(timeRemaining)}
-                  </span>
+                  </div>
                 </div>
               </div>
 
-              {/* Play/Pause Button with Hover Glow */}
+              {/* Play/Pause Button with theme color background and hover glow */}
               <button
                 onClick={togglePause}
-                className="w-20 h-20 rounded-full bg-accent-cyan flex items-center justify-center text-white shadow-lg transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,173,181,0.6)] hover:scale-105 active:scale-95"
+                className="w-20 h-20 rounded-full bg-accent-cyan/20 hover:bg-accent-cyan/30 border-2 border-accent-cyan/60 hover:border-accent-cyan flex items-center justify-center transition-all hover:shadow-[0_0_20px_rgba(0,173,181,0.4),0_0_40px_rgba(0,173,181,0.2)] active:scale-95"
                 aria-label={isPaused ? 'Play' : 'Pause'}
               >
                 {isPaused ? (
-                  <Play className="w-10 h-10 ml-1" />
+                  <Play className="w-8 h-8 text-accent-cyan fill-accent-cyan" />
                 ) : (
-                  <Pause className="w-10 h-10" />
+                  <Pause className="w-8 h-8 text-accent-cyan fill-accent-cyan" />
                 )}
               </button>
             </div>
 
-            {/* Controls Container */}
-            <Card className="bg-background/80 backdrop-blur-sm border-accent-cyan/20 shadow-lg">
-              <CardContent className="pt-6 space-y-6">
-                {/* Time Control */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-muted-foreground">
-                    Time Position
-                  </Label>
-                  <Slider
-                    value={[totalTime - timeRemaining]}
-                    onValueChange={([value]) => seekTime(totalTime - value)}
-                    max={totalTime}
-                    step={1}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>{formatTime(totalTime - timeRemaining)}</span>
-                    <span>{formatTime(totalTime)}</span>
-                  </div>
-                </div>
+            {/* Time Control - Reduced height */}
+            <div className="bg-card/60 backdrop-blur-sm rounded-xl p-4 border border-border/50 max-w-[540px] mx-auto">
+              <Label className="text-sm font-medium mb-3 block">Time</Label>
+              <Slider
+                value={[timeRemaining]}
+                onValueChange={(values) => seekTime(totalTime - values[0])}
+                max={totalTime}
+                step={1}
+                className="w-full"
+              />
+            </div>
 
-                {/* Volume Control */}
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label className="text-sm font-medium text-muted-foreground">
-                      Volume
-                    </Label>
-                    <span className="text-sm font-medium text-accent-cyan">
-                      {volume}%
-                    </span>
-                  </div>
-                  <Slider
-                    value={[volume]}
-                    onValueChange={([value]) => setVolume(value)}
-                    max={100}
-                    step={1}
-                    className="w-full"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            {/* Volume Control - Reduced height */}
+            <div className="bg-card/60 backdrop-blur-sm rounded-xl p-4 border border-border/50 max-w-[540px] mx-auto">
+              <Label className="text-sm font-medium mb-3 block">Volume</Label>
+              <Slider
+                value={[volume]}
+                onValueChange={(values) => setVolume(values[0])}
+                max={100}
+                step={1}
+                className="w-full"
+              />
+            </div>
           </div>
         </main>
       </PageBackgroundShell>
@@ -529,38 +511,31 @@ export default function PreMeditationPage() {
       <main className="relative z-10 min-h-screen flex items-center justify-center px-4 py-20">
         <div className="w-full max-w-2xl mx-auto space-y-6">
           <div className="text-center space-y-2">
-            <CheckCircle2 className="w-16 h-16 mx-auto text-accent-cyan" />
-            <h1 className="text-3xl md:text-4xl font-bold text-accent-cyan">
-              Session Complete
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              Take a moment to reflect on your practice
-            </p>
+            <h1 className="text-3xl md:text-4xl font-bold text-accent-cyan">Reflection</h1>
+            <p className="text-muted-foreground">How do you feel after your session?</p>
           </div>
 
-          <Card className="bg-background/80 backdrop-blur-sm border-accent-cyan/20 shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-xl">How are you feeling?</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
+          <Card className="bg-card/80 backdrop-blur-sm border-border/50">
+            <CardContent className="pt-6 space-y-6">
               {/* Mood Selection */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Mood (select all that apply)</Label>
-                <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                <Label className="text-base font-medium">How are you feeling? (Select all that apply)</Label>
+                <div className="flex flex-wrap gap-2">
                   {Object.entries(moodIconMap).map(([mood, Icon]) => {
-                    const isSelected = selectedMoods.includes(mood as MoodState);
+                    const moodState = mood as MoodState;
+                    const isSelected = selectedMoods.includes(moodState);
                     return (
                       <button
                         key={mood}
-                        onClick={() => handleMoodToggle(mood as MoodState)}
-                        className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all ${
+                        onClick={() => handleMoodToggle(moodState)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 transition-all ${
                           isSelected
-                            ? 'border-accent-cyan bg-accent-cyan/10'
-                            : 'border-border hover:border-accent-cyan/50'
+                            ? 'bg-accent-cyan border-accent-cyan text-white'
+                            : 'bg-background border-border hover:border-accent-cyan/50'
                         }`}
                       >
-                        <Icon className={`w-6 h-6 ${isSelected ? 'text-accent-cyan' : 'text-muted-foreground'}`} />
-                        <span className="text-xs capitalize">{mood}</span>
+                        <Icon className="h-4 w-4" />
+                        <span className="text-sm font-medium capitalize">{mood}</span>
                       </button>
                     );
                   })}
@@ -569,55 +544,48 @@ export default function PreMeditationPage() {
 
               {/* Energy Selection */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Energy Level</Label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <Label className="text-base font-medium">Energy Level</Label>
+                <div className="flex flex-wrap gap-2">
                   {Object.entries(energyIconMap).map(([energy, Icon]) => {
-                    const isSelected = selectedEnergy === energy;
+                    const energyState = energy as EnergyState;
+                    const isSelected = selectedEnergy === energyState;
                     return (
                       <button
                         key={energy}
-                        onClick={() => setSelectedEnergy(energy as EnergyState)}
-                        className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all ${
+                        onClick={() => setSelectedEnergy(energyState)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 transition-all ${
                           isSelected
-                            ? 'border-accent-cyan bg-accent-cyan/10'
-                            : 'border-border hover:border-accent-cyan/50'
+                            ? 'bg-accent-cyan border-accent-cyan text-white'
+                            : 'bg-background border-border hover:border-accent-cyan/50'
                         }`}
                       >
-                        <Icon className={`w-6 h-6 ${isSelected ? 'text-accent-cyan' : 'text-muted-foreground'}`} />
-                        <span className="text-xs capitalize">{energy}</span>
+                        <Icon className="h-4 w-4" />
+                        <span className="text-sm font-medium capitalize">{energy}</span>
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Reflection Notes */}
+              {/* Personal Notes */}
               <div className="space-y-3">
-                <Label htmlFor="reflection" className="text-sm font-medium">
-                  Personal Notes (optional)
-                </Label>
+                <Label className="text-base font-medium">Personal Notes (Optional)</Label>
                 <Textarea
-                  id="reflection"
-                  placeholder="How did this session feel? Any insights or observations..."
                   value={reflection}
                   onChange={(e) => setReflection(e.target.value)}
-                  rows={4}
-                  className="resize-none"
+                  placeholder="Any insights or observations from your practice..."
+                  className="min-h-[120px] resize-none"
                 />
               </div>
 
               {/* Favorite Toggle */}
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-3">
                 <Checkbox
                   id="favorite"
                   checked={isFavorite}
                   onCheckedChange={(checked) => setIsFavorite(checked as boolean)}
                 />
-                <Label
-                  htmlFor="favorite"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex items-center gap-2"
-                >
-                  <Heart className={`w-4 h-4 ${isFavorite ? 'fill-accent-cyan text-accent-cyan' : ''}`} />
+                <Label htmlFor="favorite" className="text-sm font-medium cursor-pointer">
                   Mark as Favorite
                 </Label>
               </div>
@@ -625,18 +593,17 @@ export default function PreMeditationPage() {
               {/* Save Button */}
               <Button
                 onClick={handleSaveReflection}
-                size="lg"
-                className="w-full premed-play-pause-btn"
+                className="w-full bg-accent-cyan hover:bg-accent-cyan/90 text-white"
                 disabled={recordSession.isPending || createJournalEntry.isPending}
               >
                 {recordSession.isPending || createJournalEntry.isPending ? (
                   <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Saving...
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 className="w-5 h-5 mr-2" />
+                    <CheckCircle2 className="mr-2 h-4 w-4" />
                     Save & Continue
                   </>
                 )}

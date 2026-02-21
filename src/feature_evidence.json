@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-move-the-meditation-guide-container-to-the-bottom-of-premeditationpage-maintaining-its-current-structure-with-the-more-details-button-centered-at-the-bottom-of-the-container",
-      "featureTitle": "Move the meditation guide container to the bottom of PreMeditationPage, maintaining its current structure with the 'More details' button centered at the bottom of the container",
+      "featureId": "feature-reduce-the-height-of-the-begin-meditation-and-save-ritual-buttons-proportionally-on-the-pre-meditation-page-so-they-are-appropriately-sized-when-stacked-in-single-column-layout",
+      "featureTitle": "Reduce the height of the Begin Meditation and Save Ritual buttons proportionally on the pre-meditation page so they are appropriately sized when stacked in single column layout",
       "files": [
         "frontend/src/pages/PreMeditationPage.tsx"
       ],
@@ -18,6 +18,26 @@
       ],
       "testIds": [
         "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-dynamic-title-to-the-meditation-guide-container-on-the-pre-meditation-page-that-corresponds-to-the-selected-meditation-type-e-g-meditation-guide-mindfulness-guide-metta-guide-visualization-guide-ifs-guide",
+      "featureTitle": "Add a dynamic title to the meditation guide container on the pre-meditation page that corresponds to the selected meditation type (e.g., 'Meditation Guide', 'Mindfulness Guide', 'Metta Guide', 'Visualization Guide', 'IFS Guide')",
+      "files": [
+        "frontend/src/pages/PreMeditationPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
       ],
       "confidence": "high"
     }

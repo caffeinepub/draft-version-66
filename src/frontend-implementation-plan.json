@@ -1,91 +1,86 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Refine meditation session controls and pre-med layout",
+  "title": "Refine pre-meditation and meditation page UI controls",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Move meditation guide container to bottom of PreMeditationPage with centered 'More details' button",
+      "summary": "Reduce the height of the Begin Meditation and Save Ritual buttons on the pre-meditation page to be appropriately sized when stacked in single column layout",
       "acceptanceCriteria": [
-        "Meditation guide container appears at the bottom of PreMeditationPage",
-        "'More details' button remains centered at the bottom of the meditation guide container",
-        "Container structure and content remain unchanged"
+        "Button heights are visibly smaller than current implementation",
+        "Proportions remain consistent when buttons wrap to single column",
+        "Buttons maintain readability and touch-friendly sizing"
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Reorder the layout structure to place the MeditationGuideStepper section at the bottom of the page while maintaining all existing content, structure, and the centered 'More details' button positioning within the guide container"
+          "description": "Reduce the height of the 'Begin Meditation' and 'Save Ritual' buttons by adjusting their padding classes from py-4 to py-3 or py-2.5. Ensure both buttons have consistent heights and maintain appropriate spacing in single-column responsive layout."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Add hover-only glow effect to pause/play button using existing theme color",
+      "summary": "Add a dynamic title to the meditation guide container on the pre-meditation page that corresponds to the selected meditation type",
       "acceptanceCriteria": [
-        "Pause/play button shows glow effect only when hovered",
-        "Glow effect uses the main color from the existing theme",
-        "No glow effect when not hovering"
+        "Title displays above or within the meditation guide container",
+        "Title text matches the selected meditation type",
+        "Title updates dynamically when meditation type changes"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/ActiveMeditationPage.tsx",
+          "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Add hover state styling to the pause/play button that applies a glow effect using the existing theme accent color (--accent from the theme system), ensuring the glow only appears on hover and uses CSS transitions for smooth activation"
+          "description": "Add a dynamic title (e.g., 'Mindfulness Guide', 'Metta Guide', 'Visualization Guide', 'IFS Guide') above or within the meditation guide container. The title should be derived from the selectedMeditationType state and displayed with appropriate typography styling. Position it above the MeditationGuideStepper component while keeping the 'More Details' button centered at the bottom."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Fix pause/play button to control both audio and timer synchronously",
+      "summary": "Add a semi-transparent background to the play/pause button on the meditation page using the app's main theme color, and implement a subtle hover glow effect",
       "acceptanceCriteria": [
-        "Clicking pause stops both the meditation audio and timer",
-        "Clicking play resumes both the audio and timer from where they were paused",
-        "Audio and timer remain synchronized"
+        "Play/pause button has a visible semi-transparent background",
+        "Background color matches the app's primary theme color",
+        "Hover state shows a subtle glow effect",
+        "Button remains easily visible and accessible"
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/ActiveMeditationPage.tsx",
           "operation": "modify",
-          "description": "Update the pause/play button handler to control both the audio element (via pause/play methods) and the timer state synchronously, ensuring the audio playback state matches the timer isRunning state"
-        },
-        {
-          "path": "frontend/src/hooks/useMeditationTimer.ts",
-          "operation": "modify",
-          "description": "Ensure the toggleTimer function properly exposes the running state and that external audio control can be coordinated with timer pause/resume actions"
+          "description": "Add a semi-transparent background to the play/pause button using the app's accent-cyan color (or primary theme color) with appropriate opacity (e.g., bg-accent-cyan/20 or bg-primary/20). Implement a hover glow effect using shadow classes or custom CSS (e.g., hover:shadow-glow hover:shadow-accent-cyan/50). Ensure the button styling integrates with the existing theme system."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Place time control scrubber and volume control with percentage in themed container",
+      "summary": "Reduce the height of the time control and volume control input containers on the meditation page to make them more compact",
       "acceptanceCriteria": [
-        "Time control scrubber allows users to navigate to any point in the meditation audio",
-        "Volume control displays current volume as a percentage",
-        "Both controls are placed in a single container styled to match the app theme",
-        "Controls have clear visual indicators of their current state"
+        "Control containers have visibly reduced height",
+        "Controls remain usable and touch-friendly",
+        "Layout remains balanced and aligned"
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/ActiveMeditationPage.tsx",
           "operation": "modify",
-          "description": "Create a themed container wrapping the existing audio scrubber (time control) and volume control inputs. Add a percentage display element that shows the current volume level. Style the container to match the app's theme using existing color variables and ensure both controls have clear visual indicators (progress bars, thumb styling). Wire the time control scrubber to update the audio currentTime and the timer's seekTo function for synchronization"
+          "description": "Reduce the height of the containers that hold the time control slider and volume control slider by adjusting their padding classes (reduce py-* values or min-h-* classes). Ensure both containers have consistent reduced heights while maintaining usability and touch-friendly dimensions."
         }
       ]
     },
     {
       "id": "REQ-5",
-      "summary": "Adjust timer text color to be white/light in dark theme and black/dark in light theme",
+      "summary": "Fix the time control slider on the meditation page so it responds correctly: dragging left decreases time and dragging right increases time",
       "acceptanceCriteria": [
-        "Timer displays in white or light color when dark theme is active",
-        "Timer displays in black or dark color when light theme is active",
-        "Timer text remains clearly readable in both themes"
+        "Dragging slider handle left decreases the time value",
+        "Dragging slider handle right increases the time value",
+        "Visual indicator moves in the same direction as user drag"
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/ActiveMeditationPage.tsx",
           "operation": "modify",
-          "description": "Update the timer display text styling to use theme-aware color classes (e.g., text-white dark:text-white and text-black for light theme, or using CSS custom properties that adapt to theme) ensuring high contrast and readability in both light and dark modes"
+          "description": "Fix the time control slider logic so that dragging left decreases the time value and dragging right increases it. Check if the slider component or its value binding is inverting the direction. Ensure the visual indicator and the actual time value change in sync with the user's drag direction."
         }
       ]
     }

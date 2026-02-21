@@ -1,18 +1,18 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-20T13:12:11.014Z",
+  "generatedAt": "2026-02-21T11:22:59.889Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 5,
-    "implemented": 1,
+    "implemented": 2,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Move the meditation guide container to the bottom of PreMeditationPage, maintaining its current structure with the 'More details' button centered at the bottom of the container",
+        "summary": "Reduce the height of the Begin Meditation and Save Ritual buttons proportionally on the pre-meditation page so they are appropriately sized when stacked in single column layout",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/pages/PreMeditationPage.tsx"
@@ -23,7 +23,18 @@
       },
       {
         "id": "REQ-2",
-        "summary": "Add a hover-only glow effect to the pause/play button on the meditation session page, using the existing theme color",
+        "summary": "Add a dynamic title to the meditation guide container on the pre-meditation page that corresponds to the selected meditation type (e.g., 'Meditation Guide', 'Mindfulness Guide', 'Metta Guide', 'Visualization Guide', 'IFS Guide')",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/PreMeditationPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/PreMeditationPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Add a semi-transparent background to the play/pause button on the meditation page using the app's main theme color, and implement a subtle hover glow effect",
         "status": "missing",
         "plannedFiles": [
           "frontend/src/pages/ActiveMeditationPage.tsx"
@@ -31,18 +42,8 @@
         "matchedFiles": []
       },
       {
-        "id": "REQ-3",
-        "summary": "Fix the pause/play button to control audio playback in addition to the timer, so pausing stops both the audio and timer",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/pages/ActiveMeditationPage.tsx",
-          "frontend/src/hooks/useMeditationTimer.ts"
-        ],
-        "matchedFiles": []
-      },
-      {
         "id": "REQ-4",
-        "summary": "Place time control (audio scrubber allowing navigation to any point) and volume control inputs in a themed container on the meditation session page with clear indicators, including a percentage display for volume",
+        "summary": "Reduce the height of the time control and volume control input containers on the meditation page to make them more compact",
         "status": "missing",
         "plannedFiles": [
           "frontend/src/pages/ActiveMeditationPage.tsx"
@@ -51,7 +52,7 @@
       },
       {
         "id": "REQ-5",
-        "summary": "Adjust timer text color on the meditation session page to be white/light in dark theme and black/dark in light theme",
+        "summary": "Fix the time control slider on the meditation page so it responds correctly: dragging left decreases time and dragging right increases time",
         "status": "missing",
         "plannedFiles": [
           "frontend/src/pages/ActiveMeditationPage.tsx"

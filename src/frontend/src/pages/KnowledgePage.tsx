@@ -13,7 +13,7 @@ import { useInternetIdentity } from '../hooks/useInternetIdentity';
 
 interface KnowledgeSearch {
   category?: string;
-  scrollToContent?: boolean;
+  scrollToContent?: string;
 }
 
 export default function KnowledgePage() {
@@ -53,9 +53,9 @@ export default function KnowledgePage() {
     setQuizScores(scoreMap);
   }, [identity]);
 
-  // Handle deep-link scroll from Pre-meditation "More details"
+  // Handle deep-link scroll from Pre-meditation "More details" - only once on initial navigation
   useEffect(() => {
-    if (search.scrollToContent && !hasScrolledRef.current && contentRef.current) {
+    if (search.scrollToContent === 'true' && !hasScrolledRef.current && contentRef.current) {
       hasScrolledRef.current = true;
       // Small delay to ensure layout is complete
       setTimeout(() => {

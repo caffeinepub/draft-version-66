@@ -17,6 +17,7 @@ export default function KnowledgeBookPager({ pages, categoryTitle }: KnowledgeBo
   const [direction, setDirection] = useState<'left' | 'right'>('right');
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [shouldScrollOnChange, setShouldScrollOnChange] = useState(false);
   const contentAnchorRef = useRef<HTMLDivElement>(null);
   const prevPageIndexRef = useRef<number>(0);
 
@@ -33,6 +34,7 @@ export default function KnowledgeBookPager({ pages, categoryTitle }: KnowledgeBo
   const handlePrevious = () => {
     if (!isFirstPage) {
       setDirection('left');
+      setShouldScrollOnChange(true);
       setCurrentPageIndex((prev) => prev - 1);
     }
   };
@@ -40,6 +42,7 @@ export default function KnowledgeBookPager({ pages, categoryTitle }: KnowledgeBo
   const handleNext = () => {
     if (!isLastPage) {
       setDirection('right');
+      setShouldScrollOnChange(true);
       setCurrentPageIndex((prev) => prev + 1);
     }
   };
@@ -65,6 +68,12 @@ export default function KnowledgeBookPager({ pages, categoryTitle }: KnowledgeBo
     }
   };
 
+  const handleDotClick = (index: number) => {
+    setDirection(index > currentPageIndex ? 'right' : 'left');
+    setShouldScrollOnChange(false); // Don't scroll when clicking dots
+    setCurrentPageIndex(index);
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') handlePrevious();
@@ -75,18 +84,22 @@ export default function KnowledgeBookPager({ pages, categoryTitle }: KnowledgeBo
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentPageIndex]);
 
-  // Scroll to content whenever page changes (but not on initial mount or category change)
+  // Scroll to content only when shouldScrollOnChange is true (arrow clicks or initial navigation)
   useEffect(() => {
-    if (prevPageIndexRef.current !== currentPageIndex) {
+    if (prevPageIndexRef.current !== currentPageIndex && shouldScrollOnChange) {
       scrollToContent();
       prevPageIndexRef.current = currentPageIndex;
+      setShouldScrollOnChange(false);
+    } else if (prevPageIndexRef.current !== currentPageIndex) {
+      prevPageIndexRef.current = currentPageIndex;
     }
-  }, [currentPageIndex]);
+  }, [currentPageIndex, shouldScrollOnChange]);
 
   // Reset to first page when pages prop changes (category change) WITHOUT scrolling
   useEffect(() => {
     setCurrentPageIndex(0);
     prevPageIndexRef.current = 0;
+    setShouldScrollOnChange(false);
   }, [pages]);
 
   return (
@@ -166,10 +179,7 @@ export default function KnowledgeBookPager({ pages, categoryTitle }: KnowledgeBo
           {pages.map((_, index) => (
             <button
               key={index}
-              onClick={() => {
-                setDirection(index > currentPageIndex ? 'right' : 'left');
-                setCurrentPageIndex(index);
-              }}
+              onClick={() => handleDotClick(index)}
               className={`w-2 h-2 rounded-full transition-all ${
                 index === currentPageIndex
                   ? 'bg-accent-cyan w-8'

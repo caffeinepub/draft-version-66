@@ -1,13 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Refine meditation session controls and reorganize pre-meditation page layout.
+**Goal:** Refine UI controls on pre-meditation and meditation pages for better sizing, clarity, and usability.
 
 **Planned changes:**
-- Move meditation guide container to bottom of pre-meditation page
-- Add hover glow effect to pause/play button using theme color
-- Fix pause/play button to control both audio and timer simultaneously
-- Add themed container with time scrubber and volume controls (with percentage display)
-- Adjust timer text color for theme compatibility (white/light in dark theme, black/dark in light theme)
+- Reduce height of Begin Meditation and Save Ritual buttons on pre-meditation page
+- Add dynamic title to meditation guide container that reflects selected meditation type
+- Add semi-transparent background with theme color and hover glow to play/pause button on meditation page
+- Reduce height of time control and volume control input containers on meditation page
+- Fix time control slider direction so dragging left decreases time and dragging right increases time
 
-**User-visible outcome:** Users will have improved meditation session controls with a time scrubber for navigation, clearer volume indication, properly functioning pause/play that stops both audio and timer, and a reorganized pre-meditation page with the guide at the bottom.
+**User-visible outcome:** Users experience more appropriately sized buttons and controls, see a helpful dynamic guide title, and interact with a corrected time slider that responds intuitively to drag direction.

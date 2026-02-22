@@ -1,29 +1,27 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-21T11:22:59.889Z",
+  "generatedAt": "2026-02-22T11:20:15.269Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
+    "total": 3,
     "implemented": 2,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Reduce the height of the Begin Meditation and Save Ritual buttons proportionally on the pre-meditation page so they are appropriately sized when stacked in single column layout",
-        "status": "implemented",
+        "summary": "Fix the time control slider in the meditation page so that dragging right increases the time value and dragging left decreases it (normal slider behavior)",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
+          "frontend/src/components/DurationRangeInput.tsx"
         ],
-        "matchedFiles": [
-          "frontend/src/pages/PreMeditationPage.tsx"
-        ]
+        "matchedFiles": []
       },
       {
         "id": "REQ-2",
-        "summary": "Add a dynamic title to the meditation guide container on the pre-meditation page that corresponds to the selected meditation type (e.g., 'Meditation Guide', 'Mindfulness Guide', 'Metta Guide', 'Visualization Guide', 'IFS Guide')",
+        "summary": "Restore the back button in the meditation page to be visible in the same position as it appears in the pre-meditation page, maintaining the same styling and behavior",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/pages/PreMeditationPage.tsx"
@@ -34,30 +32,14 @@
       },
       {
         "id": "REQ-3",
-        "summary": "Add a semi-transparent background to the play/pause button on the meditation page using the app's main theme color, and implement a subtle hover glow effect",
-        "status": "missing",
+        "summary": "In the pre-meditation page, make the 'Begin Meditation' button match the exact height and width dimensions of the 'Save Ritual' button",
+        "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/ActiveMeditationPage.tsx"
+          "frontend/src/pages/PreMeditationPage.tsx"
         ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Reduce the height of the time control and volume control input containers on the meditation page to make them more compact",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/pages/ActiveMeditationPage.tsx"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-5",
-        "summary": "Fix the time control slider on the meditation page so it responds correctly: dragging left decreases time and dragging right increases time",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/pages/ActiveMeditationPage.tsx"
-        ],
-        "matchedFiles": []
+        "matchedFiles": [
+          "frontend/src/pages/PreMeditationPage.tsx"
+        ]
       }
     ]
   },

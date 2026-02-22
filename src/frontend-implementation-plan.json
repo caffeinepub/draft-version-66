@@ -1,86 +1,54 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Refine pre-meditation and meditation page UI controls",
+  "title": "Fix meditation page slider behavior, restore back button, and match button dimensions",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Reduce the height of the Begin Meditation and Save Ritual buttons on the pre-meditation page to be appropriately sized when stacked in single column layout",
+      "summary": "Fix the time control slider in the meditation page so dragging right increases time and dragging left decreases it",
       "acceptanceCriteria": [
-        "Button heights are visibly smaller than current implementation",
-        "Proportions remain consistent when buttons wrap to single column",
-        "Buttons maintain readability and touch-friendly sizing"
+        "Dragging the slider handle to the right increases the displayed time value",
+        "Dragging the slider handle to the left decreases the displayed time value",
+        "The slider behaves consistently with standard slider controls"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/PreMeditationPage.tsx",
+          "path": "frontend/src/components/DurationRangeInput.tsx",
           "operation": "modify",
-          "description": "Reduce the height of the 'Begin Meditation' and 'Save Ritual' buttons by adjusting their padding classes from py-4 to py-3 or py-2.5. Ensure both buttons have consistent heights and maintain appropriate spacing in single-column responsive layout."
+          "description": "Investigate and fix the reversed slider behavior where dragging right currently decreases the value instead of increasing it. Check the value prop, min/max configuration, CSS transforms, or event handler logic that may be inverting the slider direction. Ensure the slider's visual position matches the numeric value correctly."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Add a dynamic title to the meditation guide container on the pre-meditation page that corresponds to the selected meditation type",
+      "summary": "Restore the back button in the meditation page to match the pre-meditation page positioning and styling",
       "acceptanceCriteria": [
-        "Title displays above or within the meditation guide container",
-        "Title text matches the selected meditation type",
-        "Title updates dynamically when meditation type changes"
+        "Back button is visible in the meditation page",
+        "Back button appears in the same position as in the pre-meditation page",
+        "Back button styling matches the pre-meditation page back button",
+        "Back button functions correctly to navigate back"
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Add a dynamic title (e.g., 'Mindfulness Guide', 'Metta Guide', 'Visualization Guide', 'IFS Guide') above or within the meditation guide container. The title should be derived from the selectedMeditationType state and displayed with appropriate typography styling. Position it above the MeditationGuideStepper component while keeping the 'More Details' button centered at the bottom."
+          "description": "Locate the meditation timer/active meditation UI section within PreMeditationPage (or identify the correct meditation page component if separate). Add the MobileBackButton component in the same position and with the same styling as it appears in the pre-meditation setup section. Ensure the back button is rendered during the active meditation state and positioned consistently."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Add a semi-transparent background to the play/pause button on the meditation page using the app's main theme color, and implement a subtle hover glow effect",
+      "summary": "Make the 'Begin Meditation' button match the exact height and width of the 'Save Ritual' button in the pre-meditation page",
       "acceptanceCriteria": [
-        "Play/pause button has a visible semi-transparent background",
-        "Background color matches the app's primary theme color",
-        "Hover state shows a subtle glow effect",
-        "Button remains easily visible and accessible"
+        "'Begin Meditation' button has the same height as the 'Save Ritual' button",
+        "'Begin Meditation' button has the same width as the 'Save Ritual' button",
+        "No other changes are made to the pre-meditation page"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/ActiveMeditationPage.tsx",
+          "path": "frontend/src/pages/PreMeditationPage.tsx",
           "operation": "modify",
-          "description": "Add a semi-transparent background to the play/pause button using the app's accent-cyan color (or primary theme color) with appropriate opacity (e.g., bg-accent-cyan/20 or bg-primary/20). Implement a hover glow effect using shadow classes or custom CSS (e.g., hover:shadow-glow hover:shadow-accent-cyan/50). Ensure the button styling integrates with the existing theme system."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Reduce the height of the time control and volume control input containers on the meditation page to make them more compact",
-      "acceptanceCriteria": [
-        "Control containers have visibly reduced height",
-        "Controls remain usable and touch-friendly",
-        "Layout remains balanced and aligned"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/ActiveMeditationPage.tsx",
-          "operation": "modify",
-          "description": "Reduce the height of the containers that hold the time control slider and volume control slider by adjusting their padding classes (reduce py-* values or min-h-* classes). Ensure both containers have consistent reduced heights while maintaining usability and touch-friendly dimensions."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Fix the time control slider on the meditation page so it responds correctly: dragging left decreases time and dragging right increases time",
-      "acceptanceCriteria": [
-        "Dragging slider handle left decreases the time value",
-        "Dragging slider handle right increases the time value",
-        "Visual indicator moves in the same direction as user drag"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/ActiveMeditationPage.tsx",
-          "operation": "modify",
-          "description": "Fix the time control slider logic so that dragging left decreases the time value and dragging right increases it. Check if the slider component or its value binding is inverting the direction. Ensure the visual indicator and the actual time value change in sync with the user's drag direction."
+          "description": "Locate the 'Begin Meditation' button and 'Save Ritual' button in the PreMeditationPage component. Update the 'Begin Meditation' button's className or inline styles to match the exact height and width dimensions of the 'Save Ritual' button. Ensure both buttons use identical dimension-related CSS classes or styles without modifying any other aspects of the page layout."
         }
       ]
     }

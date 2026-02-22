@@ -1,13 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Refine UI controls on pre-meditation and meditation pages for better sizing, clarity, and usability.
+**Goal:** Fix meditation page slider behavior, restore back button, and match button dimensions in pre-meditation page.
 
 **Planned changes:**
-- Reduce height of Begin Meditation and Save Ritual buttons on pre-meditation page
-- Add dynamic title to meditation guide container that reflects selected meditation type
-- Add semi-transparent background with theme color and hover glow to play/pause button on meditation page
-- Reduce height of time control and volume control input containers on meditation page
-- Fix time control slider direction so dragging left decreases time and dragging right increases time
+- Fix time control slider in meditation page to behave normally (dragging right increases time, dragging left decreases time)
+- Restore back button in meditation page with same styling and position as in pre-meditation page
+- Match 'Begin Meditation' button dimensions (height and width) to 'Save Ritual' button in pre-meditation page
 
-**User-visible outcome:** Users experience more appropriately sized buttons and controls, see a helpful dynamic guide title, and interact with a corrected time slider that responds intuitively to drag direction.
+**User-visible outcome:** Users can control the meditation timer slider with intuitive left/right dragging, navigate back from the meditation page using the restored back button, and see consistently sized action buttons in the pre-meditation page.

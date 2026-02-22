@@ -1,112 +1,76 @@
 {
   "kind": "build_request",
-  "title": "Refine pre-meditation and meditation page UI controls",
+  "title": "Fix meditation page slider behavior, restore back button, and match button dimensions",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Reduce the height of the Begin Meditation and Save Ritual buttons proportionally on the pre-meditation page so they are appropriately sized when stacked in single column layout",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "They seem way too big in height, make them equally smaller proportionally and appropriately"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Button heights are visibly smaller than current implementation",
-        "Proportions remain consistent when buttons wrap to single column",
-        "Buttons maintain readability and touch-friendly sizing"
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Add a dynamic title to the meditation guide container on the pre-meditation page that corresponds to the selected meditation type (e.g., 'Meditation Guide', 'Mindfulness Guide', 'Metta Guide', 'Visualization Guide', 'IFS Guide')",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "Just meditation guide, or corresponding title, like Mindfulness Guide etc."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Title displays above or within the meditation guide container",
-        "Title text matches the selected meditation type",
-        "Title updates dynamically when meditation type changes"
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Add a semi-transparent background to the play/pause button on the meditation page using the app's main theme color, and implement a subtle hover glow effect",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "The color that fits the app theme, similar to main color"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Play/pause button has a visible semi-transparent background",
-        "Background color matches the app's primary theme color",
-        "Hover state shows a subtle glow effect",
-        "Button remains easily visible and accessible"
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Reduce the height of the time control and volume control input containers on the meditation page to make them more compact",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-5",
-          "msg-6"
-        ],
-        "quotes": [
-          "containers that hold control inputs, that of time control input, and volume control input, they are too big in height",
-          "They seem way too big in height, make them equally smaller proportionally and appropriately"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Control containers have visibly reduced height",
-        "Controls remain usable and touch-friendly",
-        "Layout remains balanced and aligned"
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Fix the time control slider on the meditation page so it responds correctly: dragging left decreases time and dragging right increases time",
+      "text": "Fix the time control slider in the meditation page so that dragging right increases the time value and dragging left decreases it (normal slider behavior)",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-5"
         ],
         "quotes": [
-          "time control input itself, are responding visually in reverse order, I as a user drag it to the left side, it goes to right, and vice versa"
+          "Visually the time control input which is in container in meditation page, still behaves in reverse order when I as a user drag to right, it drags itself to left"
         ]
       },
       "acceptanceCriteria": [
-        "Dragging slider handle left decreases the time value",
-        "Dragging slider handle right increases the time value",
-        "Visual indicator moves in the same direction as user drag"
+        "Dragging the slider handle to the right increases the displayed time value",
+        "Dragging the slider handle to the left decreases the displayed time value",
+        "The slider behaves consistently with standard slider controls"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Restore the back button in the meditation page to be visible in the same position as it appears in the pre-meditation page, maintaining the same styling and behavior",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "And re-add the back button in meditation page, as it was completely removed",
+          "In the same spot it is positioned as in pre-meditation page, and this back button should be same pretty much, not new"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Back button is visible in the meditation page",
+        "Back button appears in the same position as in the pre-meditation page",
+        "Back button styling matches the pre-meditation page back button",
+        "Back button functions correctly to navigate back"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "In the pre-meditation page, make the 'Begin Meditation' button match the exact height and width dimensions of the 'Save Ritual' button",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "And in pre-meditation page, do not change anything else, except make save ritual button same size in height and width as its next button",
+          "Yes, match exact dimension, close button I am referring to is 'Begin Meditation'"
+        ]
+      },
+      "acceptanceCriteria": [
+        "'Begin Meditation' button has the same height as the 'Save Ritual' button",
+        "'Begin Meditation' button has the same width as the 'Save Ritual' button",
+        "No other changes are made to the pre-meditation page"
       ]
     }
   ],
   "constraints": [
-    "Maintain all existing functionality on both pre-meditation and meditation pages",
-    "Keep the 'More Details' button centered at the bottom of the meditation guide container",
-    "Preserve the existing structure of the pre-meditation page",
-    "Do not modify the time and volume control functionality, only visual presentation"
+    "Do not modify any functionality beyond the three specific fixes requested",
+    "Preserve all existing meditation page features and components",
+    "Do not change the pre-meditation page layout or other elements besides button sizing"
   ],
   "nonGoals": [
-    "Changing the overall layout structure of either page",
-    "Modifying control functionality beyond visual corrections",
-    "Adding new features or controls"
+    "Adding new features to the meditation or pre-meditation pages",
+    "Redesigning the meditation timer interface",
+    "Modifying other navigation elements",
+    "Changing button styling beyond dimension matching"
   ],
   "imageRequirements": {
     "required": [],

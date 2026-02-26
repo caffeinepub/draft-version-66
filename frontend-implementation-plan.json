@@ -1,0 +1,92 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Fix ActiveMeditationPage UI and Back Button Positioning",
+  "requirements": [
+    {
+      "id": "REQ-7",
+      "summary": "Apply rounded-full to play/pause button in ActiveMeditationPage.tsx to render as perfect circle",
+      "acceptanceCriteria": [
+        "The play/pause button in ActiveMeditationPage.tsx has `rounded-full` applied",
+        "The button renders as a perfect circle",
+        "All existing colors, background, hover effects, and sizing are unchanged"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/ActiveMeditationPage.tsx",
+          "operation": "modify",
+          "description": "Add `rounded-full` class to the play/pause button element (the button with play/pause icon). Do not modify any other styling properties including colors, background, hover effects, or sizing. Only add the rounded-full class to achieve a perfect circular shape."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Remove vertical padding from control input wrapper containers in ActiveMeditationPage.tsx",
+      "acceptanceCriteria": [
+        "The outer wrapper containers for the volume control and time/seek control inputs have no vertical padding classes (py-*, pt-*, pb-*)",
+        "There is no visual double-padding effect on these control sections",
+        "Inner input container padding is preserved"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/ActiveMeditationPage.tsx",
+          "operation": "modify",
+          "description": "Locate the parent wrapper containers that hold the volume control input and the time/seek control input. Remove all vertical padding classes (py-*, pt-*, pb-*) and inline vertical padding styles (padding-top, padding-bottom) from these wrapper containers. Preserve the inner input container's own padding. This eliminates the double-padding visual issue."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Ensure back button is always visible on all screen sizes in ActiveMeditationPage.tsx",
+      "acceptanceCriteria": [
+        "The back button in ActiveMeditationPage.tsx is visible on all screen sizes including large/desktop breakpoints",
+        "No responsive hiding classes (hidden, sm:hidden, md:hidden, lg:hidden, etc.) are applied to the back button",
+        "The back button's appearance and behavior match other pages (e.g. PreMeditationPage) where it is always visible"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/ActiveMeditationPage.tsx",
+          "operation": "modify",
+          "description": "Locate the back button element in ActiveMeditationPage.tsx and remove any responsive hiding classes such as `hidden`, `sm:hidden`, `md:hidden`, `lg:hidden`, or any breakpoint-based display:none rules. Ensure the back button is always visible on all screen sizes, consistent with how it appears on other pages like PreMeditationPage."
+        }
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "summary": "Fix back button layout so it sits below session indicator on larger screens without overlapping",
+      "acceptanceCriteria": [
+        "On larger screens (desktop), the back button appears visually below the session indicator header bar, not overlapping or on top of it",
+        "The fix is achieved through layout/document flow changes (e.g. removing absolute/fixed positioning that causes overlap, or adjusting layout structure) rather than z-index manipulation",
+        "On smaller screens where the hamburger menu is shown, the back button positioning remains correct as it currently is",
+        "The session indicator ('Logged In / Logout' or 'Exploring as Guest') is fully visible and not covered by the back button on any screen size"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/SessionIndicator.tsx",
+          "operation": "modify",
+          "description": "Review the SessionIndicator component's positioning styles. If it uses absolute or fixed positioning that causes layout issues with back buttons on larger screens, adjust the positioning approach to use normal document flow (static or relative positioning) on desktop breakpoints. Ensure the component remains fixed/absolute on mobile where the hamburger menu is active. This allows back buttons on pages to naturally sit below the session indicator in the layout flow on larger screens."
+        },
+        {
+          "path": "frontend/src/components/MobileBackButton.tsx",
+          "operation": "modify",
+          "description": "Review the MobileBackButton component's positioning. If it uses fixed or absolute positioning that causes it to overlap with the SessionIndicator on larger screens, adjust the positioning to use normal document flow on desktop breakpoints (e.g. static or relative positioning above a certain breakpoint). Keep the current mobile positioning behavior intact for smaller screens where the hamburger menu is shown."
+        },
+        {
+          "path": "frontend/src/components/StandardPageNav.tsx",
+          "operation": "modify",
+          "description": "Review the StandardPageNav component's layout structure and back button positioning. Ensure that on larger screens (desktop), the back button and session indicator are positioned in normal document flow without overlap. Adjust container layout if necessary (e.g. removing absolute positioning, using flex/grid with proper flow). Preserve the correct mobile behavior where the hamburger menu is shown."
+        },
+        {
+          "path": "frontend/src/pages/ActiveMeditationPage.tsx",
+          "operation": "modify",
+          "description": "Review the page-level layout and any custom back button or navigation bar positioning in ActiveMeditationPage. Ensure the back button is positioned in normal document flow relative to the SessionIndicator on larger screens. Remove any absolute/fixed positioning that causes overlap on desktop. Preserve mobile behavior."
+        },
+        {
+          "path": "frontend/src/pages/PreMeditationPage.tsx",
+          "operation": "modify",
+          "description": "Review the page-level layout and back button positioning in PreMeditationPage to ensure consistency with the fix applied to ActiveMeditationPage. Adjust layout if needed so the back button sits below the session indicator on larger screens without overlap, while preserving mobile behavior."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-25T11:26:17.564Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 4,
+    "implemented": 4,
+    "items": [
+      {
+        "id": "REQ-10",
+        "summary": "Fix the back button layout across the app so that on larger screens (before the hamburger menu kicks in), the back button sits visually below the header bar ('Logged In / Logout' or 'Exploring as Guest (Saved Locally) Return to Start') in the normal document flow. The fix must be layout/flow-based — not achieved via z-index. On smaller screens where the hamburger menu is active, the current correct behavior must be preserved.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/SessionIndicator.tsx",
+          "frontend/src/components/MobileBackButton.tsx",
+          "frontend/src/components/StandardPageNav.tsx",
+          "frontend/src/pages/ActiveMeditationPage.tsx",
+          "frontend/src/pages/PreMeditationPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/StandardPageNav.tsx",
+          "frontend/src/pages/ActiveMeditationPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-7",
+        "summary": "In ActiveMeditationPage.tsx, apply `rounded-full` to the play/pause button so it renders as a perfect circle. Do not change its existing colors, background, hover effects, sizing, or any other styling.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/ActiveMeditationPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/ActiveMeditationPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-8",
+        "summary": "In ActiveMeditationPage.tsx, remove vertical padding (py-*, pt-*, pb-*, padding-top, padding-bottom) from the parent wrapper containers that hold the volume control input and the time/seek control input, so that the inner input container's own padding is not doubled.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/ActiveMeditationPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/ActiveMeditationPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-9",
+        "summary": "In ActiveMeditationPage.tsx, ensure the back button is always visible on all screen sizes. Remove any responsive hiding classes such as `hidden`, `sm:hidden`, `md:hidden`, `lg:hidden`, or any breakpoint-based display:none rules applied to it.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/ActiveMeditationPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/ActiveMeditationPage.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/components/StandardPageNav.tsx",
+    "frontend/src/pages/ActiveMeditationPage.tsx",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

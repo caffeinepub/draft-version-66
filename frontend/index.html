@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang='en'>
+    <head>
+        <meta charset='UTF-8' />
+        <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+        <title>Inner Bloom - Meditation App</title>
+        <link rel='icon' type='image/png' sizes='32x32' href='/assets/generated/lotus-favicon-transparent.dim_32x32.png' />
+        <script>
+            // Early-runtime compatibility shim to prevent production crashes
+            // Ensure safe process.env object exists before React bundle runs
+            if (typeof process === 'undefined') {
+                window.process = { env: {} };
+            } else if (!process.env) {
+                process.env = {};
+            }
+
+            // Global error handlers to capture deployment/runtime failures
+            // These handlers log complete error details (message, stack, component stack)
+            // for post-deploy validation. Check browser console for captured errors.
+            window.addEventListener('error', function(event) {
+                console.error('Global error caught:', {
+                    message: event.message,
+                    filename: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno,
+                    error: event.error
+                });
+            });
+
+            window.addEventListener('unhandledrejection', function(event) {
+                console.error('Unhandled promise rejection:', {
+                    reason: event.reason,
+                    promise: event.promise
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <div id='root'></div>
+        <script type='module' src='/src/main.tsx'></script>
+    </body>
+</html>

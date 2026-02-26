@@ -1,0 +1,256 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* OKLCH color system - Light theme */
+    --background: 0.98 0.01 210;
+    --foreground: 0.145 0.02 210;
+    --card: 0.98 0.01 210;
+    --card-foreground: 0.145 0.02 210;
+    --popover: 0.98 0.01 210;
+    --popover-foreground: 0.145 0.02 210;
+    --primary: 0.145 0.02 210;
+    --primary-foreground: 0.98 0.01 210;
+    --secondary: 0.93 0.01 210;
+    --secondary-foreground: 0.145 0.02 210;
+    --muted: 0.93 0.01 210;
+    --muted-foreground: 0.45 0.02 210;
+    --accent: 0.93 0.01 210;
+    --accent-foreground: 0.145 0.02 210;
+    --destructive: 0.55 0.22 25;
+    --destructive-foreground: 0.98 0.01 210;
+    --border: 0.75 0.02 210;
+    --input: 0.75 0.02 210;
+    --ring: 0.145 0.02 210;
+    --radius: 0.5rem;
+
+    /* Custom colors */
+    --accent-cyan: 0.65 0.12 195;
+    --accent-cyan-tinted: 0.70 0.15 195;
+    --accent-lavender: 0.70 0.10 280;
+    --primary-dark: 0.145 0.02 210;
+    --description-gray: 0.48 0.02 210;
+    --selected-element-light: 0.35 0.02 210;
+    --guide-text: 0.75 0.02 210;
+  }
+
+  .dark {
+    /* OKLCH color system - Dark theme */
+    --background: 0.145 0.02 210;
+    --foreground: 0.93 0.01 210;
+    --card: 0.18 0.02 210;
+    --card-foreground: 0.93 0.01 210;
+    --popover: 0.145 0.02 210;
+    --popover-foreground: 0.93 0.01 210;
+    --primary: 0.93 0.01 210;
+    --primary-foreground: 0.145 0.02 210;
+    --secondary: 0.22 0.02 210;
+    --secondary-foreground: 0.93 0.01 210;
+    --muted: 0.22 0.02 210;
+    --muted-foreground: 0.60 0.02 210;
+    --accent: 0.22 0.02 210;
+    --accent-foreground: 0.93 0.01 210;
+    --destructive: 0.50 0.22 25;
+    --destructive-foreground: 0.93 0.01 210;
+    --border: 0.22 0.02 210;
+    --input: 0.22 0.02 210;
+    --ring: 0.70 0.15 195;
+
+    /* Custom colors for dark theme */
+    --accent-cyan: 0.70 0.15 195;
+    --accent-cyan-tinted: 0.75 0.18 195;
+    --accent-lavender: 0.75 0.12 280;
+    --primary-dark: 0.145 0.02 210;
+    --description-gray: 0.60 0.02 210;
+    --selected-element-light: 0.75 0.02 210;
+    --guide-text: 0.75 0.02 210;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Playfair Display', serif;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-breathe-gentle {
+    animation: breatheGentle 4s ease-in-out infinite;
+  }
+
+  @keyframes breatheGentle {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.03);
+      opacity: 0.95;
+    }
+  }
+
+  .animate-glow-pulse {
+    animation: glowPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes glowPulse {
+    0%, 100% {
+      filter: drop-shadow(0 0 8px oklch(var(--accent-cyan))) drop-shadow(0 0 16px oklch(var(--accent-cyan)));
+    }
+    50% {
+      filter: drop-shadow(0 0 12px oklch(var(--accent-cyan))) drop-shadow(0 0 24px oklch(var(--accent-cyan)));
+    }
+  }
+
+  .animate-glow-pulse-strong {
+    animation: glowPulseStrong 2.5s ease-in-out infinite;
+  }
+
+  @keyframes glowPulseStrong {
+    0%, 100% {
+      filter: drop-shadow(0 0 12px oklch(var(--accent-cyan))) drop-shadow(0 0 24px oklch(var(--accent-cyan)));
+    }
+    50% {
+      filter: drop-shadow(0 0 20px oklch(var(--accent-cyan))) drop-shadow(0 0 40px oklch(var(--accent-cyan)));
+    }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-wave {
+    animation: wave 3s ease-in-out infinite;
+  }
+
+  @keyframes wave {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+
+  .premed-back-button {
+    position: relative;
+    z-index: 50;
+  }
+
+  /* Enhanced play/pause button for pre-meditation active phase */
+  .premed-play-pause-btn {
+    background: oklch(var(--accent-cyan) / 0.15);
+    border: 2px solid oklch(var(--accent-cyan) / 0.5);
+    color: oklch(var(--accent-cyan));
+    transition: all 0.3s ease;
+  }
+
+  .premed-play-pause-btn:hover {
+    background: oklch(var(--accent-cyan) / 0.25);
+    border-color: oklch(var(--accent-cyan));
+    transform: scale(1.05);
+    box-shadow: 0 0 20px oklch(var(--accent-cyan) / 0.4), 0 0 40px oklch(var(--accent-cyan) / 0.2);
+  }
+
+  .premed-play-pause-btn:active {
+    transform: scale(0.98);
+  }
+
+  .dark .premed-play-pause-btn {
+    background: oklch(var(--accent-cyan) / 0.2);
+    border-color: oklch(var(--accent-cyan) / 0.6);
+  }
+
+  .dark .premed-play-pause-btn:hover {
+    background: oklch(var(--accent-cyan) / 0.3);
+    border-color: oklch(var(--accent-cyan));
+  }
+}
+
+#wwm4eh::-webkit-scrollbar {
+  width: 8px;
+}
+
+#wwm4eh::-webkit-scrollbar-track {
+  background: oklch(var(--muted));
+  border-radius: 4px;
+}
+
+#wwm4eh::-webkit-scrollbar-thumb {
+  background: oklch(var(--accent-cyan));
+  border-radius: 4px;
+}
+
+#wwm4eh::-webkit-scrollbar-thumb:hover {
+  background: oklch(var(--accent-cyan-tinted));
+}
+
+#wwm4eh {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(var(--accent-cyan)) oklch(var(--muted));
+}
+
+/* Notification styling for ThemedToaster */
+#t4f3jw [data-sonner-toast] {
+  background: oklch(var(--background)) !important;
+  border: 1px solid oklch(var(--border)) !important;
+  color: oklch(var(--accent-cyan)) !important;
+}
+
+#t4f3jw [data-sonner-toast] [data-title] {
+  color: oklch(var(--accent-cyan)) !important;
+}
+
+#t4f3jw [data-sonner-toast] [data-description] {
+  color: oklch(var(--muted-foreground)) !important;
+}
+
+#t4f3jw [data-sonner-toast] [data-close-button] {
+  color: oklch(var(--accent-cyan)) !important;
+  border-color: oklch(var(--accent-cyan)) !important;
+  opacity: 1 !important;
+  display: flex !important;
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+}
+
+#t4f3jw [data-sonner-toast] [data-close-button]:hover {
+  background: oklch(var(--accent-cyan) / 0.1) !important;
+}

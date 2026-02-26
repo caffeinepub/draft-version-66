@@ -1,0 +1,102 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 7,
+  "summary": "Active meditation page UI fixes and back button positioning: circular play/pause button, removed double vertical padding on control containers, back button always visible regardless of screen width, and back button sits visually below the header bar (Logged In/Logout or Exploring as Guest) in document flow on larger screens — not via z-index but via proper layout order.",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": true,
+  "existing_features": [
+    {
+      "id": "feature-in-activemeditationpage-tsx-apply-rounded-full-to-the-play-pause-button-so-it-renders-as-a-perfect-circle-do-not-change-its-existing-colors-background-hover-effects-sizing-or-any-other-styling",
+      "title": "In ActiveMeditationPage.tsx, apply `rounded-full` to the play/pause button so it renders as a perfect circle. Do not change its existing colors, background, hover effects, sizing, or any other styling.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-activemeditationpage-tsx-remove-vertical-padding-py-pt-pb-padding-top-padding-bottom-from-the-parent-wrapper-containers-that-hold-the-volume-control-input-and-the-time-seek-control-input-so-that-the-inner-input-container-s-own-padding-is-not-doubled",
+      "title": "In ActiveMeditationPage.tsx, remove vertical padding (py-*, pt-*, pb-*, padding-top, padding-bottom) from the parent wrapper containers that hold the volume control input and the time/seek control input, so that the inner input container's own padding is not doubled.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-activemeditationpage-tsx-ensure-the-back-button-is-always-visible-on-all-screen-sizes-remove-any-responsive-hiding-classes-such-as-hidden-sm-hidden-md-hidden-lg-hidden-or-any-breakpoint-based-display-none-rules-applied-to-it",
+      "title": "In ActiveMeditationPage.tsx, ensure the back button is always visible on all screen sizes. Remove any responsive hiding classes such as `hidden`, `sm:hidden`, `md:hidden`, `lg:hidden`, or any breakpoint-based display:none rules applied to it.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-back-button-layout-across-the-app-so-that-on-larger-screens-before-the-hamburger-menu-kicks-in-the-back-button-sits-visually-below-the-header-bar-logged-in-logout-or-exploring-as-guest-saved-locally-return-to-start-in-the-normal-document-flow-the-fix-must-be-layout-flow-based-not-achieved-via-z-index-on-smaller-screens-where-the-hamburger-menu-is-active-the-current-correct-behavior-must-be-preserved",
+      "title": "Fix the back button layout across the app so that on larger screens (before the hamburger menu kicks in), the back button sits visually below the header bar ('Logged In / Logout' or 'Exploring as Guest (Saved Locally) Return to Start') in the normal document flow. The fix must be layout/flow-based — not achieved via z-index. On smaller screens where the hamburger menu is active, the current correct behavior must be preserved.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Make the play/pause button (XPath: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/button[1]) fully circle-shaped by applying rounded-full. Preserve all existing colors, background, hover effects, and sizing.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Remove vertical padding from the two control input wrapper containers (XPath: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[2] and /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[3]) so that their children's own vertical padding is not doubled.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Make the back button (XPath: /html[1]/body[1]/div[1]/div[1]/button[3]) always visible regardless of screen width by removing any responsive hiding classes (e.g. hidden, md:hidden, lg:hidden, sm:hidden, or any breakpoint-based display:none rules).",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "In ActiveMeditationPage.tsx, apply `rounded-full` to the play/pause button so it renders as a perfect circle. Do not change its existing colors, background, hover effects, sizing, or any other styling.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "In ActiveMeditationPage.tsx, remove the vertical padding (py-*, pt-*, pb-*, padding-top, padding-bottom) from the parent wrapper containers that hold the volume control input and the time/seek control input, so that padding is not doubled with the inner input container's own padding.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "In ActiveMeditationPage.tsx, ensure the back button that navigates to the previous page is always visible on all screen sizes. Remove any responsive hiding classes such as `hidden`, `sm:hidden`, `md:hidden`, `lg:hidden`, or any breakpoint-based display:none rules applied to it. Its behavior and appearance should match the back button on PreMeditationPage and other pages where it is always visible.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Fix back button layout so it sits visually below the header bar ('Logged In / Logout' or 'Exploring as Guest (Saved Locally) Return to Start') in the normal document flow on larger screens. The fix must be layout/flow-based (not z-index). On smaller screens with the hamburger menu, the existing correct behavior should be preserved.",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Inner Bloom",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

@@ -175,10 +175,17 @@
 
   /* Enhanced play/pause button for pre-meditation active phase */
   .premed-play-pause-btn {
+    width: 4rem !important;
+    height: 4rem !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     background: oklch(var(--accent-cyan) / 0.15);
     border: 2px solid oklch(var(--accent-cyan) / 0.5);
     color: oklch(var(--accent-cyan));
     transition: all 0.3s ease;
+    flex-shrink: 0;
   }
 
   .premed-play-pause-btn:hover {

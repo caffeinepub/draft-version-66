@@ -1,90 +1,26 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix ActiveMeditationPage UI and Back Button Positioning",
+  "title": "Display quiz score inline with article title in X/6 format with theme-colored medal icon",
   "requirements": [
     {
-      "id": "REQ-7",
-      "summary": "Apply rounded-full to play/pause button in ActiveMeditationPage.tsx to render as perfect circle",
+      "id": "REQ-1",
+      "summary": "Move quiz score display from 'Take Quiz' button to inline position next to article/category title with X/6 format and theme-colored medal icon",
       "acceptanceCriteria": [
-        "The play/pause button in ActiveMeditationPage.tsx has `rounded-full` applied",
-        "The button renders as a perfect circle",
-        "All existing colors, background, hover effects, and sizing are unchanged"
+        "The quiz score no longer appears as a number badge/overlay on top of the 'Take Quiz' button.",
+        "The score appears inline on the same visual row as the article/category title and the 'Take Quiz' button.",
+        "The score is positioned close to and to the right of the title text.",
+        "The score uses the format 'X/6' (e.g., '3/6', '6/6').",
+        "A medal or award icon is displayed immediately next to the 'X/6' score text.",
+        "The medal/award icon uses the app's primary theme color (CSS theme variable, not a hardcoded color).",
+        "If no quiz score has been recorded for a category, the score and icon are not shown.",
+        "Layout does not break on mobile screen sizes."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/ActiveMeditationPage.tsx",
+          "path": "frontend/src/pages/KnowledgePage.tsx",
           "operation": "modify",
-          "description": "Add `rounded-full` class to the play/pause button element (the button with play/pause icon). Do not modify any other styling properties including colors, background, hover effects, or sizing. Only add the rounded-full class to achieve a perfect circular shape."
-        }
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "summary": "Remove vertical padding from control input wrapper containers in ActiveMeditationPage.tsx",
-      "acceptanceCriteria": [
-        "The outer wrapper containers for the volume control and time/seek control inputs have no vertical padding classes (py-*, pt-*, pb-*)",
-        "There is no visual double-padding effect on these control sections",
-        "Inner input container padding is preserved"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/ActiveMeditationPage.tsx",
-          "operation": "modify",
-          "description": "Locate the parent wrapper containers that hold the volume control input and the time/seek control input. Remove all vertical padding classes (py-*, pt-*, pb-*) and inline vertical padding styles (padding-top, padding-bottom) from these wrapper containers. Preserve the inner input container's own padding. This eliminates the double-padding visual issue."
-        }
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "summary": "Ensure back button is always visible on all screen sizes in ActiveMeditationPage.tsx",
-      "acceptanceCriteria": [
-        "The back button in ActiveMeditationPage.tsx is visible on all screen sizes including large/desktop breakpoints",
-        "No responsive hiding classes (hidden, sm:hidden, md:hidden, lg:hidden, etc.) are applied to the back button",
-        "The back button's appearance and behavior match other pages (e.g. PreMeditationPage) where it is always visible"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/ActiveMeditationPage.tsx",
-          "operation": "modify",
-          "description": "Locate the back button element in ActiveMeditationPage.tsx and remove any responsive hiding classes such as `hidden`, `sm:hidden`, `md:hidden`, `lg:hidden`, or any breakpoint-based display:none rules. Ensure the back button is always visible on all screen sizes, consistent with how it appears on other pages like PreMeditationPage."
-        }
-      ]
-    },
-    {
-      "id": "REQ-10",
-      "summary": "Fix back button layout so it sits below session indicator on larger screens without overlapping",
-      "acceptanceCriteria": [
-        "On larger screens (desktop), the back button appears visually below the session indicator header bar, not overlapping or on top of it",
-        "The fix is achieved through layout/document flow changes (e.g. removing absolute/fixed positioning that causes overlap, or adjusting layout structure) rather than z-index manipulation",
-        "On smaller screens where the hamburger menu is shown, the back button positioning remains correct as it currently is",
-        "The session indicator ('Logged In / Logout' or 'Exploring as Guest') is fully visible and not covered by the back button on any screen size"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/SessionIndicator.tsx",
-          "operation": "modify",
-          "description": "Review the SessionIndicator component's positioning styles. If it uses absolute or fixed positioning that causes layout issues with back buttons on larger screens, adjust the positioning approach to use normal document flow (static or relative positioning) on desktop breakpoints. Ensure the component remains fixed/absolute on mobile where the hamburger menu is active. This allows back buttons on pages to naturally sit below the session indicator in the layout flow on larger screens."
-        },
-        {
-          "path": "frontend/src/components/MobileBackButton.tsx",
-          "operation": "modify",
-          "description": "Review the MobileBackButton component's positioning. If it uses fixed or absolute positioning that causes it to overlap with the SessionIndicator on larger screens, adjust the positioning to use normal document flow on desktop breakpoints (e.g. static or relative positioning above a certain breakpoint). Keep the current mobile positioning behavior intact for smaller screens where the hamburger menu is shown."
-        },
-        {
-          "path": "frontend/src/components/StandardPageNav.tsx",
-          "operation": "modify",
-          "description": "Review the StandardPageNav component's layout structure and back button positioning. Ensure that on larger screens (desktop), the back button and session indicator are positioned in normal document flow without overlap. Adjust container layout if necessary (e.g. removing absolute positioning, using flex/grid with proper flow). Preserve the correct mobile behavior where the hamburger menu is shown."
-        },
-        {
-          "path": "frontend/src/pages/ActiveMeditationPage.tsx",
-          "operation": "modify",
-          "description": "Review the page-level layout and any custom back button or navigation bar positioning in ActiveMeditationPage. Ensure the back button is positioned in normal document flow relative to the SessionIndicator on larger screens. Remove any absolute/fixed positioning that causes overlap on desktop. Preserve mobile behavior."
-        },
-        {
-          "path": "frontend/src/pages/PreMeditationPage.tsx",
-          "operation": "modify",
-          "description": "Review the page-level layout and back button positioning in PreMeditationPage to ensure consistency with the fix applied to ActiveMeditationPage. Adjust layout if needed so the back button sits below the session indicator on larger screens without overlap, while preserving mobile behavior."
+          "description": "Remove the existing quiz score badge/overlay from the 'Take Quiz' button. Add a new inline score display component positioned immediately to the right of the article/category title text in the same row. Format the score as 'X/6' (e.g., '3/6') and display a medal/award icon (using lucide-react's Award or Medal icon) next to it. Apply the theme's primary color to the icon using CSS custom properties (e.g., 'hsl(var(--primary))'). Conditionally render this score display only when `categoryScores[currentCategory]` exists. Ensure the layout remains responsive on mobile by using appropriate Tailwind flex utilities (flex-row, items-center, gap) and text sizing."
         }
       ]
     }

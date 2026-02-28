@@ -1,103 +1,42 @@
 {
   "kind": "build_request",
-  "title": "Fix ActiveMeditationPage UI and Back Button Positioning",
+  "title": "Display quiz score inline with article title in X/6 format with theme-colored medal icon",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-7",
-      "text": "In ActiveMeditationPage.tsx, apply `rounded-full` to the play/pause button so it renders as a perfect circle. Do not change its existing colors, background, hover effects, sizing, or any other styling.",
+      "id": "REQ-1",
+      "text": "On the Knowledge page, remove the existing quiz score display from on top of the 'Take Quiz' button. Instead, render the score inline on the same row as the article/category title, positioned close to the title (e.g., immediately to its right). The score must be formatted as 'X/6' (e.g., '0/6', '4/6'). Next to the score text, display a medal or award icon styled in the app's primary theme color. Only show the score display when a quiz score exists for that category.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4",
-          "msg-6"
+          "msg-recent-1",
+          "msg-recent-2"
         ],
         "quotes": [
-          "circular play/pause button (rounded-full)",
-          "make the play/pause button (XPath: /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/button[1]) fully circle-shaped by applying rounded-full"
+          "The title I am reffering to, is in the same row visually as 'Take Quiz' btn. So for instance, Mindfulenss title would have to its right, close, score",
+          "Want the same color icon, theme color"
         ]
       },
       "acceptanceCriteria": [
-        "The play/pause button in ActiveMeditationPage.tsx has `rounded-full` applied",
-        "The button renders as a perfect circle",
-        "All existing colors, background, hover effects, and sizing are unchanged"
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "text": "In ActiveMeditationPage.tsx, remove vertical padding (py-*, pt-*, pb-*, padding-top, padding-bottom) from the parent wrapper containers that hold the volume control input and the time/seek control input, so that the inner input container's own padding is not doubled.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4",
-          "msg-6"
-        ],
-        "quotes": [
-          "removing double vertical padding on control containers",
-          "Remove vertical padding from the two control input wrapper containers"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The outer wrapper containers for the volume control and time/seek control inputs have no vertical padding classes (py-*, pt-*, pb-*)",
-        "There is no visual double-padding effect on these control sections",
-        "Inner input container padding is preserved"
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "text": "In ActiveMeditationPage.tsx, ensure the back button is always visible on all screen sizes. Remove any responsive hiding classes such as `hidden`, `sm:hidden`, `md:hidden`, `lg:hidden`, or any breakpoint-based display:none rules applied to it.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4",
-          "msg-6"
-        ],
-        "quotes": [
-          "back button always visible on all screen sizes",
-          "ensure the back button that navigates to the previous page is always visible on all screen sizes"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The back button in ActiveMeditationPage.tsx is visible on all screen sizes including large/desktop breakpoints",
-        "No responsive hiding classes (hidden, sm:hidden, md:hidden, lg:hidden, etc.) are applied to the back button",
-        "The back button's appearance and behavior match other pages (e.g. PreMeditationPage) where it is always visible"
-      ]
-    },
-    {
-      "id": "REQ-10",
-      "text": "Fix the back button layout across the app so that on larger screens (before the hamburger menu kicks in), the back button sits visually below the header bar ('Logged In / Logout' or 'Exploring as Guest (Saved Locally) Return to Start') in the normal document flow. The fix must be layout/flow-based — not achieved via z-index. On smaller screens where the hamburger menu is active, the current correct behavior must be preserved.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2",
-          "msg-4",
-          "msg-6",
-          "msg-8"
-        ],
-        "quotes": [
-          "back button is rendering on top of (overflowing) the 'Logged In / Logout' or 'Exploring as Guest' header containers. It should sit below those containers, not overlapping them",
-          "it should be below them visually and not with z-index below that container",
-          "fix the layout so the back button sits visually below the header bar in the document flow on larger screens, without any z-index tricks — just proper layout order"
-        ]
-      },
-      "acceptanceCriteria": [
-        "On larger screens (desktop), the back button appears visually below the session indicator header bar, not overlapping or on top of it",
-        "The fix is achieved through layout/document flow changes (e.g. removing absolute/fixed positioning that causes overlap, or adjusting layout structure) rather than z-index manipulation",
-        "On smaller screens where the hamburger menu is shown, the back button positioning remains correct as it currently is",
-        "The session indicator ('Logged In / Logout' or 'Exploring as Guest') is fully visible and not covered by the back button on any screen size"
+        "The quiz score no longer appears as a number badge/overlay on top of the 'Take Quiz' button.",
+        "The score appears inline on the same visual row as the article/category title and the 'Take Quiz' button.",
+        "The score is positioned close to and to the right of the title text.",
+        "The score uses the format 'X/6' (e.g., '3/6', '6/6').",
+        "A medal or award icon is displayed immediately next to the 'X/6' score text.",
+        "The medal/award icon uses the app's primary theme color (CSS theme variable, not a hardcoded color).",
+        "If no quiz score has been recorded for a category, the score and icon are not shown.",
+        "Layout does not break on mobile screen sizes."
       ]
     }
   ],
   "constraints": [
-    "Do not change the play/pause button's colors, background, hover effects, or sizing — only add rounded-full",
-    "Back button positioning fix must be layout/flow-based, not z-index-based",
-    "Hamburger menu behavior on smaller screens must not be affected"
+    "Do not modify any files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
+    "Use the existing CSS theme color variables (not hardcoded hex/rgb values) for the icon color."
   ],
   "nonGoals": [
-    "Redesigning the ActiveMeditationPage layout beyond the specified fixes",
-    "Changing the session indicator (SessionIndicator) component's appearance or behavior",
-    "Modifying the HamburgerMenu component",
-    "Any backend changes"
+    "Changing the quiz dialog or quiz logic.",
+    "Changing the score storage mechanism in knowledgeQuizStorage.ts.",
+    "Adding new medal tiers or color variations based on score value."
   ],
   "imageRequirements": {
     "required": [],

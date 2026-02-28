@@ -7,7 +7,7 @@ import KnowledgeBookPager from '../components/KnowledgeBookPager';
 import KnowledgeQuizDialog from '../components/KnowledgeQuizDialog';
 import { TECHNIQUE_CONTENT } from '../lib/knowledgeContent';
 import { Button } from '@/components/ui/button';
-import { Trophy } from 'lucide-react';
+import { Trophy, Award } from 'lucide-react';
 import { getQuizScores, saveQuizScore } from '../utils/knowledgeQuizStorage';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 
@@ -31,6 +31,7 @@ export default function KnowledgePage() {
   const hasScrolledRef = useRef(false);
 
   const selectedTechnique = TECHNIQUE_CONTENT.find((t) => t.id === selectedCategoryId) || TECHNIQUE_CONTENT[0];
+  const totalQuestions = selectedTechnique.quiz.length;
 
   // Sync selectedCategoryId when search.category changes
   useEffect(() => {
@@ -78,6 +79,9 @@ export default function KnowledgePage() {
     }));
   };
 
+  const currentScore = quizScores[selectedTechnique.id];
+  const hasScore = currentScore !== undefined;
+
   return (
     <PageBackgroundShell variant="default" intensity={0.35}>
       {/* Standard navigation overlay */}
@@ -109,34 +113,38 @@ export default function KnowledgePage() {
             <div>
               {/* Technique Header */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-border">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 min-w-0">
                   <img
                     src={selectedTechnique.icon}
                     alt={selectedTechnique.title}
-                    className="w-16 h-16 rounded-lg object-cover"
+                    className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
                   />
-                  <div>
-                    <h2 className="text-3xl font-bold text-foreground">
-                      {selectedTechnique.title}
-                    </h2>
+                  <div className="min-w-0">
+                    {/* Title row with inline score */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h2 className="text-3xl font-bold text-foreground">
+                        {selectedTechnique.title}
+                      </h2>
+                      {hasScore && (
+                        <span className="flex items-center gap-1 text-sm font-semibold text-primary">
+                          <Award className="w-4 h-4 text-primary flex-shrink-0" />
+                          <span>{currentScore}/{totalQuestions}</span>
+                        </span>
+                      )}
+                    </div>
                     <p className="text-muted-foreground mt-1">
                       {selectedTechnique.description}
                     </p>
                   </div>
                 </div>
 
-                {/* Quiz Button with Score Badge */}
+                {/* Quiz Button - no score badge */}
                 <Button
                   onClick={() => setQuizOpen(true)}
-                  className="bg-accent-cyan hover:bg-accent-cyan/90 text-white relative"
+                  className="bg-accent-cyan hover:bg-accent-cyan/90 text-white flex-shrink-0"
                 >
                   <Trophy className="w-4 h-4 mr-2" />
                   Take Quiz
-                  {quizScores[selectedTechnique.id] !== undefined && (
-                    <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                      {quizScores[selectedTechnique.id]}
-                    </span>
-                  )}
                 </Button>
               </div>
 

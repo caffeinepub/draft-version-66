@@ -1,24 +1,57 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-03-01T11:50:35.565Z",
+  "generatedAt": "2026-03-02T12:00:47.952Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 1,
-    "implemented": 1,
+    "total": 4,
+    "implemented": 4,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "In the quiz score display heading (h2) on the KnowledgePage, remove the parenthetical text and its surrounding parentheses from the Metta and IFS category titles. For example, 'Metta (Loving-Kindness)' should become 'Metta', and 'IFS (Internal Family Systems)' should become 'IFS'. The change must apply wherever those category titles are rendered in the quiz score context identified by XPath /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[1]/h2[1].",
+        "summary": "Create a new `MindfulnessGuide` component (e.g., `frontend/src/components/MindfulnessGuide.tsx`) that encapsulates everything related to the meditation guide section currently rendered inside `PreMeditationPage`: its outer container, title, step content, and the `MeditationGuideStepper` (or equivalent inline rendering). The component should accept the current meditation type (and any content data it needs) as props.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/KnowledgePage.tsx"
+          "frontend/src/components/MindfulnessGuide.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/KnowledgePage.tsx"
+          "frontend/src/components/MindfulnessGuide.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Move the **More Details** button and its navigation logic (routing/redirecting to the Knowledge page) entirely inside the `MindfulnessGuide` component. `PreMeditationPage` must not contain any routing call or handler related to the More Details action.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/MindfulnessGuide.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/MindfulnessGuide.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Move the **Previous** and **Next** step-navigation button logic (current step index state, increment/decrement handlers, boundary conditions) entirely inside the `MindfulnessGuide` component. The component manages its own step state internally.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/MindfulnessGuide.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/MindfulnessGuide.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Update `PreMeditationPage` to replace all extracted guide-related markup and state with a single `<MindfulnessGuide meditationType={...} />` usage. Ensure no orphaned state variables, handlers, or JSX fragments related to the guide remain in `PreMeditationPage`.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/PreMeditationPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/PreMeditationPage.tsx"
         ]
       }
     ]
@@ -28,7 +61,8 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/pages/KnowledgePage.tsx",
+    "frontend/src/components/MindfulnessGuide.tsx",
+    "frontend/src/pages/PreMeditationPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

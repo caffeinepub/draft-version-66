@@ -1,35 +1,94 @@
 {
   "kind": "build_request",
-  "title": "Remove parentheses and content from Metta and IFS titles in quiz score display",
+  "title": "Extract self-contained MindfulnessGuide component from PreMeditationPage",
+  "projectName": "Inner Bloom",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "In the quiz score display heading (h2) on the KnowledgePage, remove the parenthetical text and its surrounding parentheses from the Metta and IFS category titles. For example, 'Metta (Loving-Kindness)' should become 'Metta', and 'IFS (Internal Family Systems)' should become 'IFS'. The change must apply wherever those category titles are rendered in the quiz score context identified by XPath /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[1]/h2[1].",
+      "text": "Create a new `MindfulnessGuide` component (e.g., `frontend/src/components/MindfulnessGuide.tsx`) that encapsulates everything related to the meditation guide section currently rendered inside `PreMeditationPage`: its outer container, title, step content, and the `MeditationGuideStepper` (or equivalent inline rendering). The component should accept the current meditation type (and any content data it needs) as props.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-1"
         ],
         "quotes": [
-          "remove parentheses with its content inside, for Metta, and IFS"
+          "Just meditation guide. Which includes more details button to knowledge page, its title, its content and container etc."
         ]
       },
       "acceptanceCriteria": [
-        "The quiz score h2 heading displays 'Metta' without any parenthetical suffix.",
-        "The quiz score h2 heading displays 'IFS' without any parenthetical suffix.",
-        "No other category titles are altered.",
-        "The styled score badge and overall quiz score design remain unchanged."
+        "A `MindfulnessGuide` component file exists under `frontend/src/components/`.",
+        "The component renders the guide container, title, and step content independently.",
+        "No meditation-guide UI markup remains duplicated in `PreMeditationPage`; the page simply renders `<MindfulnessGuide ... />`.",
+        "Visual appearance of the guide section is unchanged."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Move the **More Details** button and its navigation logic (routing/redirecting to the Knowledge page) entirely inside the `MindfulnessGuide` component. `PreMeditationPage` must not contain any routing call or handler related to the More Details action.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "logic like more details button that redirect to knowledge page, should exist only in that component"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The `MindfulnessGuide` component internally calls the router's navigate function (or equivalent) to go to the Knowledge page when More Details is clicked.",
+        "`PreMeditationPage` passes no `onMoreDetails` callback or navigation handler to the guide component.",
+        "Clicking More Details still navigates to the Knowledge page correctly."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Move the **Previous** and **Next** step-navigation button logic (current step index state, increment/decrement handlers, boundary conditions) entirely inside the `MindfulnessGuide` component. The component manages its own step state internally.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "the buttons previous and next logic should be inside that component"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Step index state (`useState`) for the guide stepper lives inside `MindfulnessGuide`, not in `PreMeditationPage`.",
+        "`PreMeditationPage` passes no step index, `onNext`, or `onPrevious` props to the guide component.",
+        "Previous/Next navigation within the guide works correctly end-to-end.",
+        "Boundary behavior (disable or hide buttons at first/last step) is handled inside the component."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Update `PreMeditationPage` to replace all extracted guide-related markup and state with a single `<MindfulnessGuide meditationType={...} />` usage. Ensure no orphaned state variables, handlers, or JSX fragments related to the guide remain in `PreMeditationPage`.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Including their logic, should be separated into that component"
+        ]
+      },
+      "acceptanceCriteria": [
+        "`PreMeditationPage` contains a single `<MindfulnessGuide>` element where the guide section previously existed.",
+        "No guide-specific `useState` hooks, step handlers, or More Details handlers remain in `PreMeditationPage`.",
+        "The rest of the pre-meditation page (mood/energy selectors, timer settings, ambient sound, start button) is unaffected."
       ]
     }
   ],
   "constraints": [
-    "Only modify the quiz score display title rendering for Metta and IFS — do not change any other part of the UI or data."
+    "Do not alter any other section of PreMeditationPage (mood/energy pickers, duration input, ambient music carousel, start button, etc.).",
+    "Do not modify any file listed under frontend.immutablePaths.",
+    "The visual design and layout of the guide section must remain identical after the refactor."
   ],
   "nonGoals": [
-    "Changing the underlying category data or identifiers stored in knowledgeContent.ts or backend.",
-    "Modifying the carousel category titles outside of the quiz score display context.",
-    "Altering the quiz score badge styling introduced in the previous version."
+    "Refactoring any other section of PreMeditationPage into separate components.",
+    "Adding new features or changing the content of the meditation guide.",
+    "Modifying the KnowledgePage or its routing configuration.",
+    "Backend changes of any kind."
   ],
   "imageRequirements": {
     "required": [],

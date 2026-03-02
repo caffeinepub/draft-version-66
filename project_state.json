@@ -1,22 +1,56 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
-  "architectural_notes": [],
+  "summary": "Meditation/mindfulness app with a pre-meditation page being refactored into isolated components. A self-contained MindfulnessGuide component is being extracted with its own UI and logic (More Details navigation, Previous/Next buttons).",
+  "architectural_notes": [
+    "MindfulnessGuide component should be fully self-contained: owns its UI (container, title, content) and all logic (More Details navigation to knowledge page, Previous/Next navigation)"
+  ],
   "known_issues": [],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-in-the-quiz-score-display-heading-h2-on-the-knowledgepage-remove-the-parenthetical-text-and-its-surrounding-parentheses-from-the-metta-and-ifs-category-titles-for-example-metta-loving-kindness-should-become-metta-and-ifs-internal-family-systems-should-become-ifs-the-change-must-apply-wherever-those-category-titles-are-rendered-in-the-quiz-score-context-identified-by-xpath-html-1-body-1-div-1-div-1-div-2-div-1-div-3-div-1-div-1-div-1-div-1-div-1-h2-1",
-      "title": "In the quiz score display heading (h2) on the KnowledgePage, remove the parenthetical text and its surrounding parentheses from the Metta and IFS category titles. For example, 'Metta (Loving-Kindness)' should become 'Metta', and 'IFS (Internal Family Systems)' should become 'IFS'. The change must apply wherever those category titles are rendered in the quiz score context identified by XPath /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[1]/h2[1].",
+      "id": "feature-create-a-new-mindfulnessguide-component-e-g-frontend-src-components-mindfulnessguide-tsx-that-encapsulates-everything-related-to-the-meditation-guide-section-currently-rendered-inside-premeditationpage-its-outer-container-title-step-content-and-the-meditationguidestepper-or-equivalent-inline-rendering-the-component-should-accept-the-current-meditation-type-and-any-content-data-it-needs-as-props",
+      "title": "Create a new `MindfulnessGuide` component (e.g., `frontend/src/components/MindfulnessGuide.tsx`) that encapsulates everything related to the meditation guide section currently rendered inside `PreMeditationPage`: its outer container, title, step content, and the `MeditationGuideStepper` (or equivalent inline rendering). The component should accept the current meditation type (and any content data it needs) as props.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-move-the-more-details-button-and-its-navigation-logic-routing-redirecting-to-the-knowledge-page-entirely-inside-the-mindfulnessguide-component-premeditationpage-must-not-contain-any-routing-call-or-handler-related-to-the-more-details-action",
+      "title": "Move the **More Details** button and its navigation logic (routing/redirecting to the Knowledge page) entirely inside the `MindfulnessGuide` component. `PreMeditationPage` must not contain any routing call or handler related to the More Details action.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-move-the-previous-and-next-step-navigation-button-logic-current-step-index-state-increment-decrement-handlers-boundary-conditions-entirely-inside-the-mindfulnessguide-component-the-component-manages-its-own-step-state-internally",
+      "title": "Move the **Previous** and **Next** step-navigation button logic (current step index state, increment/decrement handlers, boundary conditions) entirely inside the `MindfulnessGuide` component. The component manages its own step state internally.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-premeditationpage-to-replace-all-extracted-guide-related-markup-and-state-with-a-single-mindfulnessguide-meditationtype-usage-ensure-no-orphaned-state-variables-handlers-or-jsx-fragments-related-to-the-guide-remain-in-premeditationpage",
+      "title": "Update `PreMeditationPage` to replace all extracted guide-related markup and state with a single `<MindfulnessGuide meditationType={...} />` usage. Ensure no orphaned state variables, handlers, or JSX fragments related to the guide remain in `PreMeditationPage`.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
     }
   ],
-  "new_feature_requests": [],
-  "projectName": "Remove parentheses and content from Metta and IFS titles in quiz score display",
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Refactor pre-meditation page: extract self-contained MindfulnessGuide component with its container, title, content, More Details button (navigation to knowledge page), and Previous/Next button logic",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Inner Bloom",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

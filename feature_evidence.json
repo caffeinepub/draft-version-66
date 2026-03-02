@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-in-the-quiz-score-display-heading-h2-on-the-knowledgepage-remove-the-parenthetical-text-and-its-surrounding-parentheses-from-the-metta-and-ifs-category-titles-for-example-metta-loving-kindness-should-become-metta-and-ifs-internal-family-systems-should-become-ifs-the-change-must-apply-wherever-those-category-titles-are-rendered-in-the-quiz-score-context-identified-by-xpath-html-1-body-1-div-1-div-1-div-2-div-1-div-3-div-1-div-1-div-1-div-1-div-1-h2-1",
-      "featureTitle": "In the quiz score display heading (h2) on the KnowledgePage, remove the parenthetical text and its surrounding parentheses from the Metta and IFS category titles. For example, 'Metta (Loving-Kindness)' should become 'Metta', and 'IFS (Internal Family Systems)' should become 'IFS'. The change must apply wherever those category titles are rendered in the quiz score context identified by XPath /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[1]/h2[1].",
+      "featureId": "feature-create-a-new-mindfulnessguide-component-e-g-frontend-src-components-mindfulnessguide-tsx-that-encapsulates-everything-related-to-the-meditation-guide-section-currently-rendered-inside-premeditationpage-its-outer-container-title-step-content-and-the-meditationguidestepper-or-equivalent-inline-rendering-the-component-should-accept-the-current-meditation-type-and-any-content-data-it-needs-as-props",
+      "featureTitle": "Create a new `MindfulnessGuide` component (e.g., `frontend/src/components/MindfulnessGuide.tsx`) that encapsulates everything related to the meditation guide section currently rendered inside `PreMeditationPage`: its outer container, title, step content, and the `MeditationGuideStepper` (or equivalent inline rendering). The component should accept the current meditation type (and any content data it needs) as props.",
       "files": [
-        "frontend/src/pages/KnowledgePage.tsx"
+        "frontend/src/components/MindfulnessGuide.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -18,6 +18,66 @@
       ],
       "testIds": [
         "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-move-the-more-details-button-and-its-navigation-logic-routing-redirecting-to-the-knowledge-page-entirely-inside-the-mindfulnessguide-component-premeditationpage-must-not-contain-any-routing-call-or-handler-related-to-the-more-details-action",
+      "featureTitle": "Move the **More Details** button and its navigation logic (routing/redirecting to the Knowledge page) entirely inside the `MindfulnessGuide` component. `PreMeditationPage` must not contain any routing call or handler related to the More Details action.",
+      "files": [
+        "frontend/src/components/MindfulnessGuide.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-move-the-previous-and-next-step-navigation-button-logic-current-step-index-state-increment-decrement-handlers-boundary-conditions-entirely-inside-the-mindfulnessguide-component-the-component-manages-its-own-step-state-internally",
+      "featureTitle": "Move the **Previous** and **Next** step-navigation button logic (current step index state, increment/decrement handlers, boundary conditions) entirely inside the `MindfulnessGuide` component. The component manages its own step state internally.",
+      "files": [
+        "frontend/src/components/MindfulnessGuide.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-premeditationpage-to-replace-all-extracted-guide-related-markup-and-state-with-a-single-mindfulnessguide-meditationtype-usage-ensure-no-orphaned-state-variables-handlers-or-jsx-fragments-related-to-the-guide-remain-in-premeditationpage",
+      "featureTitle": "Update `PreMeditationPage` to replace all extracted guide-related markup and state with a single `<MindfulnessGuide meditationType={...} />` usage. Ensure no orphaned state variables, handlers, or JSX fragments related to the guide remain in `PreMeditationPage`.",
+      "files": [
+        "frontend/src/pages/PreMeditationPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
       ],
       "confidence": "high"
     }

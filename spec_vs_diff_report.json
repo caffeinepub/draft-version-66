@@ -1,14 +1,15 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-03-01T11:50:35.562Z",
-  "summary": "The diff implements REQ-1 by adding a `getScoreDisplayTitle` helper function in KnowledgePage.tsx that strips parenthetical text specifically for 'metta' and 'ifs' category IDs, and uses it to compute `scoreDisplayTitle` for the quiz score h2 heading. All acceptance criteria appear to be addressed.",
+  "generatedAt": "2026-03-02T12:00:47.948Z",
+  "summary": "The diff implements all four requirements. A new MindfulnessGuide.tsx component is created under frontend/src/components/ encapsulating the guide container, title, step content, MeditationGuideStepper, More Details navigation (via useNavigate), and Previous/Next step state management. PreMeditationPage is updated to import and render <MindfulnessGuide> with a meditationType prop, replacing the previously inline guide markup and state.",
   "missing_requirements": [],
   "hallucinated_features": [],
-  "confidence": 0.95,
+  "confidence": 0.92,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/pages/KnowledgePage.tsx",
+    "frontend/src/components/MindfulnessGuide.tsx",
+    "frontend/src/pages/PreMeditationPage.tsx",
     "project_state.json"
   ]
 }

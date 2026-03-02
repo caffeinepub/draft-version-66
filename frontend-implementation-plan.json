@@ -1,22 +1,71 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Remove parentheses and content from Metta and IFS titles in quiz score display",
+  "title": "Extract self-contained MindfulnessGuide component from PreMeditationPage",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Remove parenthetical text from Metta and IFS category titles in the quiz score h2 heading on KnowledgePage",
+      "summary": "Create a new MindfulnessGuide component that encapsulates the meditation guide section currently rendered inside PreMeditationPage, including its container, title, step content, and MeditationGuideStepper",
       "acceptanceCriteria": [
-        "The quiz score h2 heading displays 'Metta' without any parenthetical suffix.",
-        "The quiz score h2 heading displays 'IFS' without any parenthetical suffix.",
-        "No other category titles are altered.",
-        "The styled score badge and overall quiz score design remain unchanged."
+        "A `MindfulnessGuide` component file exists under `frontend/src/components/`.",
+        "The component renders the guide container, title, and step content independently.",
+        "No meditation-guide UI markup remains duplicated in `PreMeditationPage`; the page simply renders `<MindfulnessGuide ... />`.",
+        "Visual appearance of the guide section is unchanged."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/KnowledgePage.tsx",
+          "path": "frontend/src/components/MindfulnessGuide.tsx",
+          "operation": "create",
+          "description": "Create a new MindfulnessGuide component that accepts meditationType as a prop and renders the meditation guide section with its container, title, step content, and MeditationGuideStepper. The component should extract all guide-related markup currently in PreMeditationPage, maintaining the same visual styling and layout structure. Use the meditation type content data to display the appropriate guide information."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Move the More Details button and its navigation logic (routing to the Knowledge page) entirely inside the MindfulnessGuide component",
+      "acceptanceCriteria": [
+        "The `MindfulnessGuide` component internally calls the router's navigate function (or equivalent) to go to the Knowledge page when More Details is clicked.",
+        "`PreMeditationPage` passes no `onMoreDetails` callback or navigation handler to the guide component.",
+        "Clicking More Details still navigates to the Knowledge page correctly."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/MindfulnessGuide.tsx",
           "operation": "modify",
-          "description": "In the quiz score display section (identified by XPath /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[1]/h2[1]), modify the h2 element that renders the category title to strip parenthetical text for 'Metta (Loving-Kindness)' and 'IFS (Internal Family Systems)'. Create a helper function that removes text matching the pattern ' (...any text...)' from category titles. Apply this transformation only when rendering the quiz score heading, ensuring 'Metta (Loving-Kindness)' becomes 'Metta' and 'IFS (Internal Family Systems)' becomes 'IFS'. Do not modify any other instances of category title rendering (carousel, content viewer) or the underlying knowledgeContent.ts data."
+          "description": "Add internal navigation logic to the MindfulnessGuide component using TanStack Router's useNavigate hook. Implement a More Details button click handler that navigates to the Knowledge page route with the appropriate meditation type parameter. Remove any dependency on parent component callbacks for this navigation action."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Move the Previous and Next step-navigation button logic (current step index state, increment/decrement handlers, boundary conditions) entirely inside the MindfulnessGuide component",
+      "acceptanceCriteria": [
+        "Step index state (`useState`) for the guide stepper lives inside `MindfulnessGuide`, not in `PreMeditationPage`.",
+        "`PreMeditationPage` passes no step index, `onNext`, or `onPrevious` props to the guide component.",
+        "Previous/Next navigation within the guide works correctly end-to-end.",
+        "Boundary behavior (disable or hide buttons at first/last step) is handled inside the component."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/MindfulnessGuide.tsx",
+          "operation": "modify",
+          "description": "Add internal state management for the current step index using useState. Implement onNext and onPrevious handlers that increment/decrement the step index with proper boundary checking (don't go below 0 or above the last step). Pass this internal state and handlers to MeditationGuideStepper. Ensure boundary behavior (disabled/hidden buttons) is managed within the component."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Update PreMeditationPage to replace all extracted guide-related markup and state with a single MindfulnessGuide component usage",
+      "acceptanceCriteria": [
+        "`PreMeditationPage` contains a single `<MindfulnessGuide>` element where the guide section previously existed.",
+        "No guide-specific `useState` hooks, step handlers, or More Details handlers remain in `PreMeditationPage`.",
+        "The rest of the pre-meditation page (mood/energy selectors, timer settings, ambient sound, start button) is unaffected."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/PreMeditationPage.tsx",
+          "operation": "modify",
+          "description": "Replace all meditation guide-related markup, state variables (step index), and handlers (onNext, onPrevious, More Details navigation) with a single <MindfulnessGuide meditationType={selectedType} /> component usage. Import the new MindfulnessGuide component at the top of the file. Remove any orphaned state, handlers, or JSX fragments related to the guide section. Ensure the mood/energy selectors, duration input, ambient music carousel, and start button sections remain untouched and fully functional."
         }
       ]
     }

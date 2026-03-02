@@ -1,10 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Remove parenthetical text from the Metta and IFS category titles in the quiz score display heading on the KnowledgePage.
+**Goal:** Extract the meditation guide section from `PreMeditationPage` into a self-contained `MindfulnessGuide` component.
 
 **Planned changes:**
-- In the quiz score display h2 heading, render "Metta" instead of "Metta (Loving-Kindness)"
-- In the quiz score display h2 heading, render "IFS" instead of "IFS (Internal Family Systems)"
+- Create a new `MindfulnessGuide` component in `frontend/src/components/MindfulnessGuide.tsx` that renders the guide container, title, step content, and stepper UI
+- Move the "More Details" button and its navigation logic (redirect to Knowledge page) inside `MindfulnessGuide`
+- Move the Previous/Next step navigation state and handlers inside `MindfulnessGuide`
+- Update `PreMeditationPage` to replace all guide-related markup and state with a single `<MindfulnessGuide meditationType={...} />` element
 
-**User-visible outcome:** The quiz score display shows "Metta" and "IFS" as clean titles without parenthetical suffixes, while all other category titles and UI elements remain unchanged.
+**User-visible outcome:** The meditation guide section looks and behaves exactly as before, but the code is now encapsulated in its own component.

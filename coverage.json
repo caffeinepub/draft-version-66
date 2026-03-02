@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-28T12:53:02.292Z",
+  "generatedAt": "2026-03-01T11:50:35.565Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -12,7 +12,7 @@
     "items": [
       {
         "id": "REQ-1",
-        "summary": "On the Knowledge page, remove the existing quiz score display from on top of the 'Take Quiz' button. Instead, render the score inline on the same row as the article/category title, positioned close to the title (e.g., immediately to its right). The score must be formatted as 'X/6' (e.g., '0/6', '4/6'). Next to the score text, display a medal or award icon styled in the app's primary theme color. Only show the score display when a quiz score exists for that category.",
+        "summary": "In the quiz score display heading (h2) on the KnowledgePage, remove the parenthetical text and its surrounding parentheses from the Metta and IFS category titles. For example, 'Metta (Loving-Kindness)' should become 'Metta', and 'IFS (Internal Family Systems)' should become 'IFS'. The change must apply wherever those category titles are rendered in the quiz score context identified by XPath /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[1]/h2[1].",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/pages/KnowledgePage.tsx"

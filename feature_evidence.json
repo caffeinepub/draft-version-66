@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-on-the-knowledge-page-remove-the-existing-quiz-score-display-from-on-top-of-the-take-quiz-button-instead-render-the-score-inline-on-the-same-row-as-the-article-category-title-positioned-close-to-the-title-e-g-immediately-to-its-right-the-score-must-be-formatted-as-x-6-e-g-0-6-4-6-next-to-the-score-text-display-a-medal-or-award-icon-styled-in-the-app-s-primary-theme-color-only-show-the-score-display-when-a-quiz-score-exists-for-that-category",
-      "featureTitle": "On the Knowledge page, remove the existing quiz score display from on top of the 'Take Quiz' button. Instead, render the score inline on the same row as the article/category title, positioned close to the title (e.g., immediately to its right). The score must be formatted as 'X/6' (e.g., '0/6', '4/6'). Next to the score text, display a medal or award icon styled in the app's primary theme color. Only show the score display when a quiz score exists for that category.",
+      "featureId": "feature-in-the-quiz-score-display-heading-h2-on-the-knowledgepage-remove-the-parenthetical-text-and-its-surrounding-parentheses-from-the-metta-and-ifs-category-titles-for-example-metta-loving-kindness-should-become-metta-and-ifs-internal-family-systems-should-become-ifs-the-change-must-apply-wherever-those-category-titles-are-rendered-in-the-quiz-score-context-identified-by-xpath-html-1-body-1-div-1-div-1-div-2-div-1-div-3-div-1-div-1-div-1-div-1-div-1-h2-1",
+      "featureTitle": "In the quiz score display heading (h2) on the KnowledgePage, remove the parenthetical text and its surrounding parentheses from the Metta and IFS category titles. For example, 'Metta (Loving-Kindness)' should become 'Metta', and 'IFS (Internal Family Systems)' should become 'IFS'. The change must apply wherever those category titles are rendered in the quiz score context identified by XPath /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[1]/h2[1].",
       "files": [
         "frontend/src/pages/KnowledgePage.tsx"
       ],

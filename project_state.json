@@ -1,30 +1,22 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "A wellness/knowledge app with quiz functionality. Working on improving the Knowledge page quiz score display.",
+  "summary": "New project",
   "architectural_notes": [],
   "known_issues": [],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-on-the-knowledge-page-remove-the-existing-quiz-score-display-from-on-top-of-the-take-quiz-button-instead-render-the-score-inline-on-the-same-row-as-the-article-category-title-positioned-close-to-the-title-e-g-immediately-to-its-right-the-score-must-be-formatted-as-x-6-e-g-0-6-4-6-next-to-the-score-text-display-a-medal-or-award-icon-styled-in-the-app-s-primary-theme-color-only-show-the-score-display-when-a-quiz-score-exists-for-that-category",
-      "title": "On the Knowledge page, remove the existing quiz score display from on top of the 'Take Quiz' button. Instead, render the score inline on the same row as the article/category title, positioned close to the title (e.g., immediately to its right). The score must be formatted as 'X/6' (e.g., '0/6', '4/6'). Next to the score text, display a medal or award icon styled in the app's primary theme color. Only show the score display when a quiz score exists for that category.",
+      "id": "feature-in-the-quiz-score-display-heading-h2-on-the-knowledgepage-remove-the-parenthetical-text-and-its-surrounding-parentheses-from-the-metta-and-ifs-category-titles-for-example-metta-loving-kindness-should-become-metta-and-ifs-internal-family-systems-should-become-ifs-the-change-must-apply-wherever-those-category-titles-are-rendered-in-the-quiz-score-context-identified-by-xpath-html-1-body-1-div-1-div-1-div-2-div-1-div-3-div-1-div-1-div-1-div-1-div-1-h2-1",
+      "title": "In the quiz score display heading (h2) on the KnowledgePage, remove the parenthetical text and its surrounding parentheses from the Metta and IFS category titles. For example, 'Metta (Loving-Kindness)' should become 'Metta', and 'IFS (Internal Family Systems)' should become 'IFS'. The change must apply wherever those category titles are rendered in the quiz score context identified by XPath /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[1]/h2[1].",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     }
   ],
-  "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Knowledge page: Display quiz score near article title in X/6 format with theme-colored medal icons, inline on the same row as the title and Take Quiz button",
-      "reqIds": [],
-      "status": "pending"
-    }
-  ],
-  "gameProjectType": "none",
-  "projectName": "Display quiz score inline with article title in X/6 format with theme-colored medal icon",
+  "new_feature_requests": [],
+  "projectName": "Remove parentheses and content from Metta and IFS titles in quiz score display",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

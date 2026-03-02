@@ -1,26 +1,22 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Display quiz score inline with article title in X/6 format with theme-colored medal icon",
+  "title": "Remove parentheses and content from Metta and IFS titles in quiz score display",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Move quiz score display from 'Take Quiz' button to inline position next to article/category title with X/6 format and theme-colored medal icon",
+      "summary": "Remove parenthetical text from Metta and IFS category titles in the quiz score h2 heading on KnowledgePage",
       "acceptanceCriteria": [
-        "The quiz score no longer appears as a number badge/overlay on top of the 'Take Quiz' button.",
-        "The score appears inline on the same visual row as the article/category title and the 'Take Quiz' button.",
-        "The score is positioned close to and to the right of the title text.",
-        "The score uses the format 'X/6' (e.g., '3/6', '6/6').",
-        "A medal or award icon is displayed immediately next to the 'X/6' score text.",
-        "The medal/award icon uses the app's primary theme color (CSS theme variable, not a hardcoded color).",
-        "If no quiz score has been recorded for a category, the score and icon are not shown.",
-        "Layout does not break on mobile screen sizes."
+        "The quiz score h2 heading displays 'Metta' without any parenthetical suffix.",
+        "The quiz score h2 heading displays 'IFS' without any parenthetical suffix.",
+        "No other category titles are altered.",
+        "The styled score badge and overall quiz score design remain unchanged."
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/KnowledgePage.tsx",
           "operation": "modify",
-          "description": "Remove the existing quiz score badge/overlay from the 'Take Quiz' button. Add a new inline score display component positioned immediately to the right of the article/category title text in the same row. Format the score as 'X/6' (e.g., '3/6') and display a medal/award icon (using lucide-react's Award or Medal icon) next to it. Apply the theme's primary color to the icon using CSS custom properties (e.g., 'hsl(var(--primary))'). Conditionally render this score display only when `categoryScores[currentCategory]` exists. Ensure the layout remains responsive on mobile by using appropriate Tailwind flex utilities (flex-row, items-center, gap) and text sizing."
+          "description": "In the quiz score display section (identified by XPath /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[1]/h2[1]), modify the h2 element that renders the category title to strip parenthetical text for 'Metta (Loving-Kindness)' and 'IFS (Internal Family Systems)'. Create a helper function that removes text matching the pattern ' (...any text...)' from category titles. Apply this transformation only when rendering the quiz score heading, ensuring 'Metta (Loving-Kindness)' becomes 'Metta' and 'IFS (Internal Family Systems)' becomes 'IFS'. Do not modify any other instances of category title rendering (carousel, content viewer) or the underlying knowledgeContent.ts data."
         }
       ]
     }

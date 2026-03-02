@@ -16,6 +16,14 @@ interface KnowledgeSearch {
   scrollToContent?: string;
 }
 
+// Strip parenthetical text only for Metta and IFS titles in the score display area
+function getScoreDisplayTitle(id: string, title: string): string {
+  if (id === 'metta' || id === 'ifs') {
+    return title.replace(/\s*\(.*?\)\s*/g, '').trim();
+  }
+  return title;
+}
+
 export default function KnowledgePage() {
   const search = useSearch({ from: '/knowledge' }) as KnowledgeSearch;
   const { identity } = useInternetIdentity();
@@ -82,6 +90,8 @@ export default function KnowledgePage() {
   const currentScore = quizScores[selectedTechnique.id];
   const hasScore = currentScore !== undefined;
 
+  const scoreDisplayTitle = getScoreDisplayTitle(selectedTechnique.id, selectedTechnique.title);
+
   return (
     <PageBackgroundShell variant="default" intensity={0.35}>
       {/* Standard navigation overlay */}
@@ -120,15 +130,15 @@ export default function KnowledgePage() {
                     className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
                   />
                   <div className="min-w-0">
-                    {/* Title row with inline score */}
-                    <div className="flex items-center gap-2 flex-wrap">
+                    {/* Title row with inline score badge */}
+                    <div className="flex items-center gap-3 flex-wrap">
                       <h2 className="text-3xl font-bold text-foreground">
-                        {selectedTechnique.title}
+                        {scoreDisplayTitle}
                       </h2>
                       {hasScore && (
-                        <span className="flex items-center gap-1 text-sm font-semibold text-primary">
-                          <Award className="w-4 h-4 text-primary flex-shrink-0" />
-                          <span>{currentScore}/{totalQuestions}</span>
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-sm font-semibold flex-shrink-0">
+                          <Award className="w-3.5 h-3.5 flex-shrink-0" />
+                          <span>{scoreDisplayTitle}: {currentScore}/{totalQuestions}</span>
                         </span>
                       )}
                     </div>

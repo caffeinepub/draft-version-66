@@ -1,42 +1,35 @@
 {
   "kind": "build_request",
-  "title": "Display quiz score inline with article title in X/6 format with theme-colored medal icon",
+  "title": "Remove parentheses and content from Metta and IFS titles in quiz score display",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "On the Knowledge page, remove the existing quiz score display from on top of the 'Take Quiz' button. Instead, render the score inline on the same row as the article/category title, positioned close to the title (e.g., immediately to its right). The score must be formatted as 'X/6' (e.g., '0/6', '4/6'). Next to the score text, display a medal or award icon styled in the app's primary theme color. Only show the score display when a quiz score exists for that category.",
+      "text": "In the quiz score display heading (h2) on the KnowledgePage, remove the parenthetical text and its surrounding parentheses from the Metta and IFS category titles. For example, 'Metta (Loving-Kindness)' should become 'Metta', and 'IFS (Internal Family Systems)' should become 'IFS'. The change must apply wherever those category titles are rendered in the quiz score context identified by XPath /html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[1]/h2[1].",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-recent-1",
-          "msg-recent-2"
+          "msg-4"
         ],
         "quotes": [
-          "The title I am reffering to, is in the same row visually as 'Take Quiz' btn. So for instance, Mindfulenss title would have to its right, close, score",
-          "Want the same color icon, theme color"
+          "remove parentheses with its content inside, for Metta, and IFS"
         ]
       },
       "acceptanceCriteria": [
-        "The quiz score no longer appears as a number badge/overlay on top of the 'Take Quiz' button.",
-        "The score appears inline on the same visual row as the article/category title and the 'Take Quiz' button.",
-        "The score is positioned close to and to the right of the title text.",
-        "The score uses the format 'X/6' (e.g., '3/6', '6/6').",
-        "A medal or award icon is displayed immediately next to the 'X/6' score text.",
-        "The medal/award icon uses the app's primary theme color (CSS theme variable, not a hardcoded color).",
-        "If no quiz score has been recorded for a category, the score and icon are not shown.",
-        "Layout does not break on mobile screen sizes."
+        "The quiz score h2 heading displays 'Metta' without any parenthetical suffix.",
+        "The quiz score h2 heading displays 'IFS' without any parenthetical suffix.",
+        "No other category titles are altered.",
+        "The styled score badge and overall quiz score design remain unchanged."
       ]
     }
   ],
   "constraints": [
-    "Do not modify any files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
-    "Use the existing CSS theme color variables (not hardcoded hex/rgb values) for the icon color."
+    "Only modify the quiz score display title rendering for Metta and IFS — do not change any other part of the UI or data."
   ],
   "nonGoals": [
-    "Changing the quiz dialog or quiz logic.",
-    "Changing the score storage mechanism in knowledgeQuizStorage.ts.",
-    "Adding new medal tiers or color variations based on score value."
+    "Changing the underlying category data or identifiers stored in knowledgeContent.ts or backend.",
+    "Modifying the carousel category titles outside of the quiz score display context.",
+    "Altering the quiz score badge styling introduced in the previous version."
   ],
   "imageRequirements": {
     "required": [],

@@ -1,12 +1,14 @@
 # Specification
 
 ## Summary
-**Goal:** Extract the meditation guide section from `PreMeditationPage` into a self-contained `MindfulnessGuide` component.
+**Goal:** Adjust the pre-meditation page layout and extract the reflection phase into a standalone component.
 
 **Planned changes:**
-- Create a new `MindfulnessGuide` component in `frontend/src/components/MindfulnessGuide.tsx` that renders the guide container, title, step content, and stepper UI
-- Move the "More Details" button and its navigation logic (redirect to Knowledge page) inside `MindfulnessGuide`
-- Move the Previous/Next step navigation state and handlers inside `MindfulnessGuide`
-- Update `PreMeditationPage` to replace all guide-related markup and state with a single `<MindfulnessGuide meditationType={...} />` element
+- Move the MindfulnessGuide section to the bottom of the pre-meditation setup phase, below all other controls.
+- Center the MindfulnessGuide title and make it dynamically display the selected meditation type (e.g., "Mindfulness Meditation Guide").
+- Move the "More Details" button to the bottom center of the MindfulnessGuide container.
+- Group the Duration slider, Ambient Sound Picker, and Begin/Save Ritual buttons into a single unified styled container.
+- Extract the reflection phase JSX from PreMeditationPage into a standalone `ReflectionPhase` component, accepting all required state and callbacks as props.
+- Replace the inline reflection phase block in PreMeditationPage with `<ReflectionPhase ... />`.
 
-**User-visible outcome:** The meditation guide section looks and behaves exactly as before, but the code is now encapsulated in its own component.
+**User-visible outcome:** The pre-meditation setup page has a cleaner layout with controls grouped together and the guide at the bottom. The reflection phase is rendered via a dedicated component, maintaining all existing save and navigation functionality.

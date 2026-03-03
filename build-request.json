@@ -1,94 +1,112 @@
 {
   "kind": "build_request",
-  "title": "Extract self-contained MindfulnessGuide component from PreMeditationPage",
+  "title": "Pre-meditation page layout adjustments and ReflectionPhase component extraction",
   "projectName": "Inner Bloom",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Create a new `MindfulnessGuide` component (e.g., `frontend/src/components/MindfulnessGuide.tsx`) that encapsulates everything related to the meditation guide section currently rendered inside `PreMeditationPage`: its outer container, title, step content, and the `MeditationGuideStepper` (or equivalent inline rendering). The component should accept the current meditation type (and any content data it needs) as props.",
+      "text": "Move the MindfulnessGuide section to the bottom of the pre-meditation setup phase layout, below all other controls.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-adjust-pre-meditation"
         ],
         "quotes": [
-          "Just meditation guide. Which includes more details button to knowledge page, its title, its content and container etc."
+          "Put meditation guide at the bottom of the page"
         ]
       },
       "acceptanceCriteria": [
-        "A `MindfulnessGuide` component file exists under `frontend/src/components/`.",
-        "The component renders the guide container, title, and step content independently.",
-        "No meditation-guide UI markup remains duplicated in `PreMeditationPage`; the page simply renders `<MindfulnessGuide ... />`.",
-        "Visual appearance of the guide section is unchanged."
+        "In the pre-meditation setup phase, the MindfulnessGuide container appears below the combined session controls container.",
+        "All other pre-meditation controls (meditation carousel, duration, ambient sound, buttons) appear above the MindfulnessGuide."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Move the **More Details** button and its navigation logic (routing/redirecting to the Knowledge page) entirely inside the `MindfulnessGuide` component. `PreMeditationPage` must not contain any routing call or handler related to the More Details action.",
+      "text": "In the MindfulnessGuide component, center the title at the top of its container. The title must read '[MeditationType] Meditation Guide' where [MeditationType] is the currently selected meditation type from the carousel (dynamic).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-adjust-pre-meditation"
         ],
         "quotes": [
-          "logic like more details button that redirect to knowledge page, should exist only in that component"
+          "the title saying '<Meditation> Meditation Guide' should be at the top center and not top left of its container",
+          "Text written in <> is dynamic meditation picked from the carousel"
         ]
       },
       "acceptanceCriteria": [
-        "The `MindfulnessGuide` component internally calls the router's navigate function (or equivalent) to go to the Knowledge page when More Details is clicked.",
-        "`PreMeditationPage` passes no `onMoreDetails` callback or navigation handler to the guide component.",
-        "Clicking More Details still navigates to the Knowledge page correctly."
+        "The MindfulnessGuide title is horizontally centered within its container.",
+        "The title text dynamically reflects the currently selected meditation type (e.g., 'Mindfulness Meditation Guide', 'Metta Meditation Guide').",
+        "The title is positioned at the top of the MindfulnessGuide container."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Move the **Previous** and **Next** step-navigation button logic (current step index state, increment/decrement handlers, boundary conditions) entirely inside the `MindfulnessGuide` component. The component manages its own step state internally.",
+      "text": "In the MindfulnessGuide component, move the 'More Details' button to the bottom center of its container.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-adjust-pre-meditation"
         ],
         "quotes": [
-          "the buttons previous and next logic should be inside that component"
+          "have more details button at the bottom center of its container"
         ]
       },
       "acceptanceCriteria": [
-        "Step index state (`useState`) for the guide stepper lives inside `MindfulnessGuide`, not in `PreMeditationPage`.",
-        "`PreMeditationPage` passes no step index, `onNext`, or `onPrevious` props to the guide component.",
-        "Previous/Next navigation within the guide works correctly end-to-end.",
-        "Boundary behavior (disable or hide buttons at first/last step) is handled inside the component."
+        "The 'More Details' button is positioned at the bottom of the MindfulnessGuide container.",
+        "The 'More Details' button is horizontally centered within the container."
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Update `PreMeditationPage` to replace all extracted guide-related markup and state with a single `<MindfulnessGuide meditationType={...} />` usage. Ensure no orphaned state variables, handlers, or JSX fragments related to the guide remain in `PreMeditationPage`.",
+      "text": "On the pre-meditation setup phase, group the Duration slider (DurationRangeInput), Ambient Sound Picker (AmbientMusicCarousel), and the Begin/Save Ritual action buttons into a single unified container with consistent styling.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-adjust-pre-meditation"
         ],
         "quotes": [
-          "Including their logic, should be separated into that component"
+          "combine, duration, ambient sound picker, and begin with save ritual buttons, inside a single container"
         ]
       },
       "acceptanceCriteria": [
-        "`PreMeditationPage` contains a single `<MindfulnessGuide>` element where the guide section previously existed.",
-        "No guide-specific `useState` hooks, step handlers, or More Details handlers remain in `PreMeditationPage`.",
-        "The rest of the pre-meditation page (mood/energy selectors, timer settings, ambient sound, start button) is unaffected."
+        "Duration, Ambient Sound Picker, and Begin/Save Ritual buttons are wrapped in one container element.",
+        "The container has consistent card/panel styling matching the rest of the pre-meditation page (e.g., bg-card/60 backdrop-blur-sm rounded-xl border border-border/50).",
+        "All three sections remain functional within the combined container."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Extract the reflection phase JSX from PreMeditationPage into a standalone ReflectionPhase component (frontend/src/pages/ReflectionPage.tsx or frontend/src/components/ReflectionPhase.tsx). The component must accept as props all required state and callbacks: selectedType, duration, selectedMoods, handleMoodToggle, selectedEnergy, setSelectedEnergy, reflection, setReflection, isFavorite, setIsFavorite, handleSaveReflection, recordSession.isPending, createJournalEntry.isPending, and a navigate/onBack handler. The component renders: session complete header, mood selection grid, energy level selection grid, reflection textarea, favorite checkbox, and Save & Continue button. Replace the inline reflection phase block in PreMeditationPage with `<ReflectionPhase ... />`.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-reflection-component",
+          "msg-reflection-clarification"
+        ],
+        "quotes": [
+          "create a separate component for reflection phase, just like you did previously for meditation guide container creating a <MindfulnessGuide/> separate component, do the same for reflection too",
+          "it should be replaced with: if (phase === 'reflection') { return <ReflectionPage/>}"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A new ReflectionPhase component file exists and contains the full reflection phase UI (mood grid, energy grid, reflection textarea, favorite checkbox, Save & Continue button).",
+        "PreMeditationPage's reflection phase block is replaced with a single `<ReflectionPhase ... />` invocation.",
+        "The ReflectionPhase component receives all state and callbacks as props from PreMeditationPage.",
+        "The ReflectionPhase component wraps its content in PageBackgroundShell with StandardPageNav, matching the original layout.",
+        "Saving a reflection still works end-to-end (records session, creates journal entry, navigates away)."
       ]
     }
   ],
   "constraints": [
-    "Do not alter any other section of PreMeditationPage (mood/energy pickers, duration input, ambient music carousel, start button, etc.).",
-    "Do not modify any file listed under frontend.immutablePaths.",
-    "The visual design and layout of the guide section must remain identical after the refactor."
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
+    "Do not alter backend logic or data models.",
+    "Preserve all existing functionality of the pre-meditation flow (setup, active, reflection phases)."
   ],
   "nonGoals": [
-    "Refactoring any other section of PreMeditationPage into separate components.",
-    "Adding new features or changing the content of the meditation guide.",
-    "Modifying the KnowledgePage or its routing configuration.",
-    "Backend changes of any kind."
+    "Adding new meditation types or backend data models.",
+    "Changing the active meditation (timer) phase UI.",
+    "Modifying the dashboard or any page other than PreMeditationPage and the new ReflectionPhase component."
   ],
   "imageRequirements": {
     "required": [],

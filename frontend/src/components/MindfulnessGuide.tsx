@@ -10,9 +10,8 @@ interface MindfulnessGuideProps {
   meditationType: MeditationTypeKey;
 }
 
-const guideContent: Record<MeditationTypeKey, { title: string; steps: { title: string; content: string }[] }> = {
+const guideContent: Record<MeditationTypeKey, { steps: { title: string; content: string }[] }> = {
   mindfulness: {
-    title: 'Mindfulness Meditation Guide',
     steps: [
       {
         title: 'Find Your Posture',
@@ -37,7 +36,6 @@ const guideContent: Record<MeditationTypeKey, { title: string; steps: { title: s
     ],
   },
   metta: {
-    title: 'Loving-Kindness (Metta) Guide',
     steps: [
       {
         title: 'Settle into Comfort',
@@ -62,7 +60,6 @@ const guideContent: Record<MeditationTypeKey, { title: string; steps: { title: s
     ],
   },
   visualization: {
-    title: 'Visualization Meditation Guide',
     steps: [
       {
         title: 'Create Your Sacred Space',
@@ -87,7 +84,6 @@ const guideContent: Record<MeditationTypeKey, { title: string; steps: { title: s
     ],
   },
   ifs: {
-    title: 'IFS (Internal Family Systems) Guide',
     steps: [
       {
         title: 'Ground in Self-Energy',
@@ -113,6 +109,13 @@ const guideContent: Record<MeditationTypeKey, { title: string; steps: { title: s
   },
 };
 
+const typeDisplayName: Record<MeditationTypeKey, string> = {
+  mindfulness: 'Mindfulness',
+  metta: 'Metta',
+  visualization: 'Visualization',
+  ifs: 'IFS',
+};
+
 const typeToKnowledgeCategory: Record<MeditationTypeKey, string> = {
   mindfulness: 'mindfulness',
   metta: 'metta',
@@ -124,6 +127,8 @@ export default function MindfulnessGuide({ meditationType }: MindfulnessGuidePro
   const navigate = useNavigate();
 
   const guide = guideContent[meditationType] ?? guideContent.mindfulness;
+  const displayName = typeDisplayName[meditationType] ?? 'Mindfulness';
+  const dynamicTitle = `${displayName} Meditation Guide`;
 
   const handleMoreDetails = () => {
     const category = typeToKnowledgeCategory[meditationType] ?? 'mindfulness';
@@ -132,24 +137,26 @@ export default function MindfulnessGuide({ meditationType }: MindfulnessGuidePro
 
   return (
     <div className="rounded-2xl border border-border/40 bg-background/60 backdrop-blur-sm p-5 flex flex-col gap-4">
-      {/* Header row: title + More Details button */}
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="text-base font-semibold text-foreground leading-tight">
-          {guide.title}
-        </h3>
+      {/* Centered title at the top */}
+      <h3 className="text-base font-semibold text-foreground leading-tight text-center">
+        {dynamicTitle}
+      </h3>
+
+      {/* Stepper — manages its own step state internally */}
+      <MeditationGuideStepper steps={guide.steps} />
+
+      {/* More Details button centered at the bottom */}
+      <div className="flex justify-center">
         <Button
           variant="outline"
           size="sm"
           onClick={handleMoreDetails}
-          className="shrink-0 flex items-center gap-1.5 text-xs border-accent-cyan/50 text-accent-cyan hover:bg-accent-cyan/10"
+          className="flex items-center gap-1.5 text-xs border-accent-cyan/50 text-accent-cyan hover:bg-accent-cyan/10"
         >
           <BookOpen className="w-3.5 h-3.5" />
           More Details
         </Button>
       </div>
-
-      {/* Stepper — manages its own step state internally */}
-      <MeditationGuideStepper steps={guide.steps} />
     </div>
   );
 }

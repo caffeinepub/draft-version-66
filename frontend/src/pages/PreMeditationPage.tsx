@@ -1,12 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Heart, Smile, Meh, Frown, Zap, Battery, BatteryCharging, Sparkles, Loader2, BookOpen, Save } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Heart, Smile, Meh, Frown, Zap, Battery, BatteryCharging, Sparkles, Loader2, Save } from 'lucide-react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import AmbientMusicCarousel from '../components/AmbientMusicCarousel';
 import MindfulnessGuide from '../components/MindfulnessGuide';
+import ReflectionPhase from '../components/ReflectionPhase';
 import PageBackgroundShell from '../components/PageBackgroundShell';
 import StandardPageNav from '../components/StandardPageNav';
 import DurationRangeInput from '../components/DurationRangeInput';
@@ -269,112 +267,24 @@ export default function PreMeditationPage() {
     );
   }
 
-  // Reflection phase
+  // Reflection phase — delegated to ReflectionPhase component
   if (phase === 'reflection') {
     return (
-      <PageBackgroundShell>
-        <StandardPageNav showBackButton onBack={() => navigate({ to: '/dashboard' })} />
-        <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-20">
-          <div className="w-full max-w-lg space-y-8 animate-fade-in">
-            <div className="text-center space-y-2">
-              <h1 className="text-3xl font-bold text-foreground">Session Complete</h1>
-              <p className="text-muted-foreground">
-                {formatMeditationType(selectedType)} · {duration} min
-              </p>
-            </div>
-
-            {/* Mood Selection */}
-            <div className="bg-card/60 backdrop-blur-sm rounded-xl p-6 border border-border/50 space-y-4">
-              <h2 className="text-lg font-semibold text-foreground">How are you feeling?</h2>
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-                {Object.values(MoodState).map((mood) => {
-                  const Icon = moodIconMap[mood];
-                  const isSelected = selectedMoods.includes(mood);
-                  return (
-                    <button
-                      key={mood}
-                      onClick={() => handleMoodToggle(mood)}
-                      className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all ${
-                        isSelected
-                          ? 'bg-accent-cyan/20 border-accent-cyan text-accent-cyan'
-                          : 'border-border/50 text-muted-foreground hover:border-accent-cyan/50 hover:bg-accent-cyan/5'
-                      }`}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <span className="text-xs capitalize">{mood}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Energy Selection */}
-            <div className="bg-card/60 backdrop-blur-sm rounded-xl p-6 border border-border/50 space-y-4">
-              <h2 className="text-lg font-semibold text-foreground">Energy level?</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {Object.values(EnergyState).map((energy) => {
-                  const Icon = energyIconMap[energy];
-                  const isSelected = selectedEnergy === energy;
-                  return (
-                    <button
-                      key={energy}
-                      onClick={() => setSelectedEnergy(energy)}
-                      className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all ${
-                        isSelected
-                          ? 'bg-accent-cyan/20 border-accent-cyan text-accent-cyan'
-                          : 'border-border/50 text-muted-foreground hover:border-accent-cyan/50 hover:bg-accent-cyan/5'
-                      }`}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <span className="text-xs capitalize">{energy}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Reflection Notes */}
-            <div className="bg-card/60 backdrop-blur-sm rounded-xl p-6 border border-border/50 space-y-3">
-              <h2 className="text-lg font-semibold text-foreground">Reflection (optional)</h2>
-              <Textarea
-                value={reflection}
-                onChange={(e) => setReflection(e.target.value)}
-                placeholder="How was your session? Any insights or observations..."
-                className="min-h-[100px] bg-background/50 border-border/50 resize-none"
-              />
-            </div>
-
-            {/* Favorite */}
-            <div className="flex items-center gap-3">
-              <Checkbox
-                id="favorite"
-                checked={isFavorite}
-                onCheckedChange={(checked) => setIsFavorite(checked === true)}
-              />
-              <Label htmlFor="favorite" className="text-sm text-muted-foreground cursor-pointer">
-                Mark this session as a favorite
-              </Label>
-            </div>
-
-            {/* Save Button */}
-            <Button
-              onClick={handleSaveReflection}
-              disabled={recordSession.isPending || createJournalEntry.isPending}
-              className="w-full"
-              size="lg"
-            >
-              {(recordSession.isPending || createJournalEntry.isPending) ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                'Save & Continue'
-              )}
-            </Button>
-          </div>
-        </div>
-      </PageBackgroundShell>
+      <ReflectionPhase
+        selectedType={selectedType}
+        duration={duration}
+        selectedMoods={selectedMoods}
+        onMoodToggle={handleMoodToggle}
+        selectedEnergy={selectedEnergy}
+        onEnergySelect={setSelectedEnergy}
+        reflection={reflection}
+        onReflectionChange={setReflection}
+        isFavorite={isFavorite}
+        onFavoriteChange={setIsFavorite}
+        onSave={handleSaveReflection}
+        isSaving={recordSession.isPending || createJournalEntry.isPending}
+        onBack={() => navigate({ to: '/dashboard' })}
+      />
     );
   }
 
@@ -392,51 +302,59 @@ export default function PreMeditationPage() {
             <p className="text-muted-foreground text-sm">Prepare your session</p>
           </div>
 
-          {/* Meditation Guide — self-contained component with its own step state,
-              Previous/Next logic, and More Details navigation */}
+          {/* Combined Session Controls: Duration + Ambient Sound + Action Buttons */}
+          <div className="rounded-2xl border border-border/40 bg-background/60 backdrop-blur-sm p-5 space-y-6">
+            {/* Duration */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground">Duration</h3>
+              <DurationRangeInput value={duration} onChange={setDuration} />
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-border/30" />
+
+            {/* Ambient Sound */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground">Ambient Sound</h3>
+              <AmbientMusicCarousel
+                selectedMusic={selectedMusicId}
+                onSelectMusic={setSelectedMusicId}
+                volume={volume}
+                onVolumeChange={setVolume}
+              />
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-border/30" />
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSaveRitual}
+                disabled={saveRitual.isPending}
+                className="flex items-center gap-1.5"
+              >
+                {saveRitual.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
+                {saveRitual.isPending ? 'Saving…' : 'Save Ritual'}
+              </Button>
+              <Button
+                className="flex-1"
+                size="lg"
+                onClick={handleBeginMeditation}
+              >
+                Begin Session
+              </Button>
+            </div>
+          </div>
+
+          {/* Meditation Guide — moved to bottom of the page */}
           <MindfulnessGuide meditationType={selectedType} />
-
-          {/* Duration */}
-          <div className="rounded-2xl border border-border/40 bg-background/60 backdrop-blur-sm p-5 space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">Duration</h3>
-            <DurationRangeInput value={duration} onChange={setDuration} />
-          </div>
-
-          {/* Ambient Sound */}
-          <div className="rounded-2xl border border-border/40 bg-background/60 backdrop-blur-sm p-5 space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">Ambient Sound</h3>
-            <AmbientMusicCarousel
-              selectedMusic={selectedMusicId}
-              onSelectMusic={setSelectedMusicId}
-              volume={volume}
-              onVolumeChange={setVolume}
-            />
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSaveRitual}
-              disabled={saveRitual.isPending}
-              className="flex items-center gap-1.5"
-            >
-              {saveRitual.isPending ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Save className="w-4 h-4" />
-              )}
-              {saveRitual.isPending ? 'Saving…' : 'Save Ritual'}
-            </Button>
-            <Button
-              className="flex-1"
-              size="lg"
-              onClick={handleBeginMeditation}
-            >
-              Begin Session
-            </Button>
-          </div>
         </div>
       </div>
     </PageBackgroundShell>

@@ -1,14 +1,40 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-03-02T12:00:47.948Z",
-  "summary": "The diff implements all four requirements. A new MindfulnessGuide.tsx component is created under frontend/src/components/ encapsulating the guide container, title, step content, MeditationGuideStepper, More Details navigation (via useNavigate), and Previous/Next step state management. PreMeditationPage is updated to import and render <MindfulnessGuide> with a meditationType prop, replacing the previously inline guide markup and state.",
-  "missing_requirements": [],
-  "hallucinated_features": [],
-  "confidence": 0.92,
+  "generatedAt": "2026-03-03T11:13:19.120Z",
+  "summary": "The diff implements most of the requested requirements: REQ-5 (ReflectionPhase extraction) is fully implemented, REQ-4 (combined container) is mentioned in the file summary, and REQ-1 (MindfulnessGuide moved to bottom) is mentioned in the file summary. However, the MindfulnessGuide.tsx diff is truncated and does not provide visible evidence for REQ-2 (centered dynamic title) or REQ-3 (More Details button at bottom center). The PreMeditationPage.tsx diff is also truncated, making it impossible to fully verify REQ-1 and REQ-4 layout details from code. REQ-5 is well-evidenced in the new ReflectionPhase.tsx file, though prop names differ slightly from the spec.",
+  "missing_requirements": [
+    {
+      "id": "REQ-2",
+      "requirement": "Center the MindfulnessGuide title at the top of its container; title reads '[MeditationType] Meditation Guide' dynamically.",
+      "reason": "The MindfulnessGuide.tsx diff is truncated and shows no evidence of a centered dynamic title reading '[MeditationType] Meditation Guide' at the top of the container.",
+      "evidence": [
+        "frontend/src/components/MindfulnessGuide.tsx"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Move the 'More Details' button to the bottom center of the MindfulnessGuide container.",
+      "reason": "The MindfulnessGuide.tsx diff is truncated and contains no visible evidence of the 'More Details' button being repositioned to the bottom center.",
+      "evidence": [
+        "frontend/src/components/MindfulnessGuide.tsx"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "ReflectionPhase component uses different prop names than specified (onMoodToggle, onEnergySelect, onReflectionChange, onFavoriteChange, onSave, isSaving instead of handleMoodToggle, setSelectedEnergy, setReflection, setIsFavorite, handleSaveReflection, recordSession.isPending/createJournalEntry.isPending).",
+      "reason": "The build request specifies exact prop names for the ReflectionPhase component. The implemented component uses a different naming convention that was not requested.",
+      "evidence": [
+        "frontend/src/components/ReflectionPhase.tsx"
+      ]
+    }
+  ],
+  "confidence": 0.6,
   "changed_files": [
     "frontend-file-summaries.txt",
     "frontend/src/components/MindfulnessGuide.tsx",
+    "frontend/src/components/ReflectionPhase.tsx",
     "frontend/src/pages/PreMeditationPage.tsx",
     "project_state.json"
   ]

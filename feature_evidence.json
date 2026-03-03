@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-create-a-new-mindfulnessguide-component-e-g-frontend-src-components-mindfulnessguide-tsx-that-encapsulates-everything-related-to-the-meditation-guide-section-currently-rendered-inside-premeditationpage-its-outer-container-title-step-content-and-the-meditationguidestepper-or-equivalent-inline-rendering-the-component-should-accept-the-current-meditation-type-and-any-content-data-it-needs-as-props",
-      "featureTitle": "Create a new `MindfulnessGuide` component (e.g., `frontend/src/components/MindfulnessGuide.tsx`) that encapsulates everything related to the meditation guide section currently rendered inside `PreMeditationPage`: its outer container, title, step content, and the `MeditationGuideStepper` (or equivalent inline rendering). The component should accept the current meditation type (and any content data it needs) as props.",
+      "featureId": "feature-move-the-mindfulnessguide-section-to-the-bottom-of-the-pre-meditation-setup-phase-layout-below-all-other-controls",
+      "featureTitle": "Move the MindfulnessGuide section to the bottom of the pre-meditation setup phase layout, below all other controls.",
       "files": [
-        "frontend/src/components/MindfulnessGuide.tsx"
+        "frontend/src/pages/PreMeditationPage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -22,10 +22,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-move-the-more-details-button-and-its-navigation-logic-routing-redirecting-to-the-knowledge-page-entirely-inside-the-mindfulnessguide-component-premeditationpage-must-not-contain-any-routing-call-or-handler-related-to-the-more-details-action",
-      "featureTitle": "Move the **More Details** button and its navigation logic (routing/redirecting to the Knowledge page) entirely inside the `MindfulnessGuide` component. `PreMeditationPage` must not contain any routing call or handler related to the More Details action.",
+      "featureId": "feature-in-the-mindfulnessguide-component-center-the-title-at-the-top-of-its-container-the-title-must-read-meditationtype-meditation-guide-where-meditationtype-is-the-currently-selected-meditation-type-from-the-carousel-dynamic",
+      "featureTitle": "In the MindfulnessGuide component, center the title at the top of its container. The title must read '[MeditationType] Meditation Guide' where [MeditationType] is the currently selected meditation type from the carousel (dynamic).",
       "files": [
-        "frontend/src/components/MindfulnessGuide.tsx"
+        "frontend/src/components/MindfulnessGuide.tsx",
+        "frontend/src/pages/PreMeditationPage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -42,8 +43,8 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-move-the-previous-and-next-step-navigation-button-logic-current-step-index-state-increment-decrement-handlers-boundary-conditions-entirely-inside-the-mindfulnessguide-component-the-component-manages-its-own-step-state-internally",
-      "featureTitle": "Move the **Previous** and **Next** step-navigation button logic (current step index state, increment/decrement handlers, boundary conditions) entirely inside the `MindfulnessGuide` component. The component manages its own step state internally.",
+      "featureId": "feature-in-the-mindfulnessguide-component-move-the-more-details-button-to-the-bottom-center-of-its-container",
+      "featureTitle": "In the MindfulnessGuide component, move the 'More Details' button to the bottom center of its container.",
       "files": [
         "frontend/src/components/MindfulnessGuide.tsx"
       ],
@@ -62,8 +63,8 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-premeditationpage-to-replace-all-extracted-guide-related-markup-and-state-with-a-single-mindfulnessguide-meditationtype-usage-ensure-no-orphaned-state-variables-handlers-or-jsx-fragments-related-to-the-guide-remain-in-premeditationpage",
-      "featureTitle": "Update `PreMeditationPage` to replace all extracted guide-related markup and state with a single `<MindfulnessGuide meditationType={...} />` usage. Ensure no orphaned state variables, handlers, or JSX fragments related to the guide remain in `PreMeditationPage`.",
+      "featureId": "feature-on-the-pre-meditation-setup-phase-group-the-duration-slider-durationrangeinput-ambient-sound-picker-ambientmusiccarousel-and-the-begin-save-ritual-action-buttons-into-a-single-unified-container-with-consistent-styling",
+      "featureTitle": "On the pre-meditation setup phase, group the Duration slider (DurationRangeInput), Ambient Sound Picker (AmbientMusicCarousel), and the Begin/Save Ritual action buttons into a single unified container with consistent styling.",
       "files": [
         "frontend/src/pages/PreMeditationPage.tsx"
       ],
@@ -78,6 +79,27 @@
       ],
       "testIds": [
         "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-extract-the-reflection-phase-jsx-from-premeditationpage-into-a-standalone-reflectionphase-component-frontend-src-pages-reflectionpage-tsx-or-frontend-src-components-reflectionphase-tsx-the-component-must-accept-as-props-all-required-state-and-callbacks-selectedtype-duration-selectedmoods-handlemoodtoggle-selectedenergy-setselectedenergy-reflection-setreflection-isfavorite-setisfavorite-handlesavereflection-recordsession-ispending-createjournalentry-ispending-and-a-navigate-onback-handler-the-component-renders-session-complete-header-mood-selection-grid-energy-level-selection-grid-reflection-textarea-favorite-checkbox-and-save-continue-button-replace-the-inline-reflection-phase-block-in-premeditationpage-with-reflectionphase",
+      "featureTitle": "Extract the reflection phase JSX from PreMeditationPage into a standalone ReflectionPhase component (frontend/src/pages/ReflectionPage.tsx or frontend/src/components/ReflectionPhase.tsx). The component must accept as props all required state and callbacks: selectedType, duration, selectedMoods, handleMoodToggle, selectedEnergy, setSelectedEnergy, reflection, setReflection, isFavorite, setIsFavorite, handleSaveReflection, recordSession.isPending, createJournalEntry.isPending, and a navigate/onBack handler. The component renders: session complete header, mood selection grid, energy level selection grid, reflection textarea, favorite checkbox, and Save & Continue button. Replace the inline reflection phase block in PreMeditationPage with `<ReflectionPhase ... />`.",
+      "files": [
+        "frontend/src/components/ReflectionPhase.tsx",
+        "frontend/src/pages/PreMeditationPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "authorization@4.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
       ],
       "confidence": "high"
     }
